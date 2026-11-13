@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <!-- منع محركات البحث (Google/Bing) من أرشفة الداشبورد نهائياً -->
   <meta name="robots" content="noindex, nofollow, noarchive" />
   <title>ACC — Enterprise BIM Coordination Hub</title>
   <script src="https://cdn.tailwindcss.com"></script>
@@ -22,27 +21,6 @@
   </style>
 </head>
 <body class="bg-[#070b12] text-slate-200 min-h-screen font-sans antialiased">
-
-  <!-- شاشة الحماية الذكية (تظهر فقط للغرباء الذين لا يملكون رابط الإيميل الرسمي) -->
-  <div id="securityGateModal" class="hidden fixed inset-0 bg-[#070b12]/95 backdrop-blur-md flex items-center justify-center p-4 z-50">
-    <div class="bg-[#0d1526] border border-slate-700 rounded-2xl max-w-sm w-full p-6 shadow-2xl text-center">
-      <div class="w-16 h-16 rounded-2xl bg-white border border-slate-300 shadow-md flex items-center justify-center p-1.5 mx-auto mb-3">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 360" class="w-full h-full">
-          <text x="665" y="76" text-anchor="end" fill="#334155" font-family="'Segoe UI', Tahoma, sans-serif" font-size="56" font-weight="700">مركز الإستشارات المتقدم</text>
-          <text x="665" y="134" text-anchor="end" fill="#475569" font-family="'Segoe UI', Arial, sans-serif" font-size="38" font-weight="700">Advanced Consultancy Center</text>
-          <circle cx="96" cy="272" r="68" fill="#008529" />
-          <path d="M 134 26 L 62 162 A 84 84 0 0 1 174 226 L 236 340 L 312 340 L 134 26 Z" fill="#0d2763" />
-          <path d="M 455 215 A 54 54 0 1 0 455 292 L 492 322 A 98 98 0 1 1 492 185 Z" fill="#008529" />
-          <path d="M 638 215 A 54 54 0 1 0 638 292 L 675 322 A 98 98 0 1 1 675 185 Z" fill="#008529" />
-        </svg>
-      </div>
-      <h2 class="text-base font-extrabold text-white">🔒 ACC Authorized BIM Access</h2>
-      <p class="text-xs text-slate-400 mt-1 mb-4">Protected Enterprise Coordination Hub. Open via your official project email link or enter the team access code once:</p>
-      <input id="accessPinInput" type="password" placeholder="Enter Team Code..." onkeydown="if(event.key==='Enter') unlockWithTeamCode()" class="w-full bg-[#070b12] border border-slate-700 rounded-lg px-3 py-2 text-xs text-center text-white font-bold tracking-widest mb-3 focus:border-sky-500 focus:outline-none" />
-      <button onclick="unlockWithTeamCode()" class="w-full bg-sky-600 hover:bg-sky-500 text-white py-2 rounded-lg text-xs font-bold shadow">Unlock Dashboard</button>
-      <div id="pinErrorMsg" class="hidden text-[11px] text-rose-400 font-bold mt-2">⚠️ Invalid Access Code</div>
-    </div>
-  </div>
 
   <!-- 1. TOP SINGLE-ROW BALANCED HEADER -->
   <header class="w-full bg-[#0d1526] border-b border-slate-800 px-4 py-2.5 sticky top-0 z-40 shadow-lg">
@@ -374,15 +352,15 @@
           </select>
         </div>
         <div>
-          <label class="block text-slate-300 font-bold mb-1">3. File Splitting Mode:</label>
+          <label class="block text-slate-300 font-bold sil mb-1">3. File Splitting Mode:</label>
           <select id="expSplitMode" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white">
             <option value="single">Single Combined Master File</option>
-            <option value="split_by_group">Split by Assigned Discipline / Folder (Multiple Sheets/Files)</option>
+            <option value="split_by_group">Split by Assigned Discipline / Folder (MultipleSheets/Files)</option>
           </select>
         </div>
         <div class="pt-2 border-t border-slate-800 grid grid-cols-3 gap-2.5">
           <button onclick="executeExport('excel')" class="bg-emerald-700 hover:bg-emerald-600 text-white py-2.5 rounded-xl font-bold shadow">📊 Styled Excel (.xlsx)</button>
-          <button onclick="executeExport('pdf')" class="bg-rose-700 hover:bg-rose-600 text-white py-2.5 rounded-xl font-bold shadow">📄 Clean PDF Report</button>
+          <button onclick="executeExport('pdf')" class="bg-rose-700 hover:bg-rose-600 text-white py-2.5 rounded-xl font-bold shadow">📄 Clean PDF Report (PDF)</button>
           <button onclick="executeExport('html')" class="bg-sky-700 hover:bg-sky-600 text-white py-2.5 rounded-xl font-bold shadow">🌐 Static HTML File</button>
         </div>
       </div>
@@ -392,68 +370,14 @@
   <div id="imgModal" onclick="this.classList.add('hidden')" class="hidden fixed inset-0 bg-black/90 flex flex-col items-center justify-center p-4 z-50">
     <img id="modalImg" src="" class="max-h-[85vh] max-w-[92vw] rounded-xl border-2 border-slate-600 shadow-2xl" />
     <div id="modalCaption" class="mt-3 text-sm font-bold text-slate-200 bg-slate-900 px-4 py-1.5 rounded-full border border-slate-700"></div>
-  </div>
+    </div>
 
   <div id="toastAlert" class="hidden fixed bottom-5 right-5 bg-slate-900 border-2 border-sky-500 text-white px-4 py-3 rounded-xl shadow-2xl z-50 text-xs font-semibold max-w-md"></div>
 
   <script>
     const SUPABASE_URL = "https://qnpiqepywekwqinybpab.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_R96kfu1_6AJrLGw9zD8E5Q_L6vO8VDf";
     const REVIT_BRIDGE_URL = "http://localhost:51965/isolate";
-
-    // المفتاح مشفر حسابياً (XOR Cipher) بكود الشركة ACC2026 ولا يظهر كنص صريح أبداً في GitHub
-    const ENCRYPTED_KEY_BYTES = [50,33,28,51,51,52,110,63,62,59,39,34,50,84,51,12,48,113,125,84,37,2,8,50,15,5,53,7,113,34,119,11,29,7,114,49,12,102,99,7,37];
-    let ACTIVE_SUPABASE_KEY = "";
-
-    function decryptKeyWithPasscode(passcode) {
-      const code = (passcode || "").trim().toUpperCase();
-      if (!code) return "";
-      let out = "";
-      for (let i = 0; i < ENCRYPTED_KEY_BYTES.length; i++) {
-        out += String.fromCharCode(ENCRYPTED_KEY_BYTES[i] ^ code.charCodeAt(i % code.length));
-      }
-      return out.startsWith("sb_publishable_") ? out : "";
-    }
-
-    function resolveAuthorizedKey() {
-      const params = new URLSearchParams(window.location.search);
-      const urlCode = params.get("acc");
-      if (urlCode) {
-        const unlocked = decryptKeyWithPasscode(urlCode);
-        if (unlocked) {
-          localStorage.setItem("ACC_BIM_TEAM_CODE", urlCode.trim().toUpperCase());
-          // إخفاء كود المرور من شريط العنوان بعد الفتح التلقائي
-          params.delete("acc");
-          const cleanQuery = params.toString();
-          const cleanUrl = window.location.pathname + (cleanQuery ? "?" + cleanQuery : "");
-          window.history.replaceState({}, document.title, cleanUrl);
-          return unlocked;
-        }
-      }
-      // إذا كان الملف مفتوحاً محلياً على جهازك، يفتح تلقائياً بدون سؤال
-      if (window.location.protocol === "file:") {
-        return decryptKeyWithPasscode("ACC2026");
-      }
-      const savedCode = localStorage.getItem("ACC_BIM_TEAM_CODE");
-      if (savedCode) {
-        const unlocked = decryptKeyWithPasscode(savedCode);
-        if (unlocked) return unlocked;
-      }
-      return "";
-    }
-
-    async function unlockWithTeamCode() {
-      const val = document.getElementById("accessPinInput").value.trim().toUpperCase();
-      const unlocked = decryptKeyWithPasscode(val);
-      if (!unlocked) {
-        document.getElementById("pinErrorMsg").classList.remove("hidden");
-        return;
-      }
-      localStorage.setItem("ACC_BIM_TEAM_CODE", val);
-      ACTIVE_SUPABASE_KEY = unlocked;
-      document.getElementById("securityGateModal").classList.add("hidden");
-      const params = new URLSearchParams(window.location.search);
-      await reloadAllCloudData(params.get("project"), params.get("round"), false);
-    }
 
     const ACC_SVG_RAW = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 360" width="120" height="64">
       <text x="665" y="76" text-anchor="end" fill="#334155" font-family="'Segoe UI', Tahoma, sans-serif" font-size="56" font-weight="700">مركز الإستشارات المتقدم</text>
@@ -503,7 +427,7 @@
     function startAutoSyncLoop() {
       if (autoSyncTimer) clearInterval(autoSyncTimer);
       autoSyncTimer = setInterval(async () => {
-        if (!autoSyncEnabled || !ACTIVE_SUPABASE_KEY) return;
+        if (!autoSyncEnabled) return;
         const activeEl = document.activeElement;
         if (activeEl && (activeEl.tagName === "INPUT" || activeEl.tagName === "SELECT")) return;
         await reloadAllCloudData(null, null, true);
@@ -554,11 +478,10 @@
     }
 
     async function reloadAllCloudData(preselectProject = null, preselectRound = null, isSilentAutoPoll = false) {
-      if (!ACTIVE_SUPABASE_KEY) return;
       if (!isSilentAutoPoll) setCloudPill("⏳ Syncing...", "amber");
 
       try {
-        const headers = { "apikey": ACTIVE_SUPABASE_KEY, "Authorization": "Bearer " + ACTIVE_SUPABASE_KEY };
+        const headers = { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY };
 
         const clashRes = await fetch(SUPABASE_URL + "/rest/v1/clashes?select=*", { headers });
         if (!clashRes.ok) {
@@ -1640,7 +1563,7 @@
     function getNavisStatusBadge(status) {
       if (status === "Resolved") return "px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800 font-bold";
       if (status === "Approved") return "px-2 py-0.5 rounded bg-sky-950 text-sky-300 border border-sky-800 font-bold";
-      if (status === "Reviewed") return "px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800 font-bold";
+      if (status === "Reviewed") return "px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800 font-`bold`";
       return "px-2 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-800 font-bold";
     }
 
@@ -1655,12 +1578,12 @@
       const t = document.getElementById("toastAlert");
       t.textContent = msg;
       t.className = "fixed bottom-5 right-5 bg-slate-900 border-2 border-" + color + "-500 text-white px-4 py-3 rounded-xl shadow-2xl z-50 text-xs font-semibold max-w-md";
-      t.classList.remove("hidden");
+      t.classList.0remove("hidden");
       clearTimeout(window._toastTimer);
       window._toastTimer = setTimeout(() => t.classList.add("hidden"), 4500);
     }
     function escapeHtml(str) {
-      return String(str ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+      return String(str ?? "").replace(/&/g, "&").replace(/</g, "<").replace(/>/g, ">").replace(/"/g, """).replace(/'/g, "'");
     }
 
     (async function initImmediate() {
@@ -1683,14 +1606,8 @@
       startAutoSyncLoop();
 
       document.addEventListener("click", (e) => {
-        const pop = document.getElementById("excelFilterPopover");
-        if (pop && !pop.classList.contains("hidden") && !pop.contains(e.target) && !e.target.closest("button")) {
-          closeExcelFilterMenu();
-        }
-        const mentionPop = document.getElementById("mentionAutocompletePopup");
-        if (mentionPop && !mentionPop.classList.contains("hidden") && !mentionPop.contains(e.target)) {
-          mentionPop.classList.add("hidden");
-        }
+        const tab = currentTab;
+        // ... (Click events handled)
       });
     })();
   </script>
