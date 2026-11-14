@@ -346,41 +346,41 @@
       </div>
     </div>
 
-    <!-- CLASHES TABLE (Clean, Compact, Professional Headers) -->
+<!-- CLASHES TABLE (Single-Line Compact Headers) -->
     <div id="clashesTableContainer" class="bg-[#0d1526] border border-slate-800 rounded-xl shadow-2xl overflow-x-auto">
       <table class="w-full text-left border-collapse text-xs">
         <thead>
-          <tr class="bg-[#060911] text-slate-300 border-b border-slate-800 uppercase text-[10px] tracking-wider select-none">
-            <th class="p-2 w-8 text-center"><input type="checkbox" id="chkAllVisibleClashes" onclick="toggleSelectAllVisible(this)" /></th>
-            <th class="p-2 w-24">Snapshot</th>
-            <th class="p-2 w-20"><div class="flex items-center justify-between"><span>Round</span><button onclick="openExcelFilterMenu(event, 'round', 'clashes')" class="px-1">🔽</button></div></th>
-            <th class="p-2 w-36"><div class="flex items-center justify-between"><span>Clash Test</span><button onclick="openExcelFilterMenu(event, 'test_name', 'clashes')" class="px-1">🔽</button></div></th>
-            <th class="p-2"><div class="flex items-center justify-between"><span>Clash / Group</span><button onclick="openExcelFilterMenu(event, 'clash_name', 'clashes')" class="px-1">🔽</button></div></th>
-            <th class="p-2 w-28"><div class="flex items-center justify-between"><span>Discipline</span><button onclick="openExcelFilterMenu(event, 'assigned_to', 'clashes')" class="px-1">🔽</button></div></th>
-            <th class="p-2 w-64"><div class="flex items-center justify-between"><span>Elements & Revit Bridge</span><button onclick="openExcelFilterMenu(event, 'item_a_file', 'clashes')" class="px-1">🔽</button></div></th>
-            <th class="p-2 w-24"><div class="flex items-center justify-between"><span>Lvl / Dist</span><button onclick="openExcelFilterMenu(event, 'level_grid', 'clashes')" class="px-1">🔽</button></div></th>
-            <th class="p-2 w-44 bg-sky-950/20 border-l border-r border-slate-800"><div class="flex items-center justify-between"><span class="text-sky-300">🛡️ BIM Status (BIM Only)</span><button onclick="openExcelFilterMenu(event, 'navis_status', 'clashes')" class="px-1">🔽</button></div></th>
-            <th class="p-2 w-48 bg-teal-950/20 border-r border-slate-800"><div class="flex items-center justify-between"><span class="text-teal-300">🔧 Team Status (Eng Only)</span><button onclick="openExcelFilterMenu(event, 'team_response', 'clashes')" class="px-1">🔽</button></div></th>
-            <th class="p-2 w-72">Discussion & @Mentions</th>
+          <tr class="bg-[#060911] text-slate-300 border-b border-slate-800 uppercase text-[10px] tracking-wider select-none whitespace-nowrap">
+            <th class="p-2.5 w-8 text-center"><input type="checkbox" id="chkAllVisibleClashes" onclick="toggleSelectAllVisible(this)" /></th>
+            <th class="p-2.5 w-24">Snapshot</th>
+            <th class="p-2.5 w-20"><div class="flex items-center justify-between gap-1"><span>Round</span><button onclick="openExcelFilterMenu(event, 'round', 'clashes')" class="px-1">🔽</button></div></th>
+            <th class="p-2.5 w-36"><div class="flex items-center justify-between gap-1"><span>Clash Test</span><button onclick="openExcelFilterMenu(event, 'test_name', 'clashes')" class="px-1">🔽</button></div></th>
+            <th class="p-2.5 min-w-[150px]"><div class="flex items-center justify-between gap-1"><span>Clash Item</span><button onclick="openExcelFilterMenu(event, 'clash_name', 'clashes')" class="px-1">🔽</button></div></th>
+            <th class="p-2.5 w-28"><div class="flex items-center justify-between gap-1"><span>Discipline</span><button onclick="openExcelFilterMenu(event, 'assigned_to', 'clashes')" class="px-1">🔽</button></div></th>
+            <th class="p-2.5 w-64"><div class="flex items-center justify-between gap-1"><span>Revit Elements</span><button onclick="openExcelFilterMenu(event, 'item_a_file', 'clashes')" class="px-1">🔽</button></div></th>
+            <th class="p-2.5 w-28"><div class="flex items-center justify-between gap-1"><span>Level / Dist</span><button onclick="openExcelFilterMenu(event, 'level_grid', 'clashes')" class="px-1">🔽</button></div></th>
+            <th class="p-2.5 w-40 bg-sky-950/20 border-l border-r border-slate-800"><div class="flex items-center justify-between gap-1"><span class="text-sky-300">🛡️ BIM Status</span><button onclick="openExcelFilterMenu(event, 'navis_status', 'clashes')" class="px-1">🔽</button></div></th>
+            <th class="p-2.5 w-44 bg-teal-950/20 border-r border-slate-800"><div class="flex items-center justify-between gap-1"><span class="text-teal-300">🔧 Team Status</span><button onclick="openExcelFilterMenu(event, 'team_response', 'clashes')" class="px-1">🔽</button></div></th>
+            <th class="p-2.5 w-72">Discussion</th>
           </tr>
         </thead>
         <tbody id="clashesTableBody" class="divide-y divide-slate-800/70"></tbody>
       </table>
     </div>
 
-    <!-- VIEWPOINTS TABLE -->
+    <!-- VIEWPOINTS TABLE (Single-Line Compact Headers) -->
     <div id="viewpointsTableContainer" class="hidden bg-[#0d1526] border border-slate-800 rounded-xl shadow-2xl overflow-x-auto">
       <table class="w-full text-left border-collapse text-xs">
         <thead>
-          <tr class="bg-[#060911] text-slate-300 border-b border-slate-800 uppercase text-[10px] tracking-wider select-none">
-            <th class="p-2 w-12"><div class="flex items-center justify-between"><span>#</span><button onclick="openExcelFilterMenu(event, 'sequence_num', 'viewpoints')" class="px-1">🔽</button></div></th>
-            <th class="p-2 w-28">Snapshot</th>
-            <th class="p-2 w-40"><div class="flex items-center justify-between"><span>Folder</span><button onclick="openExcelFilterMenu(event, 'folder_name', 'viewpoints')" class="px-1">🔽</button></div></th>
-            <th class="p-2"><div class="flex items-center justify-between"><span>Viewpoint Title</span><button onclick="openExcelFilterMenu(event, 'description', 'viewpoints')" class="px-1">🔽</button></div></th>
-            <th class="p-2 w-64"><div class="flex items-center justify-between"><span>Elements & Revit Bridge</span><button onclick="openExcelFilterMenu(event, 'item_a_file', 'viewpoints')" class="px-1">🔽</button></div></th>
-            <th class="p-2 w-44 bg-sky-950/20 border-l border-r border-slate-800"><span class="text-sky-300">🛡️ BIM Review (BIM Only)</span></th>
-            <th class="p-2 w-48 bg-teal-950/20 border-r border-slate-800"><div class="flex items-center justify-between"><span class="text-teal-300">🔧 Team Status (Eng Only)</span><button onclick="openExcelFilterMenu(event, 'status', 'viewpoints')" class="px-1">🔽</button></div></th>
-            <th class="p-2 w-72">Discussion & @Mentions</th>
+          <tr class="bg-[#060911] text-slate-300 border-b border-slate-800 uppercase text-[10px] tracking-wider select-none whitespace-nowrap">
+            <th class="p-2.5 w-12"><div class="flex items-center justify-between gap-1"><span>#</span><button onclick="openExcelFilterMenu(event, 'sequence_num', 'viewpoints')" class="px-1">🔽</button></div></th>
+            <th class="p-2.5 w-28">Snapshot</th>
+            <th class="p-2.5 w-40"><div class="flex items-center justify-between gap-1"><span>Folder</span><button onclick="openExcelFilterMenu(event, 'folder_name', 'viewpoints')" class="px-1">🔽</button></div></th>
+            <th class="p-2.5 min-w-[160px]"><div class="flex items-center justify-between gap-1"><span>Viewpoint</span><button onclick="openExcelFilterMenu(event, 'description', 'viewpoints')" class="px-1">🔽</button></div></th>
+            <th class="p-2.5 w-64"><div class="flex items-center justify-between gap-1"><span>Revit Elements</span><button onclick="openExcelFilterMenu(event, 'item_a_file', 'viewpoints')" class="px-1">🔽</button></div></th>
+            <th class="p-2.5 w-40 bg-sky-950/20 border-l border-r border-slate-800"><span class="text-sky-300">🛡️ BIM Status</span></th>
+            <th class="p-2.5 w-44 bg-teal-950/20 border-r border-slate-800"><div class="flex items-center justify-between gap-1"><span class="text-teal-300">🔧 Team Status</span><button onclick="openExcelFilterMenu(event, 'status', 'viewpoints')" class="px-1">🔽</button></div></th>
+            <th class="p-2.5 w-72">Discussion</th>
           </tr>
         </thead>
         <tbody id="viewpointsTableBody" class="divide-y divide-slate-800/70"></tbody>
