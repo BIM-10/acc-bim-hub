@@ -504,7 +504,7 @@
 
     // Global State
     let lockedProjectName = null;
-    let currentUser = { name: "Unverified", email: "", role: "BIM Coordinator", discipline: "ALL" }; // Locked Read-Only User Context
+    let currentUser = { name: "Unverified", email: "", role: "BIM Coordinator", discipline: "ALL" };
     let allClashes = [], filteredClashes = [], allViewpoints = [], filteredViewpoints = [], projectMembers = [];
     let currentTab = "clashes", collapsedGroups = new Set(), collapsedVpFolders = new Set(), selectedRowKeys = new Set(), lastCheckedIndex = null;
     let hasInitializedDefaultCollapse = false;
@@ -517,7 +517,17 @@
     let autoSyncEnabled = true, autoSyncTimer = null, lastDataSignature = "";
     let chartsVisible = true, activeMentionInputId = null;
 
-    // Role Normalization & Permission Helpers
+    function getSupabaseHeaders(includeContentType = false) {
+      const h = { "apikey": SUPABASE_KEY };
+      if (!SUPABASE_KEY.startsWith("sb_publishable_")) {
+        h["Authorization"] = "Bearer " + SUPABASE_KEY;
+      }
+      if (includeContentType) {
+        h["Content-Type"] = "application/json";
+      }
+      return h;
+    }
+
     function normalizeRoleName(rawRole) {
       const r = String(rawRole || "").trim().toLowerCase();
       if (r.includes("coordinator") || r.includes("bim")) return "BIM Coordinator";
@@ -533,7 +543,6 @@
       return "🔧";
     }
 
-    // Requirement 3: BIM Coordinator & Lead control BIM Status; Engineer controls Team Status
     function canEditBimStatus() {
       return currentUser.role === "BIM Coordinator" || currentUser.role === "Lead";
     }
@@ -813,24 +822,26 @@
       };
     }
 
-    // Requirement 2: Fault-tolerant Supabase fetching without order=sequence_num failure & automatic group reconstruction
     async function reloadAllCloudData(preselectProject = null, preselectRound = null, isSilentAutoPoll = false) {
       if (!isSilentAutoPoll) setCloudPill("⏳ Syncing...", "amber");
 
       try {
-        const headers = { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY };
+        const headers = getSupabaseHeaders(false);
 
-        const clashRes = await fetch(`${SUPABASE_URL}/rest/v1/clashes?select=*`, { headers });
-        if (!clashRes.ok) throw new Error("HTTP " + clashRes.status);
+        const clashRes = await fetch(`${SUPABASE_URL}/rest/v1/clashes?select=*`, { headers, cache: "no-store" });
+        if (!clashRes.ok) {
+          const errText = await clashRes.text();
+          throw new Error(`HTTP ${clashRes.status}: ${errText}`);
+        }
 
         let vpRawList = [], memList = [];
         try {
-          const vpRes = await fetch(`${SUPABASE_URL}/rest/v1/viewpoints?select=*`, { headers });
+          const vpRes = await fetch(`${SUPABASE_URL}/rest/v1/viewpoints?select=*`, { headers, cache: "no-store" });
           if (vpRes.ok) vpRawList = await vpRes.json();
         } catch {}
 
         try {
-          const memRes = await fetch(`${SUPABASE_URL}/rest/v1/project_members?select=*`, { headers });
+          const memRes = await fetch(`${SUPABASE_URL}/rest/v1/project_members?select=*`, { headers, cache: "no-store" });
           if (memRes.ok) memList = await memRes.json();
         } catch {}
 
@@ -866,7 +877,7 @@
         allViewpoints = vpList;
         projectMembers = memList;
 
-        // Requirement 4: Default all Clash Groups and Viewpoint Folders to COLLAPSED (▶) on initial load
+        // Default all Clash Groups and Viewpoint Folders to COLLAPSED (▶) on initial load
         if (!hasInitializedDefaultCollapse && allClashes.length > 0) {
           allClashes.filter(c => c.is_group_header).forEach(g => collapsedGroups.add(g.guid));
           hasInitializedDefaultCollapse = true;
@@ -911,7 +922,6 @@
       const projSelect = document.getElementById("filterProject");
       const projects = [...new Set([...allClashes.map(c => c.project_name), ...allViewpoints.map(v => v.project_name)].filter(Boolean))];
 
-      // Check if lockedProjectName exists in actual cloud data
       const matchedLockedProj = lockedProjectName
         ? projects.find(p => p.toLowerCase() === lockedProjectName.toLowerCase())
         : null;
@@ -1116,7 +1126,6 @@
           ? `onclick="handleGroupCheckboxClick(event, '${escapeHtml(c.round_guid)}', '${escapeHtml(c.guid)}', '${escapeHtml(c.round)}')"`
           : `onclick="handleRowCheckboxClick(event, '${escapeHtml(c.round_guid)}', ${startIdx + idx})"`;
 
-        // COLUMN 9: BIM STATUS (Editable ONLY for BIM Coordinator / Lead, Read-Only Badge for Engineer)
         const bimStatusHtml = allowBimEdit
           ? `<select onchange="updateClashBimStatus('${escapeHtml(c.round_guid)}', this.value, ${isGroup}, '${escapeHtml(c.guid)}')" class="w-full bg-[#070b12] border border-sky-700/80 rounded-lg px-2 py-1 text-[11px] font-bold text-sky-200 focus:outline-none">
               ${BIM_COORDINATOR_STATUSES.map(st => `<option value="${st}" ${c.navis_status === st ? "selected" : ""}>🛡️ ${st}</option>`).join("")}
@@ -1127,7 +1136,6 @@
                <span class="text-[9px] opacity-75" title="Controlled by BIM Coordinator">🔒</span>
              </div>`;
 
-        // COLUMN 10: TEAM STATUS (Editable ONLY for Engineer, Read-Only Badge for BIM Coordinator & Lead)
         const teamStatusHtml = allowTeamEdit
           ? `<select onchange="updateClashTeamResponse('${escapeHtml(c.round_guid)}', this.value, ${isGroup}, '${escapeHtml(c.guid)}')" class="w-full bg-[#070b12] border border-teal-700/80 rounded-lg px-2 py-1 text-[11px] font-bold text-teal-200 focus:outline-none">
               ${TEAM_UNIFIED_STATUSES.map(st => `<option value="${st}" ${c.team_response === st ? "selected" : ""}>🔧 ${st}</option>`).join("")}
@@ -1171,7 +1179,6 @@
       return "bg-rose-950/70 text-rose-300 border-rose-800";
     }
 
-    // BIM Coordinator / Lead Status Update Function (Propagates Group Status to Child Clashes)
     async function updateClashBimStatus(roundGuid, newBimStatus, isGroupHeader = false, groupGuid = "") {
       if (!canEditBimStatus()) {
         showToast("🔒 Only BIM Coordinators / Leads can modify BIM Review Status.", "rose");
@@ -1186,13 +1193,13 @@
       try {
         let res = await fetch(`${SUPABASE_URL}/rest/v1/clashes?round_guid=eq.${encodeURIComponent(roundGuid)}`, {
           method: "PATCH",
-          headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY, "Content-Type": "application/json" },
+          headers: getSupabaseHeaders(true),
           body: JSON.stringify(payload)
         });
         if (!res.ok && res.status === 400) {
           res = await fetch(`${SUPABASE_URL}/rest/v1/clashes?round_guid=eq.${encodeURIComponent(roundGuid)}`, {
             method: "PATCH",
-            headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY, "Content-Type": "application/json" },
+            headers: getSupabaseHeaders(true),
             body: JSON.stringify({ navis_status: newBimStatus, updated_at: new Date().toISOString() })
           });
         }
@@ -1208,7 +1215,7 @@
             ch.review_decision = revDecision;
             await fetch(`${SUPABASE_URL}/rest/v1/clashes?round_guid=eq.${encodeURIComponent(ch.round_guid)}`, {
               method: "PATCH",
-              headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY, "Content-Type": "application/json" },
+              headers: getSupabaseHeaders(true),
               body: JSON.stringify({ navis_status: newBimStatus, updated_at: new Date().toISOString() })
             });
           }
@@ -1221,7 +1228,6 @@
       }
     }
 
-    // Engineer Team Action Status Update Function (Propagates Group Status to Child Clashes)
     async function updateClashTeamResponse(roundGuid, newResponse, isGroupHeader = false, groupGuid = "") {
       if (!canEditTeamStatus()) {
         showToast("🔒 Only Discipline Engineers can modify Team Action Status.", "rose");
@@ -1239,7 +1245,7 @@
         const payload = { team_response: newResponse, updated_at: new Date().toISOString() };
         const res = await fetch(`${SUPABASE_URL}/rest/v1/clashes?round_guid=eq.${encodeURIComponent(roundGuid)}`, {
           method: "PATCH",
-          headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY, "Content-Type": "application/json" },
+          headers: getSupabaseHeaders(true),
           body: JSON.stringify(payload)
         });
         if (!res.ok) throw new Error("HTTP " + res.status);
@@ -1253,7 +1259,7 @@
             ch.team_response = newResponse;
             await fetch(`${SUPABASE_URL}/rest/v1/clashes?round_guid=eq.${encodeURIComponent(ch.round_guid)}`, {
               method: "PATCH",
-              headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY, "Content-Type": "application/json" },
+              headers: getSupabaseHeaders(true),
               body: JSON.stringify(payload)
             });
           }
@@ -1284,7 +1290,7 @@
 
           await fetch(`${SUPABASE_URL}/rest/v1/clashes?round_guid=eq.${encodeURIComponent(k)}`, {
             method: "PATCH",
-            headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY, "Content-Type": "application/json" },
+            headers: getSupabaseHeaders(true),
             body: JSON.stringify(payload)
           });
           const item = allClashes.find(c => c.round_guid === k);
@@ -1299,7 +1305,6 @@
       }
     }
 
-    // Viewpoints Table with Collapsible Folder Headers (Closed by Default ▶)
     function renderViewpointsTable() {
       const tbody = document.getElementById("viewpointsTableBody");
       tbody.innerHTML = "";
@@ -1396,7 +1401,7 @@
       if (!canEditBimStatus()) return;
       await fetch(`${SUPABASE_URL}/rest/v1/viewpoints?vp_key=eq.${encodeURIComponent(vpKey)}`, {
         method: "PATCH",
-        headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY, "Content-Type": "application/json" },
+        headers: getSupabaseHeaders(true),
         body: JSON.stringify({ item_b_name: newBimStatus, updated_at: new Date().toISOString() })
       });
       const vp = allViewpoints.find(v => v.vp_key === vpKey);
@@ -1409,7 +1414,7 @@
       if (!canEditTeamStatus()) return;
       await fetch(`${SUPABASE_URL}/rest/v1/viewpoints?vp_key=eq.${encodeURIComponent(vpKey)}`, {
         method: "PATCH",
-        headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY, "Content-Type": "application/json" },
+        headers: getSupabaseHeaders(true),
         body: JSON.stringify({ status: newStatus, updated_at: new Date().toISOString() })
       });
       const vp = allViewpoints.find(v => v.vp_key === vpKey);
@@ -1418,7 +1423,6 @@
       renderViewpointsTable();
     }
 
-    // MULTI-SESSION & HOST/LINK PRIORITY REVIT BRIDGE
     async function copyAndIsolateInRevit(projectName, primaryId, secondaryId, primaryFile, secondaryFile, primaryName = "", secondaryName = "") {
       if (primaryId && primaryId !== "N/A") {
         try { await navigator.clipboard.writeText(primaryId); } catch {}
@@ -1625,7 +1629,7 @@
 
       await fetch(`${SUPABASE_URL}/rest/v1/${tableType}?${keyCol}=eq.${encodeURIComponent(recordKey)}`, {
         method: "PATCH",
-        headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY, "Content-Type": "application/json" },
+        headers: getSupabaseHeaders(true),
         body: JSON.stringify({ comments_json: updatedJson, updated_at: new Date().toISOString() })
       });
       record.comments_json = updatedJson;
@@ -1950,7 +1954,6 @@
       window._toastTimer = setTimeout(() => t.classList.add("hidden"), 4500);
     }
 
-    // FIXED SYNTAX ERROR: Safe HTML escaping using hex character codes so copy/paste never breaks quotes
     function escapeHtml(str) {
       return String(str ?? "")
         .replace(/&/g, "&")
