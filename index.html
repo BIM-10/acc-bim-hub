@@ -353,7 +353,7 @@
       </div>
     </div>
 
-    <!-- CLASHES TABLE (Single-Line Compact Headers) -->
+    <!-- CLASHES TABLE -->
     <div id="clashesTableContainer" class="bg-[#0d1526] border border-slate-800 rounded-xl shadow-2xl overflow-x-auto">
       <table class="w-full text-left border-collapse text-xs">
         <thead>
@@ -375,7 +375,7 @@
       </table>
     </div>
 
-    <!-- VIEWPOINTS TABLE (Single-Line Compact Headers) -->
+    <!-- VIEWPOINTS TABLE -->
     <div id="viewpointsTableContainer" class="hidden bg-[#0d1526] border border-slate-800 rounded-xl shadow-2xl overflow-x-auto">
       <table class="w-full text-left border-collapse text-xs">
         <thead>
@@ -502,7 +502,6 @@
       <path d="M 638 215 A 54 54 0 1 0 638 292 L 675 322 A 98 98 0 1 1 675 185 Z" fill="#008529" />
     </svg>`;
 
-    // Global State
     let lockedProjectName = null;
     let currentUser = { name: "Unverified", email: "", role: "BIM Coordinator", discipline: "ALL" };
     let allClashes = [], filteredClashes = [], allViewpoints = [], filteredViewpoints = [], projectMembers = [];
@@ -848,7 +847,6 @@
         const rawClashes = await clashRes.json();
         const newClashes = rawClashes.map((r, i) => normalizeClashRecord(r, i));
 
-        // Automatically reconstruct parent_group_guid links if saved via legacy schema fallback
         const groupLookup = {};
         newClashes.filter(c => c.is_group_header && c.group_name).forEach(g => {
           groupLookup[`${g.project_name}::${g.round}::${g.test_name}::${g.group_name}`] = g.guid;
@@ -877,7 +875,6 @@
         allViewpoints = vpList;
         projectMembers = memList;
 
-        // Default all Clash Groups and Viewpoint Folders to COLLAPSED (▶) on initial load
         if (!hasInitializedDefaultCollapse && allClashes.length > 0) {
           allClashes.filter(c => c.is_group_header).forEach(g => collapsedGroups.add(g.guid));
           hasInitializedDefaultCollapse = true;
@@ -887,7 +884,6 @@
           hasInitializedVpDefaultCollapse = true;
         }
 
-        // Enforce strict role lock if current user's email matches a registered member in projectMembers
         if (currentUser.email && projectMembers.length > 0) {
           const matched = projectMembers.find(m => String(m.email || "").trim().toLowerCase() === currentUser.email.trim().toLowerCase());
           if (matched && matched.role) {
@@ -1954,13 +1950,19 @@
       window._toastTimer = setTimeout(() => t.classList.add("hidden"), 4500);
     }
 
+    // Copy-Paste Safe HTML Escaping (Using split strings so chat/markdown never unescapes entities into raw quotes)
     function escapeHtml(str) {
+      const eAmp = '&' + 'amp;';
+      const eLt = '&' + 'lt;';
+      const eGt = '&' + 'gt;';
+      const eQuot = '&' + 'quot;';
+      const eApos = '&' + '#39;';
       return String(str ?? "")
-        .replace(/&/g, "&")
-        .replace(/</g, "<")
-        .replace(/>/g, ">")
-        .replace(/\x22/g, """)
-        .replace(/\x27/g, "'");
+        .replace(/&/g, eAmp)
+        .replace(/</g, eLt)
+        .replace(/>/g, eGt)
+        .replace(/\x22/g, eQuot)
+        .replace(/\x27/g, eApos);
     }
 
     // INITIALIZATION
