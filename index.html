@@ -3,1396 +3,1994 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Enterprise BIM Coordination Hub — ACC</title>
+  <meta name="robots" content="noindex, nofollow, noarchive" />
+  <title>ACC — Enterprise BIM Coordination Hub</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js" async></script>
   <style>
-    :root {
-      --bg-main: #060a11;
-      --bg-card: #0b111e;
-      --bg-header: #080d18;
-      --border-dim: #172236;
-      --border-glow: #1e3a5f;
-    }
-    body {
-      background-color: var(--bg-main);
-      color: #e2e8f0;
-      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
-      overflow-x: hidden;
-    }
     ::-webkit-scrollbar { width: 7px; height: 7px; }
-    ::-webkit-scrollbar-track { background: #060a11; }
-    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #334155; }
-
-    .hub-panel {
-      background-color: var(--bg-card);
-      border: 1px solid var(--border-dim);
-      border-radius: 10px;
+    ::-webkit-scrollbar-track { background: #070b12; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #475569; }
+    @keyframes pulseHighlight {
+      0%, 100% { background-color: rgba(14, 165, 233, 0.35); box-shadow: 0 0 0 2px #0ea5e9 inset; }
+      50% { background-color: rgba(14, 165, 233, 0.08); }
     }
-    .kpi-card {
-      background: linear-gradient(180deg, #0c1424 0%, #090f1b 100%);
-      border-radius: 10px;
-      padding: 12px 14px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      min-height: 92px;
-    }
-    .filter-select {
-      background-color: #070b14;
-      border: 1px solid #1e293b;
-      color: #e2e8f0;
-      border-radius: 6px;
-      padding: 5px 10px;
-      font-size: 11.5px;
-      font-weight: 600;
-      outline: none;
-      transition: border-color 0.15s;
-    }
-    .filter-select:focus { border-color: #0284c7; }
-    .col-filter-btn {
-      background-color: #172554;
-      color: #60a5fa;
-      border: 1px solid #1e3a8a;
-      border-radius: 4px;
-      width: 17px;
-      height: 17px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 9px;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-    .col-filter-btn:hover, .col-filter-btn.active-filter {
-      background-color: #2563eb;
-      color: #ffffff;
-      border-color: #60a5fa;
-    }
-    .status-select {
-      background-color: #070b14;
-      border: 1px solid #1e293b;
-      border-radius: 6px;
-      padding: 4px 8px;
-      font-size: 11px;
-      font-weight: 700;
-      width: 100%;
-      outline: none;
-    }
-    .status-select:disabled {
-      opacity: 0.45;
-      cursor: not-allowed;
-      background-color: #05080f;
-    }
+    .row-highlight-flash { animation: pulseHighlight 1.5s ease-in-out 3; }
   </style>
 </head>
-<body class="min-h-screen flex flex-col p-2.5 gap-2.5 select-none">
+<body class="bg-[#070b12] text-slate-200 min-h-screen font-sans antialiased overflow-x-hidden">
 
-  <!-- ========================================================================= -->
-  <!-- 1. TOP HEADER BAR (Exact Match to Screenshot)                             -->
-  <!-- ========================================================================= -->
-  <header class="hub-panel px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 shadow-lg">
-    <!-- Left: ACC Round/Square Badge + Title + Status Pills + Subtitle -->
-    <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-xl bg-white flex flex-col items-center justify-center shadow-md border border-slate-300 shrink-0">
-        <svg width="28" height="22" viewBox="0 0 40 30" fill="none">
-          <path d="M6 12 C14 3, 26 3, 34 12" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="2 3"/>
-          <text x="20" y="25" text-anchor="middle" fill="#0d2763" font-size="14" font-weight="900" font-family="Segoe UI, Arial">ACC</text>
-        </svg>
+  <!-- نافذة التحقق التلقائي من الهوية عند فتح الرابط بدون توكن مستخدم مسبق -->
+  <div id="identityGateModal" class="hidden fixed inset-0 bg-[#070b12]/95 backdrop-blur-md flex items-center justify-center p-4 z-50">
+    <div class="bg-[#0d1526] border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl">
+      <div class="flex items-center gap-3 border-b border-slate-800 pb-3 mb-4">
+        <div class="w-11 h-11 rounded-xl bg-white p-1 shrink-0 flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 360" class="w-full h-full">
+            <circle cx="96" cy="272" r="68" fill="#008529" />
+            <path d="M 134 26 L 62 162 A 84 84 0 0 1 174 226 L 236 340 L 312 340 L 134 26 Z" fill="#0d2763" />
+            <path d="M 455 215 A 54 54 0 1 0 455 292 L 492 322 A 98 98 0 1 1 492 185 Z" fill="#008529" />
+            <path d="M 638 215 A 54 54 0 1 0 638 292 L 675 322 A 98 98 0 1 1 675 185 Z" fill="#008529" />
+          </svg>
+        </div>
+        <div>
+          <h2 class="text-sm font-extrabold text-white">🔐 Verify Project Member Identity</h2>
+          <p class="text-[11px] text-slate-400">Select your registered profile from the project roster to lock your role permissions:</p>
+        </div>
       </div>
 
-      <div>
-        <div class="flex flex-wrap items-center gap-2">
-          <h1 class="text-[15px] font-extrabold text-white tracking-tight">Enterprise BIM Coordination Hub</h1>
-          <span id="projectLockBadge" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10.5px] font-bold bg-[#0c1e36] text-sky-400 border border-sky-800/70">
-            🔒 Project Locked
-          </span>
-          <span id="connectionStatusBadge" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10.5px] font-bold bg-[#09221c] text-emerald-400 border border-emerald-800/70">
-            ⏳ Connecting...
-          </span>
+      <div id="registeredMembersPicker" class="space-y-2 max-h-60 overflow-y-auto mb-4"></div>
+
+      <div class="border-t border-slate-800 pt-3">
+        <label class="block text-[10px] uppercase text-slate-400 font-bold mb-1.5">Or Enter Your Registered Official Email:</label>
+        <div class="flex gap-2">
+          <input id="verifyEmailInput" type="email" placeholder="name@company.com" onkeydown="if(event.key==='Enter') verifyByEmailInput()" class="flex-1 bg-[#070b12] border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white focus:border-sky-500 focus:outline-none" />
+          <button onclick="verifyByEmailInput()" class="bg-sky-600 hover:bg-sky-500 text-white px-4 py-1.5 rounded-lg text-xs font-bold">Verify</button>
         </div>
-        <p class="text-[10.5px] text-slate-400 mt-0.5">
-          Advanced Consultancy Center (ACC) — ISO 19650 Clash Verification, Saved Viewpoints & Live Revit Bridge
-        </p>
+        <div id="verifyErrorMsg" class="hidden text-[11px] text-rose-400 font-bold mt-2">⚠️ Email not found in this project's registered team.</div>
       </div>
     </div>
+  </div>
 
-    <!-- Right: Action Pills & Locked User Identity -->
-    <div class="flex flex-wrap items-center gap-2">
-      <!-- Clashes / Viewpoints Pill Switcher -->
-      <div class="flex items-center bg-[#070b12] p-0.5 rounded-lg border border-slate-800">
-        <button id="btnTabClashes" onclick="switchHubTab('clashes')" class="flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-bold bg-blue-600 text-white shadow transition">
-          <span>⚡</span>
-          <span>Clashes (<span id="hdrClashCount">0</span>)</span>
-        </button>
-        <button id="btnTabViewpoints" onclick="switchHubTab('viewpoints')" class="flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-bold text-slate-400 hover:text-white transition">
-          <span>📷</span>
-          <span>Viewpoints (<span id="hdrVpCount">0</span>)</span>
-        </button>
+  <!-- نافذة دليل أعضاء المشروع (Team Directory Modal) -->
+  <div id="teamDirectoryModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+    <div class="bg-[#0d1526] border border-slate-700 rounded-2xl max-w-2xl w-full p-5 shadow-2xl text-xs">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
+        <div>
+          <h2 class="text-base font-extrabold text-white">👥 Project Team Directory & Roles</h2>
+          <p class="text-[11px] text-slate-400">Registered members authorized on this NWF coordination loop (Use @ in chat to mention)</p>
+        </div>
+        <button onclick="toggleTeamDirectoryModal()" class="text-slate-400 hover:text-white text-lg">✕</button>
+      </div>
+      <div id="teamDirectoryGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-96 overflow-y-auto pr-1"></div>
+    </div>
+  </div>
+
+  <!-- نافذة اختيار ملف الريفيت عند وجود أكثر من ملف أو سيشن مفتوحة (Target RVT Picker) -->
+  <div id="revitTargetPickerModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+    <div class="bg-[#0d1526] border border-sky-600 rounded-2xl max-w-lg w-full p-5 shadow-2xl text-xs">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3 mb-3">
+        <div>
+          <h2 class="text-sm font-extrabold text-white">🎯 Select Target Open Revit File</h2>
+          <p class="text-[11px] text-slate-400">Multiple open Revit sessions/files contain this element. Choose where to apply the 3D Section Box:</p>
+        </div>
+        <button onclick="document.getElementById('revitTargetPickerModal').classList.add('hidden')" class="text-slate-400 hover:text-white text-base">✕</button>
+      </div>
+      <div id="revitTargetsList" class="space-y-2 max-h-72 overflow-y-auto"></div>
+    </div>
+  </div>
+
+  <!-- 1. TOP SINGLE-ROW BALANCED HEADER -->
+  <header class="w-full bg-[#0d1526] border-b border-slate-800 px-3 py-2 sticky top-0 z-40 shadow-lg">
+    <div class="w-full flex items-center justify-between gap-3 flex-wrap xl:flex-nowrap">
+      <!-- Left: Logo + Title + Locked Project Pill + Subtitle -->
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div class="w-10 h-10 rounded-xl bg-white border border-slate-300 shadow-md flex items-center justify-center p-1 shrink-0" title="Advanced Consultancy Center (ACC)">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 360" class="w-full h-full">
+            <text x="665" y="76" text-anchor="end" fill="#334155" font-family="'Segoe UI', Tahoma, sans-serif" font-size="56" font-weight="700">مركز الإستشارات المتقدم</text>
+            <text x="665" y="134" text-anchor="end" fill="#475569" font-family="'Segoe UI', Arial, sans-serif" font-size="38" font-weight="700">Advanced Consultancy Center</text>
+            <circle cx="96" cy="272" r="68" fill="#008529" />
+            <path d="M 134 26 L 62 162 A 84 84 0 0 1 174 226 L 236 340 L 312 340 L 134 26 Z" fill="#0d2763" />
+            <path d="M 455 215 A 54 54 0 1 0 455 292 L 492 322 A 98 98 0 1 1 492 185 Z" fill="#008529" />
+            <path d="M 638 215 A 54 54 0 1 0 638 292 L 675 322 A 98 98 0 1 1 675 185 Z" fill="#008529" />
+          </svg>
+        </div>
+
+        <div class="min-w-0">
+          <div class="flex items-center gap-2 flex-nowrap">
+            <h1 class="text-sm font-extrabold tracking-tight text-white truncate">Enterprise BIM Coordination Hub</h1>
+            <span id="projectBadge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-950 text-sky-300 border border-sky-800 shrink-0">🔒 Project Locked</span>
+            <span id="cloudSyncPill" class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-950 text-emerald-300 border border-emerald-800 shrink-0">⏳ Connecting...</span>
+          </div>
+          <p class="text-[10px] text-slate-400 truncate">Advanced Consultancy Center (ACC) — ISO 19650 Clash Verification, Saved Viewpoints & Live Revit Bridge</p>
+        </div>
       </div>
 
-      <!-- Team Roster Button -->
-      <button onclick="openTeamModal()" class="flex items-center gap-1.5 bg-[#070b12] hover:bg-slate-800 border border-slate-800 px-2.5 py-1.5 rounded-lg text-xs font-bold text-slate-300 transition" title="View Project Coordination Team Roster">
-        <span>👥</span>
-        <span>Team</span>
-        <span id="hdrTeamCount" class="px-1.5 py-0.2 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-700/60 text-[10px]">0</span>
-      </button>
+      <!-- Right: All Action Controls in the Same Single Row -->
+      <div class="flex items-center gap-1.5 flex-wrap sm:flex-nowrap shrink-0">
+        <!-- Module Tabs -->
+        <div class="bg-[#070b12] p-0.5 rounded-lg border border-slate-800 flex gap-1">
+          <button id="tabBtnClashes" onclick="switchMainTab('clashes')" class="px-2.5 py-1 rounded-md text-[11px] font-bold bg-sky-600 text-white transition">
+            ⚡ Clashes (<span id="tabCountClashes">0</span>)
+          </button>
+          <button id="tabBtnViewpoints" onclick="switchMainTab('viewpoints')" class="px-2.5 py-1 rounded-md text-[11px] font-bold text-slate-300 hover:text-white transition">
+            📸 Viewpoints (<span id="tabCountViewpoints">0</span>)
+          </button>
+        </div>
 
-      <!-- Strictly Locked User Identity & Role Badge -->
-      <div class="flex items-center gap-2 bg-[#070b12] border border-slate-800 px-3 py-1 rounded-lg text-xs" title="Your Identity & Role are strictly locked by your registered ACC BIM Profile">
-        <span class="text-sky-400">🛡️</span>
-        <span id="hdrUserName" class="font-bold text-white">Verifying...</span>
-        <span id="hdrUserRoleBadge" class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-amber-950/80 text-amber-400 border border-amber-700/70 tracking-wide">
-          LOCKED 🔒
-        </span>
+        <!-- Team Directory Button -->
+        <button onclick="toggleTeamDirectoryModal()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-teal-300 px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1" title="View Project Team Directory & Roles">
+          <span>👥 Team</span>
+          <span id="teamCountBadge" class="px-1.5 rounded-full text-[9px] bg-teal-950 text-teal-300 border border-teal-700">0</span>
+        </button>
+
+        <!-- STRICT READ-ONLY LOCKED USER & ROLE BADGE -->
+        <div class="flex items-center gap-1.5 bg-[#070b12] border border-slate-700 rounded-lg px-2.5 py-1 select-none" title="Verified Identity & Role (Read-Only Locked)">
+          <span id="activeRoleIcon" class="text-xs">🛡️</span>
+          <span id="activeUserDisplay" class="text-[11px] font-extrabold text-white truncate max-w-[125px]">Verifying...</span>
+          <span id="activeRoleBadge" class="px-1.5 py-0.2 rounded text-[9px] font-black uppercase bg-sky-950 text-sky-300 border border-sky-700">LOCKED</span>
+          <span class="text-[10px] text-slate-500" title="Identity Locked">🔒</span>
+        </div>
+
+        <!-- Notifications Bell -->
+        <div class="relative">
+          <button onclick="toggleNotificationsPanel()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 px-2 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1" title="Mentions & Alerts">
+            <span>🔔</span>
+            <span id="notifBadge" class="px-1.5 rounded-full text-[9px] bg-rose-600 text-white font-extrabold">0</span>
+          </button>
+          <div id="notifDropdown" class="hidden absolute right-0 mt-2 w-80 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-50 overflow-hidden text-xs">
+            <div class="bg-slate-950 px-3 py-2 border-b border-slate-800 flex justify-between items-center">
+              <span class="font-bold text-white">Notifications & @Mentions</span>
+              <button onclick="toggleNotificationsPanel()" class="text-slate-400 hover:text-white">✕</button>
+            </div>
+            <div id="notifItemsList" class="max-h-72 overflow-y-auto divide-y divide-slate-800"></div>
+          </div>
+        </div>
+
+        <!-- Charts Toggle -->
+        <button id="btnToggleCharts" onclick="toggleAnalyticsSection()" class="bg-teal-950/90 hover:bg-teal-900 border border-teal-700 text-teal-200 px-2 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1 transition" title="Show / Hide Analytics Charts">
+          <span>📊</span>
+          <span id="chartsToggleIcon">▴</span>
+        </button>
+
+        <!-- Auto-Sync -->
+        <button id="btnAutoSync" onclick="toggleAutoSync()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-emerald-300 px-2 py-1 rounded-lg text-[11px] font-bold" title="Live Cloud Auto-Sync (Every 5s)">
+          ⚡ Sync: ON
+        </button>
+
+        <!-- Export -->
+        <button onclick="openExportModal()" class="bg-teal-600 hover:bg-teal-500 text-white px-2.5 py-1 rounded-lg text-[11px] font-bold shadow">
+          📥 Export
+        </button>
+
+        <!-- Refresh -->
+        <button onclick="reloadAllCloudData()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white px-2 py-1 rounded-lg text-[11px] font-bold" title="Refresh Cloud Data">
+          🔄
+        </button>
       </div>
-
-      <!-- Notifications Bell -->
-      <button onclick="toggleNotificationsDrawer()" class="flex items-center gap-1 bg-[#070b12] hover:bg-slate-800 border border-slate-800 px-2.5 py-1.5 rounded-lg text-xs font-bold text-amber-400 transition" title="Mentions & Coordination Notifications">
-        <span>🔔</span>
-        <span id="hdrNotifCount" class="px-1.5 rounded-full bg-rose-600 text-white text-[10px]">0</span>
-      </button>
-
-      <!-- Collapse / Expand Analytics Charts Section -->
-      <button id="btnToggleAnalytics" onclick="toggleAnalyticsSection()" class="flex items-center gap-1 bg-[#070b12] hover:bg-slate-800 border border-slate-800 px-2.5 py-1.5 rounded-lg text-xs font-bold text-emerald-400 transition" title="Show / Hide Analytics & KPI Cards">
-        <span>📊</span>
-        <span id="analyticsArrow">▲</span>
-      </button>
-
-      <!-- Auto-Sync Toggle -->
-      <button id="btnAutoSync" onclick="toggleAutoSync()" class="flex items-center gap-1 bg-[#09221c] hover:bg-emerald-900/60 border border-emerald-800/80 px-2.5 py-1.5 rounded-lg text-xs font-bold text-emerald-400 transition" title="Toggle Live Cloud Sync">
-        <span>⚡</span>
-        <span id="syncStateText">Sync: ON</span>
-      </button>
-
-      <!-- Export CSV -->
-      <button onclick="exportFilteredCsv()" class="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow transition" title="Export current view to CSV / Excel">
-        <span>📥</span>
-        <span>Export</span>
-      </button>
-
-      <!-- Fullscreen Toggle -->
-      <button onclick="toggleFullScreen()" class="bg-[#070b12] hover:bg-slate-800 border border-slate-800 px-2 py-1.5 rounded-lg text-xs text-slate-400 hover:text-white transition" title="Toggle Fullscreen">
-        ⛶
-      </button>
     </div>
   </header>
 
-  <!-- ========================================================================= -->
-  <!-- 2. ANALYTICS SECTION (Left: 6 KPI Cards | Right: 4 Charts)                -->
-  <!-- ========================================================================= -->
-  <section id="analyticsSection" class="hub-panel p-3 grid grid-cols-1 xl:grid-cols-12 gap-3">
-    <!-- Left 4 Columns: 2x3 KPI Cards -->
-    <div class="xl:col-span-4 grid grid-cols-3 gap-2.5">
-      <!-- KPI 1: FILTERED TOTAL -->
-      <div class="kpi-card border border-slate-800">
-        <div class="text-[10px] font-extrabold text-slate-300 uppercase tracking-wider">FILTERED TOTAL</div>
-        <div id="kpiFilteredTotal" class="text-2xl font-black text-white my-0.5">0</div>
-        <div id="kpiGroupsSub" class="text-[10.5px] font-bold text-emerald-400">0 Clash Groups</div>
-      </div>
-
-      <!-- KPI 2: BIM ACTIVE/NEW -->
-      <div class="kpi-card border border-rose-900/60">
-        <div class="text-[10px] font-extrabold text-rose-500 uppercase tracking-wider">BIM ACTIVE/NEW</div>
-        <div id="kpiBimActive" class="text-2xl font-black text-rose-500 my-0.5">0</div>
-        <div class="text-[10.5px] text-slate-400">Open Clashes</div>
-      </div>
-
-      <!-- KPI 3: FIXED IN REVIT -->
-      <div class="kpi-card border border-sky-900/60">
-        <div class="text-[10px] font-extrabold text-sky-400 uppercase tracking-wider">FIXED IN REVIT</div>
-        <div id="kpiFixedRevit" class="text-2xl font-black text-sky-400 my-0.5">0</div>
-        <div class="text-[10.5px] text-slate-400">Pending Next NWC</div>
-      </div>
-
-      <!-- KPI 4: APPROVAL / HOLD -->
-      <div class="kpi-card border border-indigo-900/60">
-        <div class="text-[10px] font-extrabold text-indigo-400 uppercase tracking-wider">APPROVAL / HOLD</div>
-        <div id="kpiApprovalHold" class="text-2xl font-black text-indigo-400 my-0.5">0</div>
-        <div class="text-[10.5px] text-slate-400">Needs BIM Review</div>
-      </div>
-
-      <!-- KPI 5: REJECTED BY BIM -->
-      <div class="kpi-card border border-amber-900/60">
-        <div class="text-[10px] font-extrabold text-amber-400 uppercase tracking-wider">REJECTED BY BIM</div>
-        <div id="kpiRejectedBim" class="text-2xl font-black text-amber-400 my-0.5">0</div>
-        <div class="text-[10.5px] text-slate-400">Unreviewed / Fix</div>
-      </div>
-
-      <!-- KPI 6: RESOLVED / CLOSED -->
-      <div class="kpi-card border border-emerald-900/60">
-        <div class="text-[10px] font-extrabold text-emerald-400 uppercase tracking-wider">RESOLVED / CLOSED</div>
-        <div id="kpiResolvedClosed" class="text-2xl font-black text-emerald-400 my-0.5">0</div>
-        <div class="text-[10.5px] text-slate-400">Approved by BIM</div>
-      </div>
-    </div>
-
-    <!-- Right 8 Columns: 4 Chart Panels -->
-    <div class="xl:col-span-8 grid grid-cols-1 md:grid-cols-4 gap-2.5">
-      <div class="bg-[#090f1b] border border-slate-800/90 rounded-xl p-3 flex flex-col justify-between h-[194px]">
-        <div class="text-[11px] font-bold text-slate-200">1. BIM Review Status</div>
-        <div class="relative flex-1 mt-1"><canvas id="chart1BimStatus"></canvas></div>
-      </div>
-
-      <div class="bg-[#090f1b] border border-slate-800/90 rounded-xl p-3 flex flex-col justify-between h-[194px]">
-        <div class="text-[11px] font-bold text-slate-200">2. Team Action Status</div>
-        <div class="relative flex-1 mt-1"><canvas id="chart2TeamStatus"></canvas></div>
-      </div>
-
-      <div class="bg-[#090f1b] border border-slate-800/90 rounded-xl p-3 flex flex-col justify-between h-[194px]">
-        <div class="text-[11px] font-bold text-slate-200">3. Discipline Breakdown</div>
-        <div class="relative flex-1 mt-1"><canvas id="chart3Discipline"></canvas></div>
-      </div>
-
-      <div class="bg-[#090f1b] border border-slate-800/90 rounded-xl p-3 flex flex-col justify-between h-[194px]">
-        <div class="text-[11px] font-bold text-slate-200">4. Coordination Rounds</div>
-        <div class="relative flex-1 mt-1"><canvas id="chart4Rounds"></canvas></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ========================================================================= -->
-  <!-- 3. FILTER & BATCH ACTION BAR (Exact Match to Screenshot)                  -->
-  <!-- ========================================================================= -->
-  <section class="hub-panel px-4 py-2.5 flex flex-wrap items-end justify-between gap-3">
-    <!-- Left Filters + Groups [+] [-] -->
-    <div class="flex flex-wrap items-end gap-2.5">
-      <div>
-        <label class="block text-[9.5px] font-extrabold text-slate-400 uppercase mb-1">PROJECT NWF</label>
-        <select id="fltProject" onchange="onTopFilterChange(true)" class="filter-select min-w-[135px]">
-          <option value="ALL">All Projects</option>
-        </select>
-      </div>
-
-      <div>
-        <label class="block text-[9.5px] font-extrabold text-slate-400 uppercase mb-1">ROUND</label>
-        <select id="fltRound" onchange="onTopFilterChange(false)" class="filter-select min-w-[105px]">
-          <option value="ALL">All Rounds</option>
-          <option value="1">Round 1</option>
-          <option value="2">Round 2</option>
-          <option value="3">Round 3</option>
-          <option value="4">Round 4</option>
-          <option value="5">Round 5</option>
-        </select>
-      </div>
-
-      <div>
-        <label class="block text-[9.5px] font-extrabold text-slate-400 uppercase mb-1">DISCIPLINE</label>
-        <select id="fltDiscipline" onchange="onTopFilterChange(false)" class="filter-select min-w-[110px]">
-          <option value="ALL">All Teams</option>
-        </select>
-      </div>
-
-      <div>
-        <label class="block text-[9.5px] font-extrabold text-slate-400 uppercase mb-1">BIM STATUS</label>
-        <select id="fltBimStatus" onchange="onTopFilterChange(false)" class="filter-select min-w-[125px]">
-          <option value="ALL">All BIM States</option>
-          <option value="New">New</option>
-          <option value="Active">Active</option>
-          <option value="Reviewed">Reviewed</option>
-          <option value="Approved">Approved</option>
-          <option value="Resolved">Resolved</option>
-        </select>
-      </div>
-
-      <div>
-        <label class="block text-[9.5px] font-extrabold text-slate-400 uppercase mb-1">TEAM STATUS</label>
-        <select id="fltTeamStatus" onchange="onTopFilterChange(false)" class="filter-select min-w-[140px]">
-          <option value="ALL">All Team Actions (5)</option>
-          <option value="Pending Action">Pending Action</option>
-          <option value="Solved / Fixed">Solved / Fixed</option>
-          <option value="Not Our Scope">Not Our Scope</option>
-          <option value="Need Workshop">Need Workshop</option>
-          <option value="Approved / Valid">Approved / Valid</option>
-        </select>
-      </div>
-
-      <div>
-        <label class="block text-[9.5px] font-extrabold text-slate-400 uppercase mb-1">GROUPS</label>
-        <div class="flex items-center gap-1">
-          <button onclick="expandOrCollapseAllGroups(true)" class="w-7 h-7 rounded-md bg-[#0f172a] hover:bg-blue-900/60 border border-slate-700 text-sky-400 font-bold text-sm flex items-center justify-center transition" title="Expand All Clash Groups / Viewpoint Folders">+</button>
-          <button onclick="expandOrCollapseAllGroups(false)" class="w-7 h-7 rounded-md bg-[#0f172a] hover:bg-blue-900/60 border border-slate-700 text-sky-400 font-bold text-sm flex items-center justify-center transition" title="Collapse All Clash Groups / Viewpoint Folders">−</button>
+  <!-- 2. ANALYTICS & CHARTS SURFACE -->
+  <div id="analyticsWrapper" class="w-full bg-gradient-to-b from-[#132038] to-[#0f192d] border-b-2 border-teal-900/60 px-3 py-2.5 shadow-inner">
+    <section id="analyticsSection" class="grid grid-cols-1 xl:grid-cols-12 gap-2.5">
+      <div class="xl:col-span-4 grid grid-cols-2 sm:grid-cols-3 gap-2">
+        <div class="bg-[#09101d]/90 border border-slate-700/80 rounded-xl p-2 flex flex-col justify-between shadow">
+          <span class="text-[10px] text-slate-400 uppercase font-semibold">Filtered Total</span>
+          <div id="kpiTotal" class="text-xl font-black text-white mt-0.5">0</div>
+          <span id="kpiGroupsSub" class="text-[10px] text-teal-400 font-semibold">0 Clash Groups</span>
+        </div>
+        <div class="bg-[#09101d]/90 border border-rose-900/60 rounded-xl p-2 flex flex-col justify-between shadow">
+          <span class="text-[10px] text-rose-400 uppercase font-semibold">BIM Active/New</span>
+          <div id="kpiActive" class="text-xl font-black text-rose-400 mt-0.5">0</div>
+          <span class="text-[10px] text-slate-400">Open Clashes</span>
+        </div>
+        <div class="bg-[#09101d]/90 border border-sky-900/60 rounded-xl p-2 flex flex-col justify-between shadow">
+          <span class="text-[10px] text-sky-400 uppercase font-semibold">Fixed in Revit</span>
+          <div id="kpiFixedRevit" class="text-xl font-black text-sky-400 mt-0.5">0</div>
+          <span class="text-[10px] text-slate-400">Pending Next NWC</span>
+        </div>
+        <div class="bg-[#09101d]/90 border border-indigo-900/60 rounded-xl p-2 flex flex-col justify-between shadow">
+          <span class="text-[10px] text-indigo-400 uppercase font-semibold">Approval / Hold</span>
+          <div id="kpiApprovalReq" class="text-xl font-black text-indigo-400 mt-0.5">0</div>
+          <span class="text-[10px] text-slate-400">Needs BIM Review</span>
+        </div>
+        <div class="bg-[#09101d]/90 border border-amber-900/60 rounded-xl p-2 flex flex-col justify-between shadow">
+          <span class="text-[10px] text-amber-400 uppercase font-semibold">Rejected by BIM</span>
+          <div id="kpiRejected" class="text-xl font-black text-amber-400 mt-0.5">0</div>
+          <span class="text-[10px] text-slate-400">Unreviewed / Fix</span>
+        </div>
+        <div class="bg-[#09101d]/90 border border-emerald-900/60 rounded-xl p-2 flex flex-col justify-between shadow">
+          <span class="text-[10px] text-emerald-400 uppercase font-semibold">Resolved / Closed</span>
+          <div id="kpiResolved" class="text-xl font-black text-emerald-400 mt-0.5">0</div>
+          <span class="text-[10px] text-slate-400">Approved by BIM</span>
         </div>
       </div>
-    </div>
 
-    <!-- Right Search + Reset + Batch Selection Apply -->
-    <div class="flex flex-wrap items-end gap-2">
-      <div>
-        <label class="block text-[9.5px] font-extrabold text-slate-400 uppercase mb-1">SEARCH</label>
-        <input id="txtGlobalSearch" type="text" oninput="onSearchInput()" placeholder="ID, Name, File, @Chat..." class="filter-select w-48" />
+      <div class="xl:col-span-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+        <div class="bg-[#09101d]/90 border border-slate-700/80 rounded-xl p-2 flex flex-col shadow">
+          <span class="text-[10px] font-bold text-slate-300 mb-1">1. BIM Review Status</span>
+          <div class="flex-1 relative min-h-[105px]"><canvas id="chartNavisStatus"></canvas></div>
+        </div>
+        <div class="bg-[#09101d]/90 border border-slate-700/80 rounded-xl p-2 flex flex-col shadow">
+          <span class="text-[10px] font-bold text-slate-300 mb-1">2. Team Action Status</span>
+          <div class="flex-1 relative min-h-[105px]"><canvas id="chartTeamResponse"></canvas></div>
+        </div>
+        <div class="bg-[#09101d]/90 border border-slate-700/80 rounded-xl p-2 flex flex-col shadow">
+          <span class="text-[10px] font-bold text-slate-300 mb-1">3. Discipline Breakdown</span>
+          <div class="flex-1 relative min-h-[105px]"><canvas id="chartDiscipline"></canvas></div>
+        </div>
+        <div class="bg-[#09101d]/90 border border-slate-700/80 rounded-xl p-2 flex flex-col shadow">
+          <span class="text-[10px] font-bold text-slate-300 mb-1">4. Coordination Rounds</span>
+          <div class="flex-1 relative min-h-[105px]"><canvas id="chartRounds"></canvas></div>
+        </div>
       </div>
+    </section>
+  </div>
 
-      <button onclick="resetAllFilters()" class="h-[29px] px-2.5 rounded-md bg-[#0f172a] hover:bg-slate-800 border border-slate-700 text-slate-300 text-xs font-bold flex items-center gap-1 transition" title="Reset All Filters">
-        <span>✕</span>
-        <span>Reset</span>
-      </button>
+  <!-- 3. WORKSPACE & SINGLE-ROW FILTER BAR -->
+  <div class="w-full px-3 py-2.5">
+    <section class="bg-[#0d1526] border border-slate-800 rounded-xl p-2.5 mb-2.5 shadow">
+      <div class="w-full flex items-end justify-between gap-2 flex-wrap xl:flex-nowrap">
+        
+        <!-- Clash Filters (Compact Single-Row) -->
+        <div id="clashTopFilters" class="flex items-end gap-2 flex-wrap xl:flex-nowrap">
+          <div>
+            <label class="block text-[9px] uppercase text-slate-400 font-bold mb-0.5">Project NWF</label>
+            <select id="filterProject" onchange="onProjectDropdownChange()" class="bg-[#070b12] border border-slate-700 rounded-lg px-2 py-1 text-[11px] font-bold text-sky-300 max-w-[160px] truncate">
+              <option value="ALL">All Projects</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[9px] uppercase text-slate-400 font-bold mb-0.5">Round</label>
+            <select id="filterRound" onchange="applyFilters()" class="bg-[#070b12] border border-slate-700 rounded-lg px-2 py-1 text-[11px] font-bold text-teal-300">
+              <option value="ALL">All Rounds</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[9px] uppercase text-slate-400 font-bold mb-0.5">Discipline</label>
+            <select id="filterAssigned" onchange="applyFilters()" class="bg-[#070b12] border border-slate-700 rounded-lg px-2 py-1 text-[11px] text-white font-semibold">
+              <option value="ALL">All Teams</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[9px] uppercase text-slate-400 font-bold mb-0.5">BIM Status</label>
+            <select id="filterNavisStatus" onchange="applyFilters()" class="bg-[#070b12] border border-slate-700 rounded-lg px-2 py-1 text-[11px] text-white">
+              <option value="ALL">All BIM States</option>
+              <option value="New">New</option>
+              <option value="Active">Active</option>
+              <option value="Reviewed">Reviewed</option>
+              <option value="Approved">Approved</option>
+              <option value="Resolved">Resolved</option>
+              <option value="Rejected">⚠️ Rejected (Fix Required)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[9px] uppercase text-slate-400 font-bold mb-0.5">Team Status</label>
+            <select id="filterTeamResponse" onchange="applyFilters()" class="bg-[#070b12] border border-slate-700 rounded-lg px-2 py-1 text-[11px] text-white">
+              <option value="ALL">All Team Actions (5)</option>
+              <option value="Pending Action">1. Pending Action</option>
+              <option value="Fixed in Revit (Pending NWC)">2. Fixed in Revit</option>
+              <option value="Request Approval (Valid Exception)">3. Request Approval</option>
+              <option value="Re-assign Request">4. Re-assign Request</option>
+              <option value="On Hold / RFI Pending">5. On Hold / RFI</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[9px] uppercase text-slate-400 font-bold mb-0.5">Groups</label>
+            <div class="flex gap-1">
+              <button onclick="expandCollapseAllGroups(false)" class="bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded-lg text-[11px] border border-slate-700" title="Expand All Clash Groups">➕</button>
+              <button onclick="expandCollapseAllGroups(true)" class="bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded-lg text-[11px] border border-slate-700" title="Collapse All Clash Groups">➖</button>
+            </div>
+          </div>
+        </div>
 
-      <div class="flex items-center bg-[#070b14] border border-slate-800 rounded-md p-0.5 h-[29px]">
-        <span id="lblBatchSelectedCount" class="px-2 text-[11px] font-bold text-sky-400">0 Sel:</span>
-        <select id="cmbBatchAction" class="bg-transparent text-xs font-bold text-slate-200 px-1.5 outline-none"></select>
-        <button onclick="applyBatchStatusUpdate()" class="bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-bold px-2.5 py-1 rounded transition">
-          Apply
-        </button>
+        <!-- Viewpoints Filters (Compact Single-Row) -->
+        <div id="vpTopFilters" class="hidden items-end gap-2 flex-wrap xl:flex-nowrap">
+          <div>
+            <label class="block text-[9px] uppercase text-slate-400 font-bold mb-0.5">Folder</label>
+            <select id="filterVpFolder" onchange="applyVpFilters()" class="bg-[#070b12] border border-slate-700 rounded-lg px-2.5 py-1 text-[11px] text-teal-300 font-bold">
+              <option value="ALL">All Folders</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[9px] uppercase text-slate-400 font-bold mb-0.5">Team Status</label>
+            <select id="filterVpStatus" onchange="applyVpFilters()" class="bg-[#070b12] border border-slate-700 rounded-lg px-2.5 py-1 text-[11px] text-white">
+              <option value="ALL">All Team Actions (5)</option>
+              <option value="Pending Action">1. Pending Action</option>
+              <option value="Fixed in Revit (Pending NWC)">2. Fixed in Revit</option>
+              <option value="Request Approval (Valid Exception)">3. Request Approval</option>
+              <option value="Re-assign Request">4. Re-assign Request</option>
+              <option value="On Hold / RFI Pending">5. On Hold / RFI</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[9px] uppercase text-slate-400 font-bold mb-0.5">Folders</label>
+            <div class="flex gap-1">
+              <button onclick="expandCollapseAllVpFolders(false)" class="bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded-lg text-[11px] border border-slate-700" title="Expand All Viewpoint Folders">➕</button>
+              <button onclick="expandCollapseAllVpFolders(true)" class="bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded-lg text-[11px] border border-slate-700" title="Collapse All Viewpoint Folders">➖</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Side of Filter Row: Search + Reset + Role-Aware Bulk Action -->
+        <div class="flex items-end gap-2 flex-wrap xl:flex-nowrap shrink-0">
+          <div>
+            <label class="block text-[9px] uppercase text-slate-400 font-bold mb-0.5">Search</label>
+            <input id="globalSearchInput" type="text" oninput="onSearchInput()" placeholder="ID, Name, File, @Chat..." class="bg-[#070b12] border border-slate-700 rounded-lg px-2.5 py-1 text-[11px] text-white w-40 focus:border-sky-500 focus:outline-none" />
+          </div>
+          <button onclick="clearAllColumnFilters()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 px-2 py-1 rounded-lg text-[11px] font-semibold">✕ Reset</button>
+
+          <!-- Bulk Action Bar (Adapts to BIM Coordinator / Lead vs Engineer) -->
+          <div id="bulkActionContainer" class="flex items-center gap-1.5 bg-sky-950/40 border border-sky-800/70 rounded-lg px-2 py-0.5">
+            <span class="text-[11px] font-bold text-sky-300"><span id="selectedCountLabel">0</span> Sel:</span>
+            <select id="bulkResponseSelect" class="bg-[#070b12] border border-slate-700 rounded px-1.5 py-0.5 text-[11px] text-white"></select>
+            <button id="btnBulkApply" onclick="applyBulkRoleAction()" class="bg-sky-600 hover:bg-sky-500 text-white px-2 py-0.5 rounded text-[11px] font-bold">Apply</button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Pagination & Permission Notice Row -->
+    <div class="flex flex-wrap justify-between items-center mb-1.5 px-1 text-[11px] text-slate-400">
+      <div class="flex items-center gap-3">
+        <span id="showingRangeLabel">Showing 0 items</span>
+        <span id="rbacNoticeLabel" class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-teal-300"></span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span>Rows:</span>
+        <select id="pageSizeSelect" onchange="changePageSize(this.value)" class="bg-[#0d1526] border border-slate-700 rounded px-1.5 py-0.5 text-[11px] text-white">
+          <option value="50">50</option>
+          <option value="100" selected>100</option>
+          <option value="250">250</option>
+          <option value="999999">All</option>
+        </select>
+        <button onclick="changePage(-1)" class="bg-slate-800 hover:bg-slate-700 px-2 py-0.5 rounded border border-slate-700 text-white">◀</button>
+        <span id="pageIndicator" class="font-bold text-white">1 / 1</span>
+        <button onclick="changePage(1)" class="bg-slate-800 hover:bg-slate-700 px-2 py-0.5 rounded border border-slate-700 text-white">▶</button>
       </div>
     </div>
-  </section>
 
-  <!-- ========================================================================= -->
-  <!-- 4. PAGINATION & ITEM COUNT BAR                                            -->
-  <!-- ========================================================================= -->
-  <div class="px-2 flex items-center justify-between text-xs text-slate-400">
-    <div class="flex items-center gap-2">
-      <span id="lblShowingCount">Showing 0 items</span>
-      <span id="revitBridgeStatusInline" class="text-[11px] text-slate-500"></span>
+    <!-- CLASHES TABLE (Single-Line Compact Headers) -->
+    <div id="clashesTableContainer" class="bg-[#0d1526] border border-slate-800 rounded-xl shadow-2xl overflow-x-auto">
+      <table class="w-full text-left border-collapse text-xs">
+        <thead>
+          <tr class="bg-[#060911] text-slate-300 border-b border-slate-800 uppercase text-[10px] tracking-wider select-none whitespace-nowrap">
+            <th class="p-2.5 w-8 text-center"><input type="checkbox" id="chkAllVisibleClashes" onclick="toggleSelectAllVisible(this)" /></th>
+            <th class="p-2.5 w-24">Snapshot</th>
+            <th class="p-2.5 w-20"><div class="flex items-center justify-between gap-1"><span>Round</span><button onclick="openExcelFilterMenu(event, 'round', 'clashes')" class="px-1">🔽</button></div></th>
+            <th class="p-2.5 w-36"><div class="flex items-center justify-between gap-1"><span>Clash Test</span><button onclick="openExcelFilterMenu(event, 'test_name', 'clashes')" class="px-1">🔽</button></div></th>
+            <th class="p-2.5 min-w-[150px]"><div class="flex items-center justify-between gap-1"><span>Clash Item</span><button onclick="openExcelFilterMenu(event, 'clash_name', 'clashes')" class="px-1">🔽</button></div></th>
+            <th class="p-2.5 w-28"><div class="flex items-center justify-between gap-1"><span>Discipline</span><button onclick="openExcelFilterMenu(event, 'assigned_to', 'clashes')" class="px-1">🔽</button></div></th>
+            <th class="p-2.5 w-64"><div class="flex items-center justify-between gap-1"><span>Revit Elements</span><button onclick="openExcelFilterMenu(event, 'item_a_file', 'clashes')" class="px-1">🔽</button></div></th>
+            <th class="p-2.5 w-28"><div class="flex items-center justify-between gap-1"><span>Level / Dist</span><button onclick="openExcelFilterMenu(event, 'level_grid', 'clashes')" class="px-1">🔽</button></div></th>
+            <th class="p-2.5 w-40 bg-sky-950/20 border-l border-r border-slate-800"><div class="flex items-center justify-between gap-1"><span class="text-sky-300">🛡️ BIM Status</span><button onclick="openExcelFilterMenu(event, 'navis_status', 'clashes')" class="px-1">🔽</button></div></th>
+            <th class="p-2.5 w-44 bg-teal-950/20 border-r border-slate-800"><div class="flex items-center justify-between gap-1"><span class="text-teal-300">🔧 Team Status</span><button onclick="openExcelFilterMenu(event, 'team_response', 'clashes')" class="px-1">🔽</button></div></th>
+            <th class="p-2.5 w-72">Discussion</th>
+          </tr>
+        </thead>
+        <tbody id="clashesTableBody" class="divide-y divide-slate-800/70"></tbody>
+      </table>
     </div>
 
-    <div class="flex items-center gap-2">
-      <span>Rows:</span>
-      <select id="cmbPageSize" onchange="onPageSizeChange()" class="bg-[#0b111e] border border-slate-800 rounded px-2 py-0.5 text-xs text-white outline-none">
-        <option value="50">50</option>
-        <option value="100" selected>100</option>
-        <option value="250">250</option>
-        <option value="500">500</option>
-      </select>
-      <button onclick="changePage(-1)" class="w-6 h-6 rounded bg-[#0b111e] hover:bg-slate-800 border border-slate-800 flex items-center justify-center text-sky-400">◀</button>
-      <span id="lblPageIndicator" class="font-bold text-slate-200 px-1">1 / 1</span>
-      <button onclick="changePage(1)" class="w-6 h-6 rounded bg-[#0b111e] hover:bg-slate-800 border border-slate-800 flex items-center justify-center text-sky-400">▶</button>
+    <!-- VIEWPOINTS TABLE (Single-Line Compact Headers) -->
+    <div id="viewpointsTableContainer" class="hidden bg-[#0d1526] border border-slate-800 rounded-xl shadow-2xl overflow-x-auto">
+      <table class="w-full text-left border-collapse text-xs">
+        <thead>
+          <tr class="bg-[#060911] text-slate-300 border-b border-slate-800 uppercase text-[10px] tracking-wider select-none whitespace-nowrap">
+            <th class="p-2.5 w-12"><div class="flex items-center justify-between gap-1"><span>#</span><button onclick="openExcelFilterMenu(event, 'sequence_num', 'viewpoints')" class="px-1">🔽</button></div></th>
+            <th class="p-2.5 w-28">Snapshot</th>
+            <th class="p-2.5 w-40"><div class="flex items-center justify-between gap-1"><span>Folder</span><button onclick="openExcelFilterMenu(event, 'folder_name', 'viewpoints')" class="px-1">🔽</button></div></th>
+            <th class="p-2.5 min-w-[160px]"><div class="flex items-center justify-between gap-1"><span>Viewpoint</span><button onclick="openExcelFilterMenu(event, 'description', 'viewpoints')" class="px-1">🔽</button></div></th>
+            <th class="p-2.5 w-64"><div class="flex items-center justify-between gap-1"><span>Revit Elements</span><button onclick="openExcelFilterMenu(event, 'item_a_file', 'viewpoints')" class="px-1">🔽</button></div></th>
+            <th class="p-2.5 w-40 bg-sky-950/20 border-l border-r border-slate-800"><span class="text-sky-300">🛡️ BIM Status</span></th>
+            <th class="p-2.5 w-44 bg-teal-950/20 border-r border-slate-800"><div class="flex items-center justify-between gap-1"><span class="text-teal-300">🔧 Team Status</span><button onclick="openExcelFilterMenu(event, 'status', 'viewpoints')" class="px-1">🔽</button></div></th>
+            <th class="p-2.5 w-72">Discussion</th>
+          </tr>
+        </thead>
+        <tbody id="viewpointsTableBody" class="divide-y divide-slate-800/70"></tbody>
+      </table>
     </div>
   </div>
 
-  <!-- ========================================================================= -->
-  <!-- 5. MAIN DATA TABLE (Clashes & Viewpoints with Excel Filter Popups)        -->
-  <!-- ========================================================================= -->
-  <section class="hub-panel flex-1 overflow-x-auto shadow-2xl">
-    <!-- CLASHES TABLE -->
-    <table id="tblClashes" class="w-full text-left border-collapse text-xs">
-      <thead>
-        <tr class="bg-[#09101d] border-b border-slate-800 text-[10.5px] font-extrabold text-slate-300 uppercase tracking-wider whitespace-nowrap">
-          <th class="p-2.5 w-9 text-center">
-            <input type="checkbox" id="chkSelectAllRows" onchange="toggleSelectAllVisibleRows(this.checked)" class="rounded bg-slate-900 border-slate-700 cursor-pointer" />
-          </th>
-          <th class="p-2.5 w-24">SNAPSHOT</th>
-          <th class="p-2.5 w-24">
-            <div class="flex items-center justify-between gap-1">
-              <span>ROUND</span>
-              <button onclick="openColFilter(event, 'round')" class="col-filter-btn" id="fbtn_round">▾</button>
-            </div>
-          </th>
-          <th class="p-2.5 w-44">
-            <div class="flex items-center justify-between gap-1">
-              <span>CLASH TEST</span>
-              <button onclick="openColFilter(event, 'test_name')" class="col-filter-btn" id="fbtn_test_name">▾</button>
-            </div>
-          </th>
-          <th class="p-2.5 min-w-[220px]">
-            <div class="flex items-center justify-between gap-1">
-              <span>CLASH ITEM</span>
-              <button onclick="openColFilter(event, 'clash_name')" class="col-filter-btn" id="fbtn_clash_name">▾</button>
-            </div>
-          </th>
-          <th class="p-2.5 w-28">
-            <div class="flex items-center justify-between gap-1">
-              <span>DISCIPLINE</span>
-              <button onclick="openColFilter(event, 'assigned_to')" class="col-filter-btn" id="fbtn_assigned_to">▾</button>
-            </div>
-          </th>
-          <th class="p-2.5 w-72">
-            <div class="flex items-center justify-between gap-1">
-              <span>REVIT ELEMENTS</span>
-              <button onclick="openColFilter(event, 'item_a_file')" class="col-filter-btn" id="fbtn_item_a_file">▾</button>
-            </div>
-          </th>
-          <th class="p-2.5 w-28">
-            <div class="flex items-center justify-between gap-1">
-              <span>LEVEL / DIST</span>
-              <button onclick="openColFilter(event, 'level_grid')" class="col-filter-btn" id="fbtn_level_grid">▾</button>
-            </div>
-          </th>
-          <th class="p-2.5 w-40 border-l border-slate-800/80 bg-[#0a1526]">
-            <div class="flex items-center justify-between gap-1 text-sky-400">
-              <span>🛡️ BIM STATUS</span>
-              <button onclick="openColFilter(event, 'navis_status')" class="col-filter-btn" id="fbtn_navis_status">▾</button>
-            </div>
-          </th>
-          <th class="p-2.5 w-44 border-l border-r border-slate-800/80 bg-[#081c1b]">
-            <div class="flex items-center justify-between gap-1 text-emerald-400">
-              <span>🔧 TEAM STATUS</span>
-              <button onclick="openColFilter(event, 'team_response')" class="col-filter-btn" id="fbtn_team_response">▾</button>
-            </div>
-          </th>
-          <th class="p-2.5 min-w-[240px]">DISCUSSION</th>
-        </tr>
-      </thead>
-      <tbody id="tbodyClashes" class="divide-y divide-slate-800/60"></tbody>
-    </table>
+  <!-- Floating @Mention Autocomplete Menu -->
+  <div id="mentionAutocompletePopup" class="hidden fixed bg-slate-900 border border-sky-500/80 rounded-xl shadow-2xl py-1.5 w-72 z-50 text-xs max-h-56 overflow-y-auto"></div>
 
-    <!-- VIEWPOINTS TABLE -->
-    <table id="tblViewpoints" class="hidden w-full text-left border-collapse text-xs">
-      <thead>
-        <tr class="bg-[#09101d] border-b border-slate-800 text-[10.5px] font-extrabold text-slate-300 uppercase tracking-wider whitespace-nowrap">
-          <th class="p-2.5 w-12 text-center">#</th>
-          <th class="p-2.5 w-24">SNAPSHOT</th>
-          <th class="p-2.5 w-48">
-            <div class="flex items-center justify-between gap-1">
-              <span>FOLDER / SECTION</span>
-              <button onclick="openColFilter(event, 'folder_name')" class="col-filter-btn">▾</button>
-            </div>
-          </th>
-          <th class="p-2.5 min-w-[240px]">
-            <div class="flex items-center justify-between gap-1">
-              <span>SAVED VIEWPOINT</span>
-              <button onclick="openColFilter(event, 'description')" class="col-filter-btn">▾</button>
-            </div>
-          </th>
-          <th class="p-2.5 w-64">REVIT ELEMENTS</th>
-          <th class="p-2.5 w-40 border-l border-slate-800/80 bg-[#0a1526] text-sky-400">🛡️ BIM STATUS</th>
-          <th class="p-2.5 w-44 border-l border-r border-slate-800/80 bg-[#081c1b] text-emerald-400">🔧 TEAM STATUS</th>
-          <th class="p-2.5 min-w-[240px]">DISCUSSION</th>
-        </tr>
-      </thead>
-      <tbody id="tbodyViewpoints" class="divide-y divide-slate-800/60"></tbody>
-    </table>
-  </section>
-
-  <!-- ========================================================================= -->
-  <!-- POPUPS & MODALS (Excel Column Filter, Snapshot Lightbox, Team Roster)     -->
-  <!-- ========================================================================= -->
-  <!-- Excel Column Filter Popup -->
-  <div id="colFilterPopup" onclick="event.stopPropagation()" class="hidden fixed z-50 bg-[#0b111e] border border-slate-700 rounded-xl shadow-2xl p-3 w-64 text-xs">
-    <div class="flex items-center justify-between font-bold text-sky-400 mb-2">
-      <span id="colFilterTitle">Filter Column</span>
-      <button onclick="closeColFilter()" class="text-slate-400 hover:text-white">✕</button>
+  <!-- Excel Column Filter Popover -->
+  <div id="excelFilterPopover" class="hidden fixed bg-slate-900 border border-slate-600 rounded-xl shadow-2xl p-3 w-64 z-50 text-xs">
+    <div class="flex justify-between items-center border-b border-slate-800 pb-2 mb-2">
+      <span id="excelFilterTitle" class="font-bold text-white">Filter Column</span>
+      <button onclick="closeExcelFilterMenu()" class="text-slate-400 hover:text-white">✕</button>
     </div>
-    <input id="colFilterSearch" type="text" oninput="filterColPopupOptions()" placeholder="Search values..." class="w-full bg-[#060a11] border border-slate-700 rounded px-2 py-1 text-white mb-2 outline-none" />
-    <div class="flex items-center justify-between text-[11px] text-slate-400 pb-1 border-b border-slate-800">
-      <button onclick="toggleColPopupAll(true)" class="hover:text-sky-400">Select All</button>
-      <button onclick="toggleColPopupAll(false)" class="hover:text-rose-400">Clear All</button>
+    <div class="flex gap-1.5 mb-2">
+      <button onclick="sortColumn('asc')" class="flex-1 bg-slate-800 hover:bg-slate-700 py-1 rounded font-semibold">⬆ A-Z</button>
+      <button onclick="sortColumn('desc')" class="flex-1 bg-slate-800 hover:bg-slate-700 py-1 rounded font-semibold">⬇ Z-A</button>
     </div>
-    <div id="colFilterList" class="max-h-48 overflow-y-auto space-y-1 py-2 my-1"></div>
-    <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
-      <button onclick="resetSingleColFilter()" class="px-2.5 py-1 rounded bg-slate-800 text-slate-300 hover:bg-slate-700">Reset</button>
-      <button onclick="applySingleColFilter()" class="px-3 py-1 rounded bg-blue-600 text-white font-bold hover:bg-blue-500">Apply</button>
+    <input id="excelFilterSearch" type="text" oninput="filterExcelUniqueList()" placeholder="Search values..." class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 mb-2 text-white" />
+    <div class="mb-1.5 flex items-center gap-1.5 px-1">
+      <input type="checkbox" id="excelFilterSelectAll" checked onchange="toggleExcelSelectAll(this.checked)" />
+      <label for="excelFilterSelectAll" class="font-bold text-sky-300 cursor-pointer">(Select All)</label>
+    </div>
+    <div id="excelFilterValuesList" class="max-h-44 overflow-y-auto bg-slate-950 border border-slate-800 rounded p-1.5 space-y-1 mb-2.5"></div>
+    <div class="flex justify-end gap-2">
+      <button onclick="clearSingleColumnFilter()" class="bg-slate-800 hover:bg-slate-700 px-2.5 py-1 rounded text-slate-300">Clear</button>
+      <button onclick="applyExcelColumnFilter()" class="bg-sky-600 hover:bg-sky-500 px-3 py-1 rounded font-bold text-white">Apply</button>
     </div>
   </div>
 
-  <!-- Snapshot Modal -->
-  <div id="snapshotModal" onclick="closeSnapshotModal()" class="hidden fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-6">
-    <div onclick="event.stopPropagation()" class="bg-[#0b111e] border border-slate-700 rounded-xl p-4 max-w-3xl w-full shadow-2xl">
-      <div class="flex items-center justify-between mb-3">
-        <h3 id="snapshotModalTitle" class="text-sm font-bold text-sky-400">3D Coordination Snapshot</h3>
-        <button onclick="closeSnapshotModal()" class="text-slate-400 hover:text-white text-base font-bold">✕</button>
+  <!-- Export Modal -->
+  <div id="exportModal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-6 shadow-2xl text-xs">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
+        <h2 class="text-base font-extrabold text-white">📥 Export Professional BIM Reports</h2>
+        <button onclick="closeExportModal()" class="text-slate-400 hover:text-white text-lg">✕</button>
       </div>
-      <img id="snapshotModalImg" src="" alt="Snapshot" class="w-full rounded-lg border border-slate-800 max-h-[75vh] object-contain bg-black" />
-    </div>
-  </div>
-
-  <!-- Team Roster Modal -->
-  <div id="teamModal" onclick="closeTeamModal()" class="hidden fixed inset-0 z-50 bg-black/75 flex items-center justify-center p-6">
-    <div onclick="event.stopPropagation()" class="bg-[#0b111e] border border-slate-700 rounded-xl p-5 max-w-2xl w-full shadow-2xl">
-      <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-800">
+      <div class="space-y-3.5">
         <div>
-          <h3 class="text-sm font-bold text-white">👥 Project Coordination Team Roster</h3>
-          <p class="text-[11px] text-slate-400">Synced from Navisworks — Roles are strictly locked per member email</p>
+          <label class="block text-slate-300 font-bold mb-1">1. Target Module:</label>
+          <select id="expModule" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white">
+            <option value="clashes">Clashes & Coordination Rounds</option>
+            <option value="viewpoints">Saved Viewpoints & Folders</option>
+          </select>
         </div>
-        <button onclick="closeTeamModal()" class="text-slate-400 hover:text-white font-bold">✕</button>
+        <div>
+          <label class="block text-slate-300 font-bold mb-1">2. Status / Scope:</label>
+          <select id="expScope" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white">
+            <option value="current_filtered">Current Filtered View on Screen</option>
+            <option value="all_data">Complete Project Dataset</option>
+            <option value="only_active">Only Active / New Clashes</option>
+            <option value="only_fixed_revit">Only Fixed in Revit (Pending NWC)</option>
+            <option value="only_approval">Only Request Approval / Hold</option>
+            <option value="only_resolved">Only Resolved / Approved</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-slate-300 font-bold mb-1">3. File Splitting Mode:</label>
+          <select id="expSplitMode" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white">
+            <option value="single">Single Combined Master File</option>
+            <option value="split_by_group">Split by Discipline / Folder</option>
+          </select>
+        </div>
+        <div class="pt-2 border-t border-slate-800 grid grid-cols-3 gap-2.5">
+          <button onclick="executeExport('excel')" class="bg-emerald-700 hover:bg-emerald-600 text-white py-2.5 rounded-xl font-bold shadow">📊 Styled Excel</button>
+          <button onclick="executeExport('pdf')" class="bg-rose-700 hover:bg-rose-600 text-white py-2.5 rounded-xl font-bold shadow">📄 Clean PDF</button>
+          <button onclick="executeExport('html')" class="bg-sky-700 hover:bg-sky-600 text-white py-2.5 rounded-xl font-bold shadow">🌐 Static HTML</button>
+        </div>
       </div>
-      <div id="teamModalBody" class="max-h-80 overflow-y-auto divide-y divide-slate-800 text-xs"></div>
     </div>
   </div>
+
+  <!-- Snapshot Zoom Modal -->
+  <div id="imgModal" onclick="this.classList.add('hidden')" class="hidden fixed inset-0 bg-black/90 flex flex-col items-center justify-center p-4 z-50">
+    <img id="modalImg" src="" class="max-h-[85vh] max-w-[92vw] rounded-xl border-2 border-slate-600 shadow-2xl" />
+    <div id="modalCaption" class="mt-3 text-sm font-bold text-slate-200 bg-slate-900 px-4 py-1.5 rounded-full border border-slate-700"></div>
+  </div>
+
+  <!-- Toast Alert -->
+  <div id="toastAlert" class="hidden fixed bottom-5 right-5 bg-slate-900 border-2 border-sky-500 text-white px-4 py-3 rounded-xl shadow-2xl z-50 text-xs font-semibold max-w-md"></div>
 
   <script>
-    // =========================================================================
-    // CONFIGURATION & STATE
-    // =========================================================================
     const SUPABASE_URL = "https://qnpiqepywekwqinybpab.supabase.co";
     const SUPABASE_KEY = "sb_publishable_R96kfu1_6AJrLGw9zD8E5Q_L6vO8VDf";
     const REVIT_PORTS = [51965, 51966, 51967, 51968, 51969, 51970, 51971, 51972, 51973, 51974];
 
-    const BIM_STATES = ["New", "Active", "Reviewed", "Approved", "Resolved"];
-    const TEAM_STATES = ["Pending Action", "Solved / Fixed", "Not Our Scope", "Need Workshop", "Approved / Valid"];
+    const TEAM_UNIFIED_STATUSES = [
+      "Pending Action",
+      "Fixed in Revit (Pending NWC)",
+      "Request Approval (Valid Exception)",
+      "Re-assign Request",
+      "On Hold / RFI Pending"
+    ];
 
-    let currentTab = "clashes";
-    let lockedProjectFromUrl = "";
-    let currentUser = { fullName: "BIM Coordinator", email: "", role: "BIM Coordinator", discipline: "ALL", locked: true };
+    const BIM_COORDINATOR_STATUSES = [
+      "New",
+      "Active",
+      "Reviewed",
+      "Approved",
+      "Resolved",
+      "Rejected"
+    ];
 
-    let rawClashes = [];
-    let rawViewpoints = [];
-    let projectMembers = [];
-    let filteredClashes = [];
-    let filteredViewpoints = [];
+    const ACC_SVG_RAW = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 360" width="120" height="64">
+      <text x="665" y="76" text-anchor="end" fill="#334155" font-family="'Segoe UI', Tahoma, sans-serif" font-size="56" font-weight="700">مركز الإستشارات المتقدم</text>
+      <text x="665" y="134" text-anchor="end" fill="#475569" font-family="'Segoe UI', Arial, sans-serif" font-size="38" font-weight="700">Advanced Consultancy Center</text>
+      <circle cx="96" cy="272" r="68" fill="#008529" />
+      <path d="M 134 26 L 62 162 A 84 84 0 0 1 174 226 L 236 340 L 312 340 L 134 26 Z" fill="#0d2763" />
+      <path d="M 455 215 A 54 54 0 1 0 455 292 L 492 322 A 98 98 0 1 1 492 185 Z" fill="#008529" />
+      <path d="M 638 215 A 54 54 0 1 0 638 292 L 675 322 A 98 98 0 1 1 675 185 Z" fill="#008529" />
+    </svg>`;
 
-    // Default: All Clash Groups & Viewpoint Folders start COLLAPSED (empty sets)
-    let expandedGroupGuids = new Set();
-    let expandedVpFolders = new Set();
-    let selectedRowGuids = new Set();
+    // Global State
+    let lockedProjectName = null;
+    let currentUser = { name: "Unverified", email: "", role: "BIM Coordinator", discipline: "ALL" }; // Locked Read-Only User Context
+    let allClashes = [], filteredClashes = [], allViewpoints = [], filteredViewpoints = [], projectMembers = [];
+    let currentTab = "clashes", collapsedGroups = new Set(), collapsedVpFolders = new Set(), selectedRowKeys = new Set(), lastCheckedIndex = null;
+    let hasInitializedDefaultCollapse = false;
+    let hasInitializedVpDefaultCollapse = false;
+    let currentPage = 1, pageSize = 100;
+    let activeColumnFilters = { clashes: {}, viewpoints: {} };
+    let activeSort = { dataset: "clashes", field: "sequence_num", dir: "asc" };
+    let currentPopupCol = null, currentPopupDataset = "clashes";
+    let chartNavis = null, chartTeam = null, chartDisc = null, chartRound = null;
+    let autoSyncEnabled = true, autoSyncTimer = null, lastDataSignature = "";
+    let chartsVisible = true, activeMentionInputId = null;
 
-    let columnFilters = {};
-    let activePopupCol = "";
+    // Role Normalization & Permission Helpers
+    function normalizeRoleName(rawRole) {
+      const r = String(rawRole || "").trim().toLowerCase();
+      if (r.includes("coordinator") || r.includes("bim")) return "BIM Coordinator";
+      if (r.includes("lead") || r.includes("manager") || r.includes("head")) return "Lead";
+      if (r.includes("eng")) return "Engineer";
+      return "Engineer";
+    }
 
-    let currentPage = 1;
-    let pageSize = 100;
-    let autoSyncTimer = null;
-    let isAutoSyncOn = true;
+    function getRoleIcon(role) {
+      const norm = normalizeRoleName(role);
+      if (norm === "BIM Coordinator") return "🛡️";
+      if (norm === "Lead") return "⭐";
+      return "🔧";
+    }
 
-    let chart1 = null, chart2 = null, chart3 = null, chart4 = null;
+    // Requirement 3: BIM Coordinator & Lead control BIM Status; Engineer controls Team Status
+    function canEditBimStatus() {
+      return currentUser.role === "BIM Coordinator" || currentUser.role === "Lead";
+    }
 
-    // =========================================================================
-    // 1. INITIALIZATION & STRICT FIXED ROLE LOCKING
-    // =========================================================================
-    window.addEventListener("DOMContentLoaded", async () => {
-      initLockedUserFromUrlOrStorage();
-      populateBatchDropdownForRole();
-      await fetchAllCloudData(true);
+    function canEditTeamStatus() {
+      return currentUser.role === "Engineer";
+    }
 
-      autoSyncTimer = setInterval(() => {
-        if (isAutoSyncOn) fetchAllCloudData(false);
-      }, 25000);
+    function applyLockedUserToHeader(userObj) {
+      currentUser = {
+        name: userObj.name || "Engineer",
+        email: userObj.email || "",
+        role: normalizeRoleName(userObj.role),
+        discipline: userObj.discipline || "ALL"
+      };
 
-      document.addEventListener("click", () => closeColFilter());
-    });
+      document.getElementById("activeRoleIcon").textContent = getRoleIcon(currentUser.role);
+      document.getElementById("activeUserDisplay").textContent = currentUser.name;
+      const badge = document.getElementById("activeRoleBadge");
+      badge.textContent = currentUser.role;
 
-    function initLockedUserFromUrlOrStorage() {
+      if (currentUser.role === "BIM Coordinator" || currentUser.role === "Lead") {
+        badge.className = "px-1.5 py-0.2 rounded text-[9px] font-black uppercase bg-sky-950 text-sky-300 border border-sky-700";
+        document.getElementById("rbacNoticeLabel").textContent = `🛡️ ${currentUser.role} Mode: You control [BIM Status]. [Team Status] is Read-Only.`;
+      } else {
+        badge.className = "px-1.5 py-0.2 rounded text-[9px] font-black uppercase bg-teal-950 text-teal-300 border border-teal-700";
+        document.getElementById("rbacNoticeLabel").textContent = "🔧 Engineer Mode: You control [Team Status]. [BIM Status] is Read-Only.";
+      }
+
+      configureBulkActionBarForRole();
+    }
+
+    function configureBulkActionBarForRole() {
+      const bulkContainer = document.getElementById("bulkActionContainer");
+      const bulkSelect = document.getElementById("bulkResponseSelect");
+      const bulkBtn = document.getElementById("btnBulkApply");
+
+      if (canEditTeamStatus()) {
+        bulkContainer.classList.remove("opacity-50", "pointer-events-none");
+        bulkSelect.innerHTML = TEAM_UNIFIED_STATUSES.map(s => `<option value="${escapeHtml(s)}">🔧 ${escapeHtml(s)}</option>`).join("");
+        bulkBtn.disabled = false;
+      } else if (canEditBimStatus()) {
+        bulkContainer.classList.remove("opacity-50", "pointer-events-none");
+        bulkSelect.innerHTML = BIM_COORDINATOR_STATUSES.map(s => `<option value="${escapeHtml(s)}">🛡️ BIM: ${escapeHtml(s)}</option>`).join("");
+        bulkBtn.disabled = false;
+      } else {
+        bulkContainer.classList.add("opacity-50", "pointer-events-none");
+        bulkSelect.innerHTML = `<option>🔒 Read-Only</option>`;
+        bulkBtn.disabled = true;
+      }
+    }
+
+    function resolveUserIdentityFromUrlOrStorage() {
       const params = new URLSearchParams(window.location.search);
-      const pProj = params.get("project");
-      const pRound = params.get("round");
-      const pTab = params.get("tab");
       const uName = params.get("uname");
       const uRole = params.get("urole");
       const uEmail = params.get("uemail");
       const uDisc = params.get("udisc");
 
+      const storageKey = "ACC_LOCKED_USER_" + (lockedProjectName || "GLOBAL");
+
       if (uName && uRole) {
-        currentUser = {
-          fullName: uName.trim(),
-          role: normalizeRole(uRole),
-          email: (uEmail || "").trim(),
-          discipline: (uDisc || "ALL").trim(),
-          locked: true
-        };
-        localStorage.setItem("acc_hub_locked_user", JSON.stringify(currentUser));
-      } else {
+        const verified = { name: uName, role: normalizeRoleName(uRole), email: uEmail || "", discipline: uDisc || "ALL" };
+        localStorage.setItem(storageKey, JSON.stringify(verified));
+        localStorage.setItem("ACC_LOCKED_USER_GLOBAL", JSON.stringify(verified));
+        params.delete("uname"); params.delete("urole"); params.delete("uemail"); params.delete("udisc"); params.delete("lockrole");
+        const cleanQ = params.toString();
+        window.history.replaceState({}, document.title, window.location.pathname + (cleanQ ? "?" + cleanQ : ""));
+        applyLockedUserToHeader(verified);
+        return true;
+      }
+
+      const saved = localStorage.getItem(storageKey) || localStorage.getItem("ACC_LOCKED_USER_GLOBAL");
+      if (saved) {
         try {
-          const saved = JSON.parse(localStorage.getItem("acc_hub_locked_user") || "null");
-          if (saved && saved.fullName) currentUser = saved;
-        } catch (e) {}
+          const parsed = JSON.parse(saved);
+          if (parsed && parsed.name && parsed.role) {
+            applyLockedUserToHeader(parsed);
+            return true;
+          }
+        } catch {}
       }
+      return false;
+    }
 
-      if (pProj) {
-        lockedProjectFromUrl = pProj.trim();
-        document.getElementById("projectLockBadge").textContent = `🔒 ${lockedProjectFromUrl}`;
+    function promptIdentityVerificationModal() {
+      const modal = document.getElementById("identityGateModal");
+      const picker = document.getElementById("registeredMembersPicker");
+
+      if (projectMembers.length > 0) {
+        picker.innerHTML = projectMembers.map(m => {
+          const rNorm = normalizeRoleName(m.role);
+          const icon = getRoleIcon(rNorm);
+          return `<div onclick="selectVerifiedMember('${escapeHtml(m.member_name)}', '${escapeHtml(rNorm)}', '${escapeHtml(m.email || '')}', '${escapeHtml(m.discipline_team || 'ALL')}')" class="p-2.5 rounded-xl bg-[#070b12] hover:bg-sky-950/60 border border-slate-800 hover:border-sky-600 cursor-pointer flex items-center justify-between transition">
+            <div class="flex items-center gap-2">
+              <span class="text-base">${icon}</span>
+              <div>
+                <div class="font-bold text-white text-xs">${escapeHtml(m.member_name)}</div>
+                <div class="text-[10px] text-slate-400">${escapeHtml(m.email || 'Registered Member')} • <span class="text-teal-300 font-semibold">${escapeHtml(m.discipline_team || 'Project Team')}</span></div>
+              </div>
+            </div>
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-sky-300 border border-slate-700">${escapeHtml(rNorm)}</span>
+          </div>`;
+        }).join("");
       } else {
-        document.getElementById("projectLockBadge").textContent = `🔒 Project Hub`;
+        picker.innerHTML = `
+          <div onclick="selectVerifiedMember('BIM Coordinator', 'BIM Coordinator', 'bim@acc.com', 'BIM-TEAM')" class="p-2.5 rounded-xl bg-[#070b12] hover:bg-sky-950/60 border border-slate-800 hover:border-sky-600 cursor-pointer flex items-center justify-between">
+            <div class="flex items-center gap-2"><span class="text-base">🛡️</span><div><div class="font-bold text-white text-xs">BIM Coordinator</div><div class="text-[10px] text-slate-400">Controls BIM Review Status Only</div></div></div>
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-sky-950 text-sky-300">BIM Coordinator</span>
+          </div>
+          <div onclick="selectVerifiedMember('Technical Engineer', 'Engineer', 'eng@acc.com', 'MEP-TEAM')" class="p-2.5 rounded-xl bg-[#070b12] hover:bg-teal-950/60 border border-slate-800 hover:border-teal-600 cursor-pointer flex items-center justify-between">
+            <div class="flex items-center gap-2"><span class="text-base">🔧</span><div><div class="font-bold text-white text-xs">Discipline Engineer</div><div class="text-[10px] text-slate-400">Controls Team Action Status Only</div></div></div>
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-teal-950 text-teal-300">Engineer</span>
+          </div>
+          <div onclick="selectVerifiedMember('Project Lead', 'Lead', 'lead@acc.com', 'MANAGEMENT')" class="p-2.5 rounded-xl bg-[#070b12] hover:bg-amber-950/60 border border-slate-800 hover:border-amber-600 cursor-pointer flex items-center justify-between">
+            <div class="flex items-center gap-2"><span class="text-base">⭐</span><div><div class="font-bold text-white text-xs">Discipline / Project Lead</div><div class="text-[10px] text-slate-400">Controls BIM Review & Guidance</div></div></div>
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-950 text-amber-300">Lead</span>
+          </div>`;
       }
 
-      if (pRound && pRound !== "ALL") {
-        const rSel = document.getElementById("fltRound");
-        if ([...rSel.options].some(o => o.value === pRound)) rSel.value = pRound;
+      modal.classList.remove("hidden");
+    }
+
+    function selectVerifiedMember(name, role, email, discipline) {
+      const storageKey = "ACC_LOCKED_USER_" + (lockedProjectName || "GLOBAL");
+      const verified = { name, role: normalizeRoleName(role), email, discipline };
+      localStorage.setItem(storageKey, JSON.stringify(verified));
+      localStorage.setItem("ACC_LOCKED_USER_GLOBAL", JSON.stringify(verified));
+      document.getElementById("identityGateModal").classList.add("hidden");
+      applyLockedUserToHeader(verified);
+      renderClashesTable();
+      renderViewpointsTable();
+    }
+
+    function verifyByEmailInput() {
+      const emailVal = document.getElementById("verifyEmailInput").value.trim().toLowerCase();
+      if (!emailVal) return;
+      const found = projectMembers.find(m => String(m.email || "").trim().toLowerCase() === emailVal);
+      if (found) {
+        selectVerifiedMember(found.member_name, found.role, found.email, found.discipline_team);
+      } else {
+        document.getElementById("verifyErrorMsg").classList.remove("hidden");
       }
-
-      if (pTab === "viewpoints") switchHubTab("viewpoints");
-      updateHeaderIdentityUI();
     }
 
-    function normalizeRole(r) {
-      const s = String(r || "").toLowerCase();
-      if (s.includes("coordinator")) return "BIM Coordinator";
-      if (s.includes("lead") || s.includes("manager")) return "Lead";
-      return "Engineer";
+    function toggleTeamDirectoryModal() {
+      const modal = document.getElementById("teamDirectoryModal");
+      const grid = document.getElementById("teamDirectoryGrid");
+      if (modal.classList.contains("hidden")) {
+        const activeProj = document.getElementById("filterProject").value;
+        const list = (activeProj && activeProj !== "ALL")
+          ? projectMembers.filter(m => m.project_name === activeProj)
+          : projectMembers;
+
+        if (list.length === 0) {
+          grid.innerHTML = `<div class="col-span-2 p-6 text-center text-slate-400">No project members synced yet for this NWF. Add team members in Tab 1 of the Navisworks Add-in.</div>`;
+        } else {
+          grid.innerHTML = list.map(m => {
+            const rNorm = normalizeRoleName(m.role);
+            const icon = getRoleIcon(rNorm);
+            return `<div class="p-3 rounded-xl bg-[#070b12] border border-slate-800 flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <div class="w-9 h-9 rounded-lg bg-slate-900 border border-slate-700 flex items-center justify-center text-base shrink-0">${icon}</div>
+                <div class="min-w-0">
+                  <div class="font-bold text-white text-xs truncate">${escapeHtml(m.member_name)}</div>
+                  <div class="text-[10px] text-slate-400 truncate">${escapeHtml(m.email || '-')}</div>
+                  <div class="text-[10px] text-teal-400 font-bold mt-0.5">🏷️ Team: @${escapeHtml(m.discipline_team || 'TEAM')}</div>
+                </div>
+              </div>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-900 text-sky-300 border border-slate-700 shrink-0">${escapeHtml(rNorm)} 🔒</span>
+            </div>`;
+          }).join("");
+        }
+        modal.classList.remove("hidden");
+      } else {
+        modal.classList.add("hidden");
+      }
     }
 
-    function isBimCoordinatorOrLead() {
-      return currentUser.role === "BIM Coordinator" || currentUser.role === "Lead";
+    function toggleAnalyticsSection() {
+      chartsVisible = !chartsVisible;
+      const wrapper = document.getElementById("analyticsWrapper");
+      const icon = document.getElementById("chartsToggleIcon");
+      if (chartsVisible) {
+        wrapper.classList.remove("hidden");
+        icon.textContent = "▴";
+      } else {
+        wrapper.classList.add("hidden");
+        icon.textContent = "▾";
+      }
     }
 
-    function updateHeaderIdentityUI() {
-      document.getElementById("hdrUserName").textContent = `${currentUser.fullName} (${currentUser.role})`;
-      document.getElementById("hdrUserRoleBadge").textContent = `LOCKED 🔒`;
+    function startAutoSyncLoop() {
+      if (autoSyncTimer) clearInterval(autoSyncTimer);
+      autoSyncTimer = setInterval(async () => {
+        if (!autoSyncEnabled) return;
+        const activeEl = document.activeElement;
+        if (activeEl && (activeEl.tagName === "INPUT" || activeEl.tagName === "SELECT")) return;
+        await reloadAllCloudData(null, null, true);
+      }, 5000);
     }
 
-    function populateBatchDropdownForRole() {
-      const cmb = document.getElementById("cmbBatchAction");
-      const allowed = isBimCoordinatorOrLead() ? BIM_STATES : TEAM_STATES;
-      cmb.innerHTML = allowed.map(st => `<option value="${st}">${st}</option>`).join("");
+    function toggleAutoSync() {
+      autoSyncEnabled = !autoSyncEnabled;
+      document.getElementById("btnAutoSync").textContent = autoSyncEnabled ? "⚡ Sync: ON" : "⏸️ Sync: OFF";
     }
 
-    // =========================================================================
-    // 2. FAULT-TOLERANT SUPABASE CLOUD DATA FETCHING
-    // =========================================================================
-    async function fetchAllCloudData(isInitialLoad) {
-      const badge = document.getElementById("connectionStatusBadge");
+    function normalizeTeamStatus(rawStatus) {
+      if (!rawStatus) return "Pending Action";
+      if (TEAM_UNIFIED_STATUSES.includes(rawStatus)) return rawStatus;
+      const s = String(rawStatus).toLowerCase();
+      if (s.includes("solved") || s.includes("fixed")) return "Fixed in Revit (Pending NWC)";
+      if (s.includes("approval") || s.includes("valid")) return "Request Approval (Valid Exception)";
+      if (s.includes("scope") || s.includes("re-assign") || s.includes("reassign")) return "Re-assign Request";
+      if (s.includes("workshop") || s.includes("hold") || s.includes("rfi")) return "On Hold / RFI Pending";
+      return "Pending Action";
+    }
+
+    function normalizeBimStatus(rawNavis, reviewDecision) {
+      if (reviewDecision === "Rejected" || String(rawNavis || "").includes("Rejected")) return "Rejected";
+      const found = BIM_COORDINATOR_STATUSES.find(s => s.toLowerCase() === String(rawNavis || "").trim().toLowerCase());
+      if (found) return found;
+      return "Active";
+    }
+
+    function normalizeClashRecord(raw, idx) {
+      const bimSt = normalizeBimStatus(raw.navis_status || raw.status, raw.review_decision);
+      return {
+        round_guid: raw.round_guid || raw.guid || ("ROW_" + idx),
+        guid: raw.guid || raw.round_guid || ("GUID_" + idx),
+        project_name: raw.project_name || "Federated_Model",
+        round: String(raw.round || "1"),
+        sequence_num: typeof raw.sequence_num === "number" ? raw.sequence_num : (idx + 1),
+        test_name: raw.test_name || "-",
+        is_group_header: Boolean(raw.is_group_header),
+        group_name: raw.group_name || "",
+        parent_group_guid: raw.parent_group_guid || "",
+        clash_name: raw.clash_name || ("Clash #" + (idx + 1)),
+        assigned_to: raw.assigned_to || raw.discipline || "ALL",
+        level_grid: raw.level_grid || "N/A",
+        distance: raw.distance || "0m",
+        item_a_id: raw.item_a_id || "N/A",
+        item_a_name: raw.item_a_name || "Element A",
+        item_a_file: raw.item_a_file || "N/A",
+        item_b_id: raw.item_b_id || "N/A",
+        item_b_name: raw.item_b_name || "Element B",
+        item_b_file: raw.item_b_file || "N/A",
+        navis_status: bimSt,
+        team_response: normalizeTeamStatus(raw.team_response),
+        reassigned_to: raw.reassigned_to || "",
+        review_decision: raw.review_decision || "Pending",
+        comments_json: raw.comments_json || "[]",
+        image_base64: raw.image_base64 || "",
+        updated_at: raw.updated_at || ""
+      };
+    }
+
+    function normalizeViewpointRecord(raw, idx) {
+      let folder = raw.folder_name || "";
+      let desc = raw.description || ("Viewpoint #" + (idx + 1));
+      if (!folder) {
+        const dashIdx = desc.indexOf("—");
+        if (dashIdx > 0) {
+          folder = desc.substring(0, dashIdx).replace(/^\[\d+\]\s*/, "").trim();
+        } else {
+          folder = raw.item_a_file || "Saved Viewpoints";
+        }
+      }
+      return {
+        ...raw,
+        vp_key: raw.vp_key || ("VP_" + idx),
+        project_name: raw.project_name || "Federated_Model",
+        sequence_num: typeof raw.sequence_num === "number" ? raw.sequence_num : (idx + 1),
+        folder_name: folder,
+        description: desc,
+        status: raw.status || "Pending Action"
+      };
+    }
+
+    // Requirement 2: Fault-tolerant Supabase fetching without order=sequence_num failure & automatic group reconstruction
+    async function reloadAllCloudData(preselectProject = null, preselectRound = null, isSilentAutoPoll = false) {
+      if (!isSilentAutoPoll) setCloudPill("⏳ Syncing...", "amber");
+
       try {
-        if (isInitialLoad) {
-          badge.className = "inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10.5px] font-bold bg-amber-950/60 text-amber-400 border border-amber-800/70";
-          badge.textContent = "⏳ Syncing Cloud...";
-        }
+        const headers = { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY };
 
-        // Fetch without order=sequence_num so it never fails with HTTP 400 on any Supabase table structure
-        const [cRes, vRes, mRes] = await Promise.all([
-          fetch(`${SUPABASE_URL}/rest/v1/clashes?select=*`, { headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` } }),
-          fetch(`${SUPABASE_URL}/rest/v1/viewpoints?select=*`, { headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` } }),
-          fetch(`${SUPABASE_URL}/rest/v1/project_members?select=*`, { headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` } })
-        ]);
+        const clashRes = await fetch(`${SUPABASE_URL}/rest/v1/clashes?select=*`, { headers });
+        if (!clashRes.ok) throw new Error("HTTP " + clashRes.status);
 
-        rawClashes = cRes.ok ? await cRes.json() : [];
-        rawViewpoints = vRes.ok ? await vRes.json() : [];
-        projectMembers = mRes.ok ? await mRes.json() : [];
+        let vpRawList = [], memList = [];
+        try {
+          const vpRes = await fetch(`${SUPABASE_URL}/rest/v1/viewpoints?select=*`, { headers });
+          if (vpRes.ok) vpRawList = await vpRes.json();
+        } catch {}
 
-        // Reconstruct Group-Child hierarchy safely if parent_group_guid wasn't stored in legacy schema
-        const groupMap = {};
-        rawClashes.filter(c => c.is_group_header).forEach(g => {
-          groupMap[`${g.project_name}::${g.test_name}::${g.group_name}`] = g.guid;
+        try {
+          const memRes = await fetch(`${SUPABASE_URL}/rest/v1/project_members?select=*`, { headers });
+          if (memRes.ok) memList = await memRes.json();
+        } catch {}
+
+        const rawClashes = await clashRes.json();
+        const newClashes = rawClashes.map((r, i) => normalizeClashRecord(r, i));
+
+        // Automatically reconstruct parent_group_guid links if saved via legacy schema fallback
+        const groupLookup = {};
+        newClashes.filter(c => c.is_group_header && c.group_name).forEach(g => {
+          groupLookup[`${g.project_name}::${g.round}::${g.test_name}::${g.group_name}`] = g.guid;
+          groupLookup[`${g.project_name}::${g.test_name}::${g.group_name}`] = g.guid;
         });
-
-        rawClashes.forEach((c, idx) => {
-          if (!c.sequence_num) c.sequence_num = idx + 1;
+        newClashes.forEach(c => {
           if (!c.is_group_header && !c.parent_group_guid && c.group_name) {
-            c.parent_group_guid = groupMap[`${c.project_name}::${c.test_name}::${c.group_name}`] || "";
+            c.parent_group_guid =
+              groupLookup[`${c.project_name}::${c.round}::${c.test_name}::${c.group_name}`] ||
+              groupLookup[`${c.project_name}::${c.test_name}::${c.group_name}`] ||
+              "";
           }
         });
 
-        rawViewpoints.forEach((v, idx) => {
-          if (!v.sequence_num) v.sequence_num = idx + 1;
-          if (!v.folder_name) {
-            const desc = String(v.description || "");
-            const dashIdx = desc.indexOf("—");
-            v.folder_name = dashIdx > 0 ? desc.substring(0, dashIdx).replace(/^\[\d+\]\s*/, "").trim() : (v.item_a_file || "Saved Viewpoints");
-          }
-        });
+        const vpList = vpRawList.map((v, i) => normalizeViewpointRecord(v, i));
+        newClashes.sort((a, b) => (a.sequence_num || 0) - (b.sequence_num || 0));
+        vpList.sort((a, b) => (a.sequence_num || 0) - (b.sequence_num || 0));
 
-        // Match user email against project_members if available to enforce strict role lock
+        const sig = newClashes.length + "_" + vpList.length + "_" + memList.length + "_" +
+          (newClashes[0]?.updated_at || "") + "_" + (newClashes[newClashes.length - 1]?.updated_at || "");
+
+        if (isSilentAutoPoll && sig === lastDataSignature) return;
+        lastDataSignature = sig;
+
+        allClashes = newClashes;
+        allViewpoints = vpList;
+        projectMembers = memList;
+
+        // Requirement 4: Default all Clash Groups and Viewpoint Folders to COLLAPSED (▶) on initial load
+        if (!hasInitializedDefaultCollapse && allClashes.length > 0) {
+          allClashes.filter(c => c.is_group_header).forEach(g => collapsedGroups.add(g.guid));
+          hasInitializedDefaultCollapse = true;
+        }
+        if (!hasInitializedVpDefaultCollapse && allViewpoints.length > 0) {
+          allViewpoints.forEach(v => { if (v.folder_name) collapsedVpFolders.add(v.folder_name); });
+          hasInitializedVpDefaultCollapse = true;
+        }
+
+        // Enforce strict role lock if current user's email matches a registered member in projectMembers
         if (currentUser.email && projectMembers.length > 0) {
-          const matchedMember = projectMembers.find(m => String(m.email || "").toLowerCase() === currentUser.email.toLowerCase());
-          if (matchedMember && matchedMember.role) {
-            currentUser.role = normalizeRole(matchedMember.role);
-            updateHeaderIdentityUI();
-            populateBatchDropdownForRole();
+          const matched = projectMembers.find(m => String(m.email || "").trim().toLowerCase() === currentUser.email.trim().toLowerCase());
+          if (matched && matched.role) {
+            applyLockedUserToHeader({
+              name: matched.member_name || currentUser.name,
+              email: matched.email,
+              role: matched.role,
+              discipline: matched.discipline_team || currentUser.discipline
+            });
           }
         }
 
-        populateProjectAndDisciplineDropdowns(isInitialLoad);
-        applyAllFiltersAndRender();
+        populateDynamicDropdowns(preselectProject, preselectRound);
+        applyFilters();
+        applyVpFilters();
+        updateNotificationsList();
 
-        badge.className = "inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10.5px] font-bold bg-[#09221c] text-emerald-400 border border-emerald-800/70";
-        badge.textContent = `🟢 Cloud Connected`;
+        setCloudPill(`● Synced (${filteredClashes.length} Clashes, ${filteredViewpoints.length} VPs)`, "emerald");
       } catch (err) {
-        badge.className = "inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10.5px] font-bold bg-rose-950 text-rose-400 border border-rose-800";
-        badge.textContent = `⚠️ Offline / Retry`;
+        setCloudPill("⚠️ Sync Error", "rose");
+        if (!isSilentAutoPoll) showToast("⚠️ Supabase Error: " + err.message, "rose");
       }
     }
 
-    function populateProjectAndDisciplineDropdowns(isInitialLoad) {
-      const pSel = document.getElementById("fltProject");
-      const prevProj = pSel.value;
-
-      const allProjs = [...new Set([
-        ...rawClashes.map(c => c.project_name),
-        ...rawViewpoints.map(v => v.project_name)
-      ].filter(Boolean))];
-
-      pSel.innerHTML = `<option value="ALL">All Projects (${allProjs.length})</option>` +
-        allProjs.map(p => `<option value="${escapeAttr(p)}">${escapeHtml(p)}</option>`).join("");
-
-      if (isInitialLoad && lockedProjectFromUrl) {
-        const exact = allProjs.find(p => p.toLowerCase() === lockedProjectFromUrl.toLowerCase());
-        if (exact) pSel.value = exact;
-        else pSel.value = "ALL";
-      } else if ([...pSel.options].some(o => o.value === prevProj)) {
-        pSel.value = prevProj;
-      }
-
-      // Populate Discipline dropdown
-      const dSel = document.getElementById("fltDiscipline");
-      const prevDisc = dSel.value;
-      const allDiscs = [...new Set(rawClashes.map(c => c.assigned_to).filter(Boolean))].sort();
-      dSel.innerHTML = `<option value="ALL">All Teams</option>` +
-        allDiscs.map(d => `<option value="${escapeAttr(d)}">${escapeHtml(d)}</option>`).join("");
-      if ([...dSel.options].some(o => o.value === prevDisc)) dSel.value = prevDisc;
-
-      // Update Team Roster count
-      const activeProj = pSel.value;
-      const teamForProj = activeProj === "ALL" ? projectMembers : projectMembers.filter(m => m.project_name === activeProj);
-      document.getElementById("hdrTeamCount").textContent = teamForProj.length;
+    function setCloudPill(text, color) {
+      const pill = document.getElementById("cloudSyncPill");
+      pill.textContent = text;
+      pill.className = `px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-${color}-950 text-${color}-300 border-${color}-800 shrink-0`;
     }
 
-    // =========================================================================
-    // 3. FILTERING, KPIs, & 4 CHARTS ENGINE
-    // =========================================================================
-    function onTopFilterChange(projectChanged) {
-      if (projectChanged) {
-        const pVal = document.getElementById("fltProject").value;
-        document.getElementById("projectLockBadge").textContent = pVal === "ALL" ? "🔒 All Projects" : `🔒 ${pVal}`;
+    function populateDynamicDropdowns(preselectProject, preselectRound) {
+      const projSelect = document.getElementById("filterProject");
+      const projects = [...new Set([...allClashes.map(c => c.project_name), ...allViewpoints.map(v => v.project_name)].filter(Boolean))];
+
+      // Check if lockedProjectName exists in actual cloud data
+      const matchedLockedProj = lockedProjectName
+        ? projects.find(p => p.toLowerCase() === lockedProjectName.toLowerCase())
+        : null;
+
+      if (matchedLockedProj) {
+        lockedProjectName = matchedLockedProj;
+        projSelect.innerHTML = `<option value="${escapeHtml(matchedLockedProj)}" selected>🔒 ${escapeHtml(matchedLockedProj)}</option>` +
+          projects.filter(p => p !== matchedLockedProj).map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join("") +
+          `<option value="ALL">All Projects (${projects.length})</option>`;
+        projSelect.disabled = false;
+        document.getElementById("projectBadge").textContent = "🔒 NWF: " + matchedLockedProj;
+      } else {
+        let currentProj = preselectProject || projSelect.value || "ALL";
+        if (currentProj !== "ALL" && !projects.includes(currentProj)) {
+          currentProj = projects.length === 1 ? projects[0] : "ALL";
+        }
+        projSelect.innerHTML = `<option value="ALL">All Projects (${projects.length})</option>` +
+          projects.map(p => `<option value="${escapeHtml(p)}" ${p === currentProj ? "selected" : ""}>${escapeHtml(p)}</option>`).join("");
+        projSelect.disabled = false;
+        document.getElementById("projectBadge").textContent = currentProj === "ALL" ? "🔒 All Projects" : ("🔒 NWF: " + currentProj);
       }
+
+      const activeProjVal = projSelect.value;
+      const scopeClashes = activeProjVal === "ALL" ? allClashes : allClashes.filter(c => c.project_name === activeProjVal);
+      const scopeVps = activeProjVal === "ALL" ? allViewpoints : allViewpoints.filter(v => v.project_name === activeProjVal);
+      const scopeMembers = activeProjVal === "ALL" ? projectMembers : projectMembers.filter(m => m.project_name === activeProjVal);
+
+      document.getElementById("tabCountClashes").textContent = scopeClashes.length;
+      document.getElementById("tabCountViewpoints").textContent = scopeVps.length;
+      document.getElementById("teamCountBadge").textContent = scopeMembers.length;
+
+      const roundSelect = document.getElementById("filterRound");
+      const rounds = [...new Set(scopeClashes.map(c => c.round).filter(Boolean))].sort();
+      let currentRound = preselectRound || roundSelect.value || "ALL";
+      if (currentRound !== "ALL" && !rounds.includes(currentRound)) currentRound = "ALL";
+      roundSelect.innerHTML = `<option value="ALL">All Rounds (${rounds.length})</option>` +
+        rounds.map(r => `<option value="${escapeHtml(r)}" ${r === currentRound ? "selected" : ""}>R-${escapeHtml(r)}</option>`).join("");
+
+      const assignedSelect = document.getElementById("filterAssigned");
+      const currentAssigned = assignedSelect.value || "ALL";
+      const assignedList = [...new Set(scopeClashes.map(c => c.assigned_to).filter(Boolean))].sort();
+      assignedSelect.innerHTML = `<option value="ALL">All Teams (${assignedList.length})</option>` +
+        assignedList.map(a => `<option value="${escapeHtml(a)}" ${a === currentAssigned ? "selected" : ""}>${escapeHtml(a)}</option>`).join("");
+
+      const vpFolderSelect = document.getElementById("filterVpFolder");
+      const currentFolder = vpFolderSelect.value || "ALL";
+      const folders = [...new Set(scopeVps.map(v => v.folder_name).filter(Boolean))].sort();
+      vpFolderSelect.innerHTML = `<option value="ALL">All Folders (${folders.length})</option>` +
+        folders.map(f => `<option value="${escapeHtml(f)}" ${f === currentFolder ? "selected" : ""}>📁 ${escapeHtml(f)}</option>`).join("");
+    }
+
+    function onProjectDropdownChange() {
+      const val = document.getElementById("filterProject").value;
+      lockedProjectName = val === "ALL" ? null : val;
+      document.getElementById("projectBadge").textContent = val === "ALL" ? "🔒 All Projects" : ("🔒 NWF: " + val);
+      populateDynamicDropdowns(val, "ALL");
+      applyFilters();
+      applyVpFilters();
+    }
+
+    function switchMainTab(tab) {
+      currentTab = tab;
       currentPage = 1;
-      applyAllFiltersAndRender();
+      const isClash = tab === "clashes";
+      document.getElementById("clashesTableContainer").classList.toggle("hidden", !isClash);
+      document.getElementById("clashTopFilters").classList.toggle("hidden", !isClash);
+      document.getElementById("analyticsWrapper").classList.toggle("hidden", !isClash || !chartsVisible);
+      document.getElementById("viewpointsTableContainer").classList.toggle("hidden", isClash);
+      document.getElementById("vpTopFilters").classList.toggle("hidden", isClash);
+      document.getElementById("vpTopFilters").classList.toggle("flex", !isClash);
+
+      document.getElementById("tabBtnClashes").className = isClash
+        ? "px-2.5 py-1 rounded-md text-[11px] font-bold bg-sky-600 text-white"
+        : "px-2.5 py-1 rounded-md text-[11px] font-bold text-slate-300 hover:text-white";
+      document.getElementById("tabBtnViewpoints").className = !isClash
+        ? "px-2.5 py-1 rounded-md text-[11px] font-bold bg-teal-600 text-white"
+        : "px-2.5 py-1 rounded-md text-[11px] font-bold text-slate-300 hover:text-white";
+
+      if (isClash) renderClashesTable();
+      else renderViewpointsTable();
     }
 
     function onSearchInput() {
       currentPage = 1;
-      applyAllFiltersAndRender();
+      if (currentTab === "clashes") applyFilters();
+      else applyVpFilters();
     }
 
-    function applyAllFiltersAndRender() {
-      const fProj = document.getElementById("fltProject").value;
-      const fRound = document.getElementById("fltRound").value;
-      const fDisc = document.getElementById("fltDiscipline").value;
-      const fBim = document.getElementById("fltBimStatus").value;
-      const fTeam = document.getElementById("fltTeamStatus").value;
-      const q = (document.getElementById("txtGlobalSearch").value || "").trim().toLowerCase();
+    function applyFilters() {
+      const proj = document.getElementById("filterProject").value;
+      const round = document.getElementById("filterRound").value;
+      const assigned = document.getElementById("filterAssigned").value;
+      const navisSt = document.getElementById("filterNavisStatus").value;
+      const teamResp = document.getElementById("filterTeamResponse").value;
+      const q = document.getElementById("globalSearchInput").value.trim().toLowerCase();
 
-      filteredClashes = rawClashes.filter(c => {
-        if (fProj !== "ALL" && c.project_name !== fProj) return false;
-        if (fRound !== "ALL" && String(c.round) !== fRound) return false;
-        if (fDisc !== "ALL" && String(c.assigned_to || "ALL") !== fDisc) return false;
-        if (fBim !== "ALL" && String(c.navis_status || "").toLowerCase() !== fBim.toLowerCase()) return false;
-        if (fTeam !== "ALL" && String(c.team_response || "").toLowerCase() !== fTeam.toLowerCase()) return false;
+      filteredClashes = allClashes.filter(c => {
+        if (proj !== "ALL" && c.project_name !== proj) return false;
+        if (round !== "ALL" && c.round !== round) return false;
+        if (assigned !== "ALL" && c.assigned_to !== assigned) return false;
+        if (navisSt !== "ALL" && c.navis_status !== navisSt) return false;
+        if (teamResp !== "ALL" && c.team_response !== teamResp) return false;
 
-        for (const col of Object.keys(columnFilters)) {
-          const allowed = columnFilters[col];
-          if (allowed && allowed.size > 0 && !allowed.has(String(c[col] ?? ""))) return false;
+        for (const [col, allowedSet] of Object.entries(activeColumnFilters.clashes)) {
+          if (allowedSet && !allowedSet.has(String(c[col] ?? ""))) return false;
         }
-
-        if (q && !JSON.stringify(c).toLowerCase().includes(q)) return false;
-        return true;
-      });
-
-      filteredViewpoints = rawViewpoints.filter(v => {
-        if (fProj !== "ALL" && v.project_name !== fProj) return false;
-        if (fTeam !== "ALL" && String(v.status || "").toLowerCase() !== fTeam.toLowerCase()) return false;
-        if (q && !JSON.stringify(v).toLowerCase().includes(q)) return false;
-        return true;
-      });
-
-      updateKpisAndFourCharts();
-      renderMainTable();
-    }
-
-    function updateKpisAndFourCharts() {
-      const groups = filteredClashes.filter(c => c.is_group_header);
-      const leafClashes = filteredClashes.filter(c => !c.is_group_header);
-      const itemsToCount = leafClashes.length > 0 ? leafClashes : filteredClashes;
-
-      const totalCount = itemsToCount.length;
-      const openActive = itemsToCount.filter(c => ["new", "active"].includes(String(c.navis_status || "").toLowerCase())).length;
-      const fixedRevit = itemsToCount.filter(c => String(c.team_response || "").toLowerCase().includes("solved")).length;
-      const approvalHold = itemsToCount.filter(c => ["need workshop", "not our scope"].includes(String(c.team_response || "").toLowerCase()) || String(c.navis_status || "").toLowerCase() === "reviewed").length;
-      const rejectedBim = itemsToCount.filter(c => String(c.navis_status || "").toLowerCase() === "active" && String(c.team_response || "").toLowerCase() === "pending action").length;
-      const resolvedClosed = itemsToCount.filter(c => ["approved", "resolved"].includes(String(c.navis_status || "").toLowerCase())).length;
-
-      document.getElementById("hdrClashCount").textContent = totalCount;
-      document.getElementById("hdrVpCount").textContent = filteredViewpoints.length;
-
-      document.getElementById("kpiFilteredTotal").textContent = totalCount;
-      document.getElementById("kpiGroupsSub").textContent = `${groups.length} Clash Groups`;
-      document.getElementById("kpiBimActive").textContent = openActive;
-      document.getElementById("kpiFixedRevit").textContent = fixedRevit;
-      document.getElementById("kpiApprovalHold").textContent = approvalHold;
-      document.getElementById("kpiRejectedBim").textContent = rejectedBim;
-      document.getElementById("kpiResolvedClosed").textContent = resolvedClosed;
-
-      // Count notifications (@mentions or comments)
-      const commentRows = itemsToCount.filter(c => c.comments_json && c.comments_json !== "[]").length;
-      document.getElementById("hdrNotifCount").textContent = commentRows;
-
-      // Chart 1: BIM Review Status
-      const bimMap = { New: 0, Active: 0, Reviewed: 0, Approved: 0, Resolved: 0 };
-      itemsToCount.forEach(c => {
-        const k = Object.keys(bimMap).find(x => x.toLowerCase() === String(c.navis_status || "").toLowerCase()) || "Active";
-        bimMap[k]++;
-      });
-      if (chart1) chart1.destroy();
-      chart1 = new Chart(document.getElementById("chart1BimStatus"), {
-        type: "doughnut",
-        data: {
-          labels: Object.keys(bimMap),
-          datasets: [{ data: Object.values(bimMap), backgroundColor: ["#f59e0b", "#ef4444", "#3b82f6", "#10b981", "#14b8a6"], borderWidth: 0 }]
-        },
-        options: { responsive: true, maintainAspectRatio: false, cutout: "62%", plugins: { legend: { position: "right", labels: { color: "#94a3b8", boxWidth: 10, font: { size: 10 } } } } }
-      });
-
-      // Chart 2: Team Action Status
-      const teamMap = { "Pending Action": 0, "Solved / Fixed": 0, "Not Our Scope": 0, "Need Workshop": 0 };
-      itemsToCount.forEach(c => {
-        const k = Object.keys(teamMap).find(x => x.toLowerCase() === String(c.team_response || "").toLowerCase()) || "Pending Action";
-        teamMap[k]++;
-      });
-      if (chart2) chart2.destroy();
-      chart2 = new Chart(document.getElementById("chart2TeamStatus"), {
-        type: "doughnut",
-        data: {
-          labels: Object.keys(teamMap),
-          datasets: [{ data: Object.values(teamMap), backgroundColor: ["#475569", "#0ea5e9", "#f43f5e", "#eab308"], borderWidth: 0 }]
-        },
-        options: { responsive: true, maintainAspectRatio: false, cutout: "62%", plugins: { legend: { position: "right", labels: { color: "#94a3b8", boxWidth: 10, font: { size: 10 } } } } }
-      });
-
-      // Chart 3: Discipline Breakdown
-      const discCounts = {};
-      itemsToCount.forEach(c => {
-        const d = c.assigned_to || "ALL";
-        discCounts[d] = (discCounts[d] || 0) + 1;
-      });
-      const dLabels = Object.keys(discCounts).slice(0, 6);
-      if (chart3) chart3.destroy();
-      chart3 = new Chart(document.getElementById("chart3Discipline"), {
-        type: "bar",
-        data: {
-          labels: dLabels,
-          datasets: [{ data: dLabels.map(k => discCounts[k]), backgroundColor: "#3b82f6", borderRadius: 4 }]
-        },
-        options: {
-          responsive: true, maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: {
-            x: { ticks: { color: "#94a3b8", font: { size: 9 } }, grid: { display: false } },
-            y: { ticks: { color: "#64748b", font: { size: 9 } }, grid: { color: "#172236" } }
-          }
-        }
-      });
-
-      // Chart 4: Coordination Rounds
-      const roundCounts = {};
-      itemsToCount.forEach(c => {
-        const r = "R-" + (c.round || "1");
-        roundCounts[r] = (roundCounts[r] || 0) + 1;
-      });
-      const rLabels = Object.keys(roundCounts).sort();
-      if (chart4) chart4.destroy();
-      chart4 = new Chart(document.getElementById("chart4Rounds"), {
-        type: "bar",
-        data: {
-          labels: rLabels.length ? rLabels : ["R-1"],
-          datasets: [{ data: rLabels.length ? rLabels.map(k => roundCounts[k]) : [0], backgroundColor: "#14b8a6", borderRadius: 4 }]
-        },
-        options: {
-          responsive: true, maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: {
-            x: { ticks: { color: "#94a3b8", font: { size: 9 } }, grid: { display: false } },
-            y: { ticks: { color: "#64748b", font: { size: 9 } }, grid: { color: "#172236" } }
-          }
-        }
-      });
-    }
-
-    // =========================================================================
-    // 4. TABLE RENDERING (Collapsible Groups Default Closed + Role Permissions)
-    // =========================================================================
-    function renderMainTable() {
-      if (currentTab === "clashes") renderClashesRows();
-      else renderViewpointsRows();
-    }
-
-    function renderClashesRows() {
-      const tbody = document.getElementById("tbodyClashes");
-      const canEditBim = isBimCoordinatorOrLead();
-      const canEditTeam = !canEditBim;
-
-      // Filter out child clashes whose parent group is currently collapsed (▶)
-      const visibleStream = filteredClashes.filter(c => {
-        if (!c.is_group_header && c.parent_group_guid) {
-          return expandedGroupGuids.has(c.parent_group_guid);
+        if (q) {
+          const hay = [c.test_name, c.group_name, c.clash_name, c.assigned_to, c.item_a_id, c.item_b_id, c.item_a_name, c.item_b_name, c.item_a_file, c.item_b_file, c.level_grid, c.comments_json].join(" ").toLowerCase();
+          if (!hay.includes(q)) return false;
         }
         return true;
       });
 
-      const totalVisible = visibleStream.length;
-      const totalPages = Math.max(1, Math.ceil(totalVisible / pageSize));
+      sortDataset(filteredClashes, "clashes");
+      updateKPIsAndCharts();
+      renderClashesTable();
+    }
+
+    function applyVpFilters() {
+      const proj = document.getElementById("filterProject").value;
+      const folder = document.getElementById("filterVpFolder").value;
+      const st = document.getElementById("filterVpStatus").value;
+      const q = document.getElementById("globalSearchInput").value.trim().toLowerCase();
+
+      filteredViewpoints = allViewpoints.filter(v => {
+        if (proj !== "ALL" && v.project_name !== proj) return false;
+        if (folder !== "ALL" && v.folder_name !== folder) return false;
+        const normSt = normalizeTeamStatus(v.status);
+        if (st !== "ALL" && normSt !== st) return false;
+        for (const [col, allowedSet] of Object.entries(activeColumnFilters.viewpoints)) {
+          if (allowedSet && !allowedSet.has(String(v[col] ?? ""))) return false;
+        }
+        if (q) {
+          const hay = [v.folder_name, v.description, v.item_a_id, v.item_b_id, v.item_a_file, v.item_b_file, v.comments_json].join(" ").toLowerCase();
+          if (!hay.includes(q)) return false;
+        }
+        return true;
+      });
+
+      sortDataset(filteredViewpoints, "viewpoints");
+      if (currentTab === "viewpoints") renderViewpointsTable();
+    }
+
+    function sortDataset(arr, datasetName) {
+      if (activeSort.dataset !== datasetName) return;
+      const f = activeSort.field;
+      const mul = activeSort.dir === "asc" ? 1 : -1;
+      arr.sort((a, b) => String(a[f] ?? "").localeCompare(String(b[f] ?? ""), undefined, { numeric: true }) * mul);
+    }
+
+    function renderClashesTable() {
+      const tbody = document.getElementById("clashesTableBody");
+      tbody.innerHTML = "";
+      const visibleRows = filteredClashes.filter(c => !c.parent_group_guid || !collapsedGroups.has(c.parent_group_guid));
+      const total = visibleRows.length;
+      const totalPages = Math.max(1, Math.ceil(total / pageSize));
       if (currentPage > totalPages) currentPage = totalPages;
 
       const startIdx = (currentPage - 1) * pageSize;
-      const pageItems = visibleStream.slice(startIdx, startIdx + pageSize);
+      const pageItems = visibleRows.slice(startIdx, startIdx + pageSize);
 
-      document.getElementById("lblShowingCount").textContent = `Showing ${pageItems.length} of ${filteredClashes.length} items`;
-      document.getElementById("lblPageIndicator").textContent = `${currentPage} / ${totalPages}`;
+      document.getElementById("showingRangeLabel").textContent =
+        `Showing ${total === 0 ? 0 : startIdx + 1}-${Math.min(total, startIdx + pageSize)} of ${total} (${filteredClashes.length} filtered)`;
+      document.getElementById("pageIndicator").textContent = `${currentPage} / ${totalPages}`;
 
-      let html = "";
-      for (const c of pageItems) {
-        const isGrp = Boolean(c.is_group_header);
-        const isExpanded = isGrp && expandedGroupGuids.has(c.guid);
-        const isChecked = selectedRowGuids.has(c.round_guid);
-
-        // Distinct Group Header Row styling vs Child Row vs Single Clash Row
-        const trClass = isGrp
-          ? "bg-[#112240] text-sky-200 font-bold border-l-4 border-l-sky-400"
-          : (c.parent_group_guid ? "bg-[#080d18] text-slate-300" : "bg-[#0b111e] hover:bg-[#0f192d]");
-
-        const snapCell = c.image_base64
-          ? `<img src="${c.image_base64}" onclick="openSnapshotModal('${c.image_base64}', '${escapeAttr(c.clash_name)}')" class="w-14 h-10 object-cover rounded border border-slate-700 cursor-pointer hover:scale-105 transition" />`
-          : `<span class="text-[10px] text-slate-600">No Img</span>`;
-
-        // Left-side Arrow on Group Header (Default Collapsed ▶)
-        const clashItemCell = isGrp
-          ? `<button onclick="toggleSingleGroupRow('${escapeAttr(c.guid)}')" class="flex items-center gap-2 text-left text-sky-300 hover:text-white font-extrabold">
-               <span class="w-5 h-5 rounded bg-sky-950 border border-sky-700 flex items-center justify-center text-[10px]">${isExpanded ? "▼" : "▶"}</span>
-               <span>${escapeHtml(c.group_name || c.clash_name)}</span>
-             </button>`
-          : `<div class="${c.parent_group_guid ? 'pl-7 text-slate-300' : 'font-semibold text-white'}">
-               ${c.parent_group_guid ? '<span class="text-sky-500 mr-1">↳</span>' : ''}${escapeHtml(c.clash_name)}
-             </div>`;
-
-        const revitElementsCell = isGrp
-          ? `<span class="text-[11px] text-sky-300/90">${escapeHtml(c.item_a_name || "Clash Group Summary")}</span>`
-          : `<div class="space-y-1">
-               <div class="flex items-center justify-between gap-1 bg-[#060a11] px-2 py-0.5 rounded border border-slate-800">
-                 <span class="truncate max-w-[160px] text-[11px]" title="${escapeAttr(c.item_a_file)} — ${escapeAttr(c.item_a_name)}">${escapeHtml(c.item_a_name)}</span>
-                 <button onclick="isolateElementInRevit('${escapeAttr(c.item_a_id)}','${escapeAttr(c.item_a_file)}','${escapeAttr(c.item_b_id)}','${escapeAttr(c.item_b_file)}')" class="bg-blue-700 hover:bg-blue-600 text-white px-1.5 py-0.5 rounded text-[10px] font-bold">ID ${escapeHtml(c.item_a_id)} 🎯</button>
-               </div>
-               <div class="flex items-center justify-between gap-1 bg-[#060a11] px-2 py-0.5 rounded border border-slate-800">
-                 <span class="truncate max-w-[160px] text-[11px]" title="${escapeAttr(c.item_b_file)} — ${escapeAttr(c.item_b_name)}">${escapeHtml(c.item_b_name)}</span>
-                 <button onclick="isolateElementInRevit('${escapeAttr(c.item_b_id)}','${escapeAttr(c.item_b_file)}','${escapeAttr(c.item_a_id)}','${escapeAttr(c.item_a_file)}')" class="bg-teal-700 hover:bg-teal-600 text-white px-1.5 py-0.5 rounded text-[10px] font-bold">ID ${escapeHtml(c.item_b_id)} 🎯</button>
-               </div>
-             </div>`;
-
-        const bimOpts = BIM_STATES.map(s => `<option value="${s}" ${String(c.navis_status || "").toLowerCase() === s.toLowerCase() ? "selected" : ""}>${s}</option>`).join("");
-        const teamOpts = TEAM_STATES.map(s => `<option value="${s}" ${String(c.team_response || "").toLowerCase() === s.toLowerCase() ? "selected" : ""}>${s}</option>`).join("");
-
-        let comments = [];
-        try { comments = JSON.parse(c.comments_json || "[]"); } catch (e) {}
-        const latestComment = comments.length > 0
-          ? `<span class="text-sky-400 font-semibold">${escapeHtml(comments[comments.length - 1].author)}:</span> ${escapeHtml(comments[comments.length - 1].text)}`
-          : `<span class="text-slate-600">No comments</span>`;
-
-        html += `
-          <tr class="${trClass} transition">
-            <td class="p-2.5 text-center">
-              <input type="checkbox" ${isChecked ? "checked" : ""} onchange="onRowSelectToggle('${escapeAttr(c.round_guid)}', this.checked)" class="rounded bg-slate-900 border-slate-700 cursor-pointer" />
-            </td>
-            <td class="p-2.5">${snapCell}</td>
-            <td class="p-2.5 font-bold text-teal-400">R-${escapeHtml(c.round || "1")}</td>
-            <td class="p-2.5 text-slate-300 truncate max-w-[170px]" title="${escapeAttr(c.test_name)}">${escapeHtml(c.test_name)}</td>
-            <td class="p-2.5">${clashItemCell}</td>
-            <td class="p-2.5">
-              <span class="px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-sky-300 font-bold text-[10.5px]">${escapeHtml(c.assigned_to || "ALL")}</span>
-            </td>
-            <td class="p-2.5">${revitElementsCell}</td>
-            <td class="p-2.5 text-slate-400 whitespace-nowrap">${escapeHtml(c.level_grid || "")}<br/><span class="text-[10px] text-slate-500">${escapeHtml(c.distance || "")}</span></td>
-            <td class="p-2.5 border-l border-slate-800/80 bg-[#0a1526]/40">
-              <select onchange="onInlineClashStatusChange('${escapeAttr(c.round_guid)}', '${escapeAttr(c.guid)}', ${isGrp}, 'navis_status', this.value)" ${canEditBim ? "" : "disabled"} class="status-select text-sky-300">
-                ${bimOpts}
-              </select>
-            </td>
-            <td class="p-2.5 border-l border-r border-slate-800/80 bg-[#081c1b]/40">
-              <select onchange="onInlineClashStatusChange('${escapeAttr(c.round_guid)}', '${escapeAttr(c.guid)}', ${isGrp}, 'team_response', this.value)" ${canEditTeam ? "" : "disabled"} class="status-select text-emerald-300">
-                ${teamOpts}
-              </select>
-            </td>
-            <td class="p-2.5">
-              <div class="text-[11px] truncate max-w-[220px] mb-1">${latestComment}</div>
-              <div class="flex gap-1">
-                <input type="text" id="chat_${escapeAttr(c.round_guid)}" placeholder="Write @comment..." class="flex-1 bg-[#060a11] border border-slate-800 rounded px-2 py-0.5 text-[11px] text-white outline-none focus:border-sky-600" />
-                <button onclick="sendRowComment('${escapeAttr(c.round_guid)}')" class="bg-slate-800 hover:bg-blue-600 text-white px-2 py-0.5 rounded text-[10.5px] font-bold">Send</button>
-              </div>
-            </td>
-          </tr>`;
+      if (pageItems.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="11" class="p-8 text-center text-slate-400">No clashes match the current filters.</td></tr>`;
+        return;
       }
 
-      tbody.innerHTML = html || `<tr><td colspan="11" class="p-10 text-center text-slate-500 font-semibold">No clashes match the current filters.</td></tr>`;
-    }
+      const allowBimEdit = canEditBimStatus();
+      const allowTeamEdit = canEditTeamStatus();
 
-    function renderViewpointsRows() {
-      const tbody = document.getElementById("tbodyViewpoints");
-      const canEditBim = isBimCoordinatorOrLead();
-      const canEditTeam = !canEditBim;
+      pageItems.forEach((c, idx) => {
+        const isGroup = c.is_group_header === true;
+        const isSubClash = !isGroup && Boolean(c.parent_group_guid);
+        const isChecked = selectedRowKeys.has(c.round_guid);
+        const isRejected = c.navis_status === "Rejected" || c.review_decision === "Rejected";
 
-      const byFolder = {};
-      filteredViewpoints.forEach((v, i) => {
-        const f = v.folder_name || "Saved Viewpoints";
-        if (!byFolder[f]) byFolder[f] = [];
-        v._seq = v.sequence_num || (i + 1);
-        byFolder[f].push(v);
-      });
+        const tr = document.createElement("tr");
+        tr.id = "row_" + c.round_guid;
 
-      document.getElementById("lblShowingCount").textContent = `Showing ${filteredViewpoints.length} Saved Viewpoints (${Object.keys(byFolder).length} Folders)`;
-      document.getElementById("lblPageIndicator").textContent = `1 / 1`;
-
-      let html = "";
-      for (const folder of Object.keys(byFolder)) {
-        const items = byFolder[folder];
-        const isExpanded = expandedVpFolders.has(folder);
-
-        // Folder Header Row with Left Arrow (Default Closed ▶)
-        html += `
-          <tr class="bg-[#112240] text-sky-200 font-bold border-l-4 border-l-sky-400">
-            <td class="p-2.5 text-center">—</td>
-            <td class="p-2.5 text-[10px] text-sky-400">FOLDER</td>
-            <td class="p-2.5" colspan="6">
-              <button onclick="toggleVpFolderRow('${escapeAttr(folder)}')" class="flex items-center gap-2 text-left text-sky-300 hover:text-white font-extrabold">
-                <span class="w-5 h-5 rounded bg-sky-950 border border-sky-700 flex items-center justify-center text-[10px]">${isExpanded ? "▼" : "▶"}</span>
-                <span>${escapeHtml(folder)}</span>
-                <span class="px-2 py-0.5 rounded bg-sky-950 text-sky-300 text-[10px]">${items.length} Viewpoints</span>
-              </button>
-            </td>
-          </tr>`;
-
-        if (!isExpanded) continue;
-
-        for (const v of items) {
-          const snapCell = v.image_base64
-            ? `<img src="${v.image_base64}" onclick="openSnapshotModal('${v.image_base64}', '${escapeAttr(v.description)}')" class="w-14 h-10 object-cover rounded border border-slate-700 cursor-pointer" />`
-            : `<span class="text-[10px] text-slate-600">No Img</span>`;
-
-          const curBim = BIM_STATES.find(s => s.toLowerCase() === String(v.item_b_name || "").toLowerCase()) || "Active";
-          const bimOpts = BIM_STATES.map(s => `<option value="${s}" ${curBim === s ? "selected" : ""}>${s}</option>`).join("");
-          const teamOpts = TEAM_STATES.map(s => `<option value="${s}" ${String(v.status || "").toLowerCase() === s.toLowerCase() ? "selected" : ""}>${s}</option>`).join("");
-
-          html += `
-            <tr class="bg-[#080d18] hover:bg-[#0f192d] transition">
-              <td class="p-2.5 text-center font-bold text-sky-400">${v._seq}</td>
-              <td class="p-2.5">${snapCell}</td>
-              <td class="p-2.5 pl-6 text-slate-400">↳ ${escapeHtml(folder)}</td>
-              <td class="p-2.5 font-semibold text-white">${escapeHtml(v.description || "")}</td>
-              <td class="p-2.5 text-slate-400">${escapeHtml(v.item_a_name || "Annotated 3D Viewpoint")}</td>
-              <td class="p-2.5 border-l border-slate-800/80 bg-[#0a1526]/40">
-                <select onchange="onInlineVpStatusChange('${escapeAttr(v.vp_key)}', 'item_b_name', this.value)" ${canEditBim ? "" : "disabled"} class="status-select text-sky-300">
-                  ${bimOpts}
-                </select>
-              </td>
-              <td class="p-2.5 border-l border-r border-slate-800/80 bg-[#081c1b]/40">
-                <select onchange="onInlineVpStatusChange('${escapeAttr(v.vp_key)}', 'status', this.value)" ${canEditTeam ? "" : "disabled"} class="status-select text-emerald-300">
-                  ${teamOpts}
-                </select>
-              </td>
-              <td class="p-2.5 text-slate-400">Saved Viewpoint Review</td>
-            </tr>`;
+        if (isRejected) {
+          tr.className = "bg-rose-950/35 hover:bg-rose-900/40 border-l-4 border-rose-500";
+        } else if (isGroup) {
+          tr.className = "bg-gradient-to-r from-teal-950/80 via-slate-900/95 to-slate-900/90 hover:from-teal-900/80 border-l-4 border-teal-400 border-t border-b border-teal-800/50";
+        } else if (isSubClash) {
+          tr.className = "bg-[#070b12]/85 hover:bg-slate-800/50 border-l-4 border-slate-700";
+        } else {
+          tr.className = "hover:bg-slate-800/50";
         }
-      }
 
-      tbody.innerHTML = html || `<tr><td colspan="8" class="p-10 text-center text-slate-500 font-semibold">No Saved Viewpoints found.</td></tr>`;
-    }
+        const imgHtml = c.image_base64 && c.image_base64.startsWith("data:image")
+          ? `<img src="${c.image_base64}" onclick="showModal('${c.image_base64}', '${escapeHtml(c.clash_name)}')" class="w-20 h-14 object-cover rounded-lg cursor-pointer border border-slate-700 hover:scale-105 transition" />`
+          : `<div class="w-20 h-14 bg-slate-800 rounded-lg flex items-center justify-center text-[9px] text-slate-500">No Image</div>`;
 
-    // =========================================================================
-    // 5. GROUP EXPAND/COLLAPSE & STATUS UPDATES (Group Propagates to Children)
-    // =========================================================================
-    function toggleSingleGroupRow(groupGuid) {
-      if (expandedGroupGuids.has(groupGuid)) expandedGroupGuids.delete(groupGuid);
-      else expandedGroupGuids.add(groupGuid);
-      renderClashesRows();
-    }
+        const collapseBtn = isGroup
+          ? `<button onclick="toggleGroupCollapse('${escapeHtml(c.guid)}')" class="mr-1.5 px-1.5 py-0.5 rounded bg-teal-800 hover:bg-teal-700 text-teal-100 text-[10px] font-extrabold" title="Expand / Collapse Group">${collapsedGroups.has(c.guid) ? "▶" : "▼"}</button>`
+          : (isSubClash ? `<span class="text-teal-500 font-bold mr-1 pl-3">↳</span>` : "");
 
-    function toggleVpFolderRow(folderName) {
-      if (expandedVpFolders.has(folderName)) expandedVpFolders.delete(folderName);
-      else expandedVpFolders.add(folderName);
-      renderViewpointsRows();
-    }
+        const checkboxOnClick = isGroup
+          ? `onclick="handleGroupCheckboxClick(event, '${escapeHtml(c.round_guid)}', '${escapeHtml(c.guid)}', '${escapeHtml(c.round)}')"`
+          : `onclick="handleRowCheckboxClick(event, '${escapeHtml(c.round_guid)}', ${startIdx + idx})"`;
 
-    function expandOrCollapseAllGroups(expand) {
-      expandedGroupGuids.clear();
-      expandedVpFolders.clear();
-      if (expand) {
-        rawClashes.filter(c => c.is_group_header).forEach(g => expandedGroupGuids.add(g.guid));
-        rawViewpoints.forEach(v => expandedVpFolders.add(v.folder_name || "Saved Viewpoints"));
-      }
-      renderMainTable();
-    }
+        // COLUMN 9: BIM STATUS (Editable ONLY for BIM Coordinator / Lead, Read-Only Badge for Engineer)
+        const bimStatusHtml = allowBimEdit
+          ? `<select onchange="updateClashBimStatus('${escapeHtml(c.round_guid)}', this.value, ${isGroup}, '${escapeHtml(c.guid)}')" class="w-full bg-[#070b12] border border-sky-700/80 rounded-lg px-2 py-1 text-[11px] font-bold text-sky-200 focus:outline-none">
+              ${BIM_COORDINATOR_STATUSES.map(st => `<option value="${st}" ${c.navis_status === st ? "selected" : ""}>🛡️ ${st}</option>`).join("")}
+             </select>
+             <div id="bimSync_${c.round_guid}" class="text-[9px] text-slate-400 mt-1">✓ BIM Control</div>`
+          : `<div class="px-2 py-1 rounded-lg border text-[11px] font-bold flex items-center justify-between ${getBimStatusBadgeClass(c.navis_status)}">
+               <span>${escapeHtml(c.navis_status)}</span>
+               <span class="text-[9px] opacity-75" title="Controlled by BIM Coordinator">🔒</span>
+             </div>`;
 
-    async function onInlineClashStatusChange(roundGuid, guid, isGroup, fieldName, newValue) {
-      // Strictly verify role permission before patching
-      if (fieldName === "navis_status" && !isBimCoordinatorOrLead()) return;
-      if (fieldName === "team_response" && isBimCoordinatorOrLead()) return;
+        // COLUMN 10: TEAM STATUS (Editable ONLY for Engineer, Read-Only Badge for BIM Coordinator & Lead)
+        const teamStatusHtml = allowTeamEdit
+          ? `<select onchange="updateClashTeamResponse('${escapeHtml(c.round_guid)}', this.value, ${isGroup}, '${escapeHtml(c.guid)}')" class="w-full bg-[#070b12] border border-teal-700/80 rounded-lg px-2 py-1 text-[11px] font-bold text-teal-200 focus:outline-none">
+              ${TEAM_UNIFIED_STATUSES.map(st => `<option value="${st}" ${c.team_response === st ? "selected" : ""}>🔧 ${st}</option>`).join("")}
+             </select>
+             <div id="syncStatus_${c.round_guid}" class="text-[9px] text-slate-400 mt-1">✓ Eng Control</div>`
+          : `<div class="px-2 py-1 rounded-lg border border-slate-700 bg-[#070b12] text-slate-200 text-[11px] font-bold flex items-center justify-between">
+               <span class="truncate">${escapeHtml(c.team_response)}</span>
+               <span class="text-[9px] text-slate-500 ml-1" title="Controlled by Discipline Engineer">🔒</span>
+             </div>`;
 
-      const target = rawClashes.find(c => c.round_guid === roundGuid);
-      if (target) target[fieldName] = newValue;
+        tr.innerHTML =
+          `<td class="p-2 text-center"><input type="checkbox" class="w-3.5 h-3.5 accent-teal-500 cursor-pointer" ${isChecked ? "checked" : ""} ${checkboxOnClick} /></td>` +
+          `<td class="p-2">${imgHtml}</td>` +
+          `<td class="p-2"><span class="px-1.5 py-0.5 rounded bg-slate-800 text-teal-300 border border-slate-700 font-bold text-[11px]">R-${escapeHtml(c.round)}</span><div class="text-[9px] text-slate-400 mt-0.5 truncate max-w-[80px]">${escapeHtml(c.project_name)}</div></td>` +
+          `<td class="p-2 font-medium text-slate-200 text-[11px] break-words">${escapeHtml(c.test_name)}</td>` +
+          `<td class="p-2"><div class="flex items-center">${collapseBtn}<span class="${isGroup ? 'text-teal-200 font-black cursor-pointer' : 'text-white font-semibold'} text-[11px]" ${isGroup ? `onclick="toggleGroupCollapse('${escapeHtml(c.guid)}')"` : ""}>${escapeHtml(c.clash_name)}</span></div></td>` +
+          `<td class="p-2"><span class="px-2 py-0.5 rounded bg-sky-950 text-sky-300 border border-sky-800 font-bold text-[11px]">${escapeHtml(c.assigned_to)}</span></td>` +
+          `<td class="p-2">` +
+            `<div class="bg-[#070b12] border border-slate-800 rounded p-1 mb-1 flex items-center justify-between gap-1">` +
+              `<span class="text-rose-400 font-bold truncate max-w-[115px] text-[10px]" title="${escapeHtml(c.item_a_file)}">A: ${escapeHtml(c.item_a_name)}</span>` +
+              `<button onclick="copyAndIsolateInRevit('${escapeHtml(c.project_name)}', '${escapeHtml(c.item_a_id)}', '${escapeHtml(c.item_b_id)}', '${escapeHtml(c.item_a_file)}', '${escapeHtml(c.item_b_file)}', '${escapeHtml(c.item_a_name)}', '${escapeHtml(c.item_b_name)}')" class="bg-sky-950 hover:bg-sky-800 text-sky-200 border border-sky-700 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold">ID: ${escapeHtml(c.item_a_id)} 🎯</button>` +
+            `</div>` +
+            `<div class="bg-[#070b12] border border-slate-800 rounded p-1 flex items-center justify-between gap-1">` +
+              `<span class="text-emerald-400 font-bold truncate max-w-[115px] text-[10px]" title="${escapeHtml(c.item_b_file)}">B: ${escapeHtml(c.item_b_name)}</span>` +
+              `<button onclick="copyAndIsolateInRevit('${escapeHtml(c.project_name)}', '${escapeHtml(c.item_b_id)}', '${escapeHtml(c.item_a_id)}', '${escapeHtml(c.item_b_file)}', '${escapeHtml(c.item_a_file)}', '${escapeHtml(c.item_b_name)}', '${escapeHtml(c.item_a_name)}')" class="bg-emerald-950 hover:bg-emerald-800 text-emerald-200 border border-emerald-700 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold">ID: ${escapeHtml(c.item_b_id)} 🎯</button>` +
+            `</div>` +
+          `</td>` +
+          `<td class="p-2 text-[11px]"><div class="font-bold text-slate-200">${escapeHtml(c.level_grid)}</div><div class="text-slate-400 text-[10px]">${escapeHtml(c.distance)}</div></td>` +
+          `<td class="p-2 bg-sky-950/10 border-l border-r border-slate-800/80">${bimStatusHtml}</td>` +
+          `<td class="p-2 bg-teal-950/10 border-r border-slate-800/80">${teamStatusHtml}</td>` +
+          `<td class="p-2">${buildChatCellHtml(c.round_guid, c.comments_json, "clashes")}</td>`;
 
-      const payload = { [fieldName]: newValue, updated_at: new Date().toISOString() };
-      await fetch(`${SUPABASE_URL}/rest/v1/clashes?round_guid=eq.${encodeURIComponent(roundGuid)}`, {
-        method: "PATCH",
-        headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}`, "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+        tbody.appendChild(tr);
       });
+    }
 
-      // Propagate Group Status to all child clashes inside the group (Navisworks behavior)
-      if (isGroup && guid) {
-        const children = rawClashes.filter(c => c.parent_group_guid === guid);
-        for (const ch of children) {
-          ch[fieldName] = newValue;
-          await fetch(`${SUPABASE_URL}/rest/v1/clashes?round_guid=eq.${encodeURIComponent(ch.round_guid)}`, {
+    function getBimStatusBadgeClass(status) {
+      if (status === "Resolved" || status === "Approved") return "bg-emerald-950 text-emerald-300 border-emerald-700";
+      if (status === "Rejected") return "bg-rose-950 text-rose-300 border-rose-600";
+      if (status === "Reviewed") return "bg-amber-950 text-amber-300 border-amber-700";
+      return "bg-rose-950/70 text-rose-300 border-rose-800";
+    }
+
+    // BIM Coordinator / Lead Status Update Function (Propagates Group Status to Child Clashes)
+    async function updateClashBimStatus(roundGuid, newBimStatus, isGroupHeader = false, groupGuid = "") {
+      if (!canEditBimStatus()) {
+        showToast("🔒 Only BIM Coordinators / Leads can modify BIM Review Status.", "rose");
+        return;
+      }
+      const ind = document.getElementById("bimSync_" + roundGuid);
+      if (ind) { ind.textContent = "⏳ Saving..."; ind.className = "text-[9px] text-amber-400 mt-1 font-bold"; }
+
+      const revDecision = newBimStatus === "Rejected" ? "Rejected" : (newBimStatus === "Approved" || newBimStatus === "Resolved" ? "Approved" : "Reviewed");
+      const payload = { navis_status: newBimStatus, review_decision: revDecision, updated_at: new Date().toISOString() };
+
+      try {
+        let res = await fetch(`${SUPABASE_URL}/rest/v1/clashes?round_guid=eq.${encodeURIComponent(roundGuid)}`, {
+          method: "PATCH",
+          headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY, "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok && res.status === 400) {
+          res = await fetch(`${SUPABASE_URL}/rest/v1/clashes?round_guid=eq.${encodeURIComponent(roundGuid)}`, {
             method: "PATCH",
-            headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}`, "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
+            headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY, "Content-Type": "application/json" },
+            body: JSON.stringify({ navis_status: newBimStatus, updated_at: new Date().toISOString() })
           });
         }
-      }
+        if (!res.ok) throw new Error("HTTP " + res.status);
 
-      updateKpisAndFourCharts();
-      renderClashesRows();
+        const item = allClashes.find(c => c.round_guid === roundGuid);
+        if (item) { item.navis_status = newBimStatus; item.review_decision = revDecision; }
+
+        if (isGroupHeader && groupGuid && item) {
+          const children = allClashes.filter(c => c.parent_group_guid === groupGuid && c.round === item.round);
+          for (const ch of children) {
+            ch.navis_status = newBimStatus;
+            ch.review_decision = revDecision;
+            await fetch(`${SUPABASE_URL}/rest/v1/clashes?round_guid=eq.${encodeURIComponent(ch.round_guid)}`, {
+              method: "PATCH",
+              headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY, "Content-Type": "application/json" },
+              body: JSON.stringify({ navis_status: newBimStatus, updated_at: new Date().toISOString() })
+            });
+          }
+          renderClashesTable();
+        }
+        if (ind) { ind.textContent = "✓ Saved by BIM"; ind.className = "text-[9px] text-emerald-400 mt-1 font-bold"; }
+        updateKPIsAndCharts();
+      } catch {
+        if (ind) { ind.textContent = "⚠️ Failed"; ind.className = "text-[9px] text-rose-400 mt-1 font-bold"; }
+      }
     }
 
-    async function onInlineVpStatusChange(vpKey, fieldName, newValue) {
-      if (fieldName === "item_b_name" && !isBimCoordinatorOrLead()) return;
-      if (fieldName === "status" && isBimCoordinatorOrLead()) return;
+    // Engineer Team Action Status Update Function (Propagates Group Status to Child Clashes)
+    async function updateClashTeamResponse(roundGuid, newResponse, isGroupHeader = false, groupGuid = "") {
+      if (!canEditTeamStatus()) {
+        showToast("🔒 Only Discipline Engineers can modify Team Action Status.", "rose");
+        return;
+      }
+      const statusEl = document.getElementById("syncStatus_" + roundGuid);
+      if (statusEl) { statusEl.textContent = "⏳ Saving..."; statusEl.className = "text-[9px] text-amber-400 mt-1 font-bold"; }
 
-      const target = rawViewpoints.find(v => v.vp_key === vpKey);
-      if (target) target[fieldName] = newValue;
+      let reassignedTarget = "";
+      if (newResponse === "Re-assign Request") {
+        reassignedTarget = prompt("Enter target Discipline / Team to Re-assign to:", "STR") || "";
+      }
 
+      try {
+        const payload = { team_response: newResponse, updated_at: new Date().toISOString() };
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/clashes?round_guid=eq.${encodeURIComponent(roundGuid)}`, {
+          method: "PATCH",
+          headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY, "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+
+        const item = allClashes.find(c => c.round_guid === roundGuid);
+        if (item) { item.team_response = newResponse; item.reassigned_to = reassignedTarget; }
+
+        if (isGroupHeader && groupGuid && item) {
+          const children = allClashes.filter(c => c.parent_group_guid === groupGuid && c.round === item.round);
+          for (const ch of children) {
+            ch.team_response = newResponse;
+            await fetch(`${SUPABASE_URL}/rest/v1/clashes?round_guid=eq.${encodeURIComponent(ch.round_guid)}`, {
+              method: "PATCH",
+              headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY, "Content-Type": "application/json" },
+              body: JSON.stringify(payload)
+            });
+          }
+          renderClashesTable();
+        }
+        if (statusEl) { statusEl.textContent = "✓ Saved"; statusEl.className = "text-[9px] text-emerald-400 mt-1 font-bold"; }
+        updateKPIsAndCharts();
+      } catch {
+        if (statusEl) { statusEl.textContent = "⚠️ Failed!"; statusEl.className = "text-[9px] text-rose-400 mt-1 font-bold"; }
+      }
+    }
+
+    async function applyBulkRoleAction() {
+      if (selectedRowKeys.size === 0) { showToast("Select rows first.", "amber"); return; }
+      const newVal = document.getElementById("bulkResponseSelect").value;
+      const keys = Array.from(selectedRowKeys);
+
+      try {
+        for (const k of keys) {
+          let payload = {};
+          if (canEditTeamStatus()) {
+            payload = { team_response: newVal, updated_at: new Date().toISOString() };
+          } else if (canEditBimStatus()) {
+            payload = { navis_status: newVal, updated_at: new Date().toISOString() };
+          } else {
+            return;
+          }
+
+          await fetch(`${SUPABASE_URL}/rest/v1/clashes?round_guid=eq.${encodeURIComponent(k)}`, {
+            method: "PATCH",
+            headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY, "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          });
+          const item = allClashes.find(c => c.round_guid === k);
+          if (item) Object.assign(item, payload);
+        }
+        selectedRowKeys.clear();
+        document.getElementById("selectedCountLabel").textContent = "0";
+        showToast(`✓ Updated ${keys.length} items to '${newVal}'!`, "emerald");
+        applyFilters();
+      } catch (err) {
+        showToast("⚠️ Bulk update error: " + err.message, "rose");
+      }
+    }
+
+    // Viewpoints Table with Collapsible Folder Headers (Closed by Default ▶)
+    function renderViewpointsTable() {
+      const tbody = document.getElementById("viewpointsTableBody");
+      tbody.innerHTML = "";
+      if (filteredViewpoints.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-slate-400">No Saved Viewpoints published yet.</td></tr>`;
+        return;
+      }
+
+      const allowBimEdit = canEditBimStatus();
+      const allowTeamEdit = canEditTeamStatus();
+
+      const groupedByFolder = {};
+      filteredViewpoints.forEach(vp => {
+        const f = vp.folder_name || "Saved Viewpoints";
+        if (!groupedByFolder[f]) groupedByFolder[f] = [];
+        groupedByFolder[f].push(vp);
+      });
+
+      Object.entries(groupedByFolder).forEach(([folderName, vps]) => {
+        const isCollapsed = collapsedVpFolders.has(folderName);
+
+        const folderTr = document.createElement("tr");
+        folderTr.className = "bg-gradient-to-r from-teal-950/80 via-slate-900/95 to-slate-900/90 hover:from-teal-900/80 border-l-4 border-teal-400 border-t border-b border-teal-800/50 cursor-pointer";
+        folderTr.onclick = () => toggleVpFolderCollapse(folderName);
+        folderTr.innerHTML =
+          `<td class="p-2 text-center font-bold text-teal-300">—</td>` +
+          `<td class="p-2 text-[10px] font-extrabold text-teal-400 uppercase">FOLDER</td>` +
+          `<td class="p-2" colspan="6">` +
+            `<div class="flex items-center gap-2">` +
+              `<button class="px-1.5 py-0.5 rounded bg-teal-800 hover:bg-teal-700 text-teal-100 text-[10px] font-extrabold">${isCollapsed ? "▶" : "▼"}</button>` +
+              `<span class="text-teal-200 font-black text-xs">📁 ${escapeHtml(folderName)}</span>` +
+              `<span class="px-2 py-0.5 rounded-full bg-slate-800 text-sky-300 text-[10px] font-bold border border-slate-700">${vps.length} Viewpoints</span>` +
+            `</div>` +
+          `</td>`;
+        tbody.appendChild(folderTr);
+
+        if (isCollapsed) return;
+
+        vps.forEach(vp => {
+          const imgHtml = vp.image_base64 && vp.image_base64.startsWith("data:image")
+            ? `<img src="${vp.image_base64}" onclick="showModal('${vp.image_base64}', '${escapeHtml(vp.description)}')" class="w-24 h-16 object-cover rounded-lg cursor-pointer border border-slate-700" />`
+            : `<div class="w-24 h-16 bg-slate-800 rounded-lg flex items-center justify-center text-[10px] text-slate-500">No Image</div>`;
+
+          const currentVpTeamVal = normalizeTeamStatus(vp.status);
+          const bimVpState = (vp.item_b_name && BIM_COORDINATOR_STATUSES.includes(vp.item_b_name))
+            ? vp.item_b_name
+            : ((vp.status || "").includes("Approved") ? "Approved" : ((vp.status || "").includes("Unreviewed") ? "Rejected" : "Active"));
+
+          const bimVpHtml = allowBimEdit
+            ? `<select onchange="updateViewpointBimStatus('${escapeHtml(vp.vp_key)}', this.value)" class="w-full bg-[#070b12] border border-sky-700 rounded-lg px-2 py-1 text-[11px] font-bold text-sky-200">
+                ${BIM_COORDINATOR_STATUSES.map(st => `<option value="${st}" ${bimVpState === st ? "selected" : ""}>🛡️ ${st}</option>`).join("")}
+               </select>`
+            : `<div class="px-2 py-1 rounded-lg border ${getBimStatusBadgeClass(bimVpState)} text-[11px] font-bold flex justify-between"><span>${bimVpState}</span><span>🔒</span></div>`;
+
+          const teamVpHtml = allowTeamEdit
+            ? `<select onchange="updateViewpointStatus('${escapeHtml(vp.vp_key)}', this.value)" class="w-full bg-[#070b12] border border-teal-700 rounded-lg px-2 py-1 text-[11px] font-bold text-teal-200">
+                ${TEAM_UNIFIED_STATUSES.map(st => `<option value="${st}" ${currentVpTeamVal === st ? "selected" : ""}>🔧 ${st}</option>`).join("")}
+               </select>`
+            : `<div class="px-2 py-1 rounded-lg border border-slate-700 bg-[#070b12] text-slate-200 text-[11px] font-bold flex justify-between"><span class="truncate">${escapeHtml(currentVpTeamVal)}</span><span>🔒</span></div>`;
+
+          const tr = document.createElement("tr");
+          tr.id = "row_" + vp.vp_key;
+          tr.className = "bg-[#070b12]/85 hover:bg-slate-800/50 border-l-4 border-slate-700";
+          tr.innerHTML =
+            `<td class="p-2 font-black text-teal-400">#${vp.sequence_num}</td>` +
+            `<td class="p-2">${imgHtml}</td>` +
+            `<td class="p-2"><span class="px-2 py-0.5 rounded bg-slate-800 text-teal-300 border border-slate-700 font-bold text-[11px]">↳ 📁 ${escapeHtml(vp.folder_name || "Root")}</span></td>` +
+            `<td class="p-2 font-bold text-white text-xs">${escapeHtml(vp.description || "-")}</td>` +
+            `<td class="p-2">` +
+              `<div class="mb-1"><button onclick="copyAndIsolateInRevit('${escapeHtml(vp.project_name)}', '${escapeHtml(vp.item_a_id)}', '${escapeHtml(vp.item_b_id)}', '${escapeHtml(vp.item_a_file)}', '${escapeHtml(vp.item_b_file)}', 'Element 1', 'Element 2')" class="bg-sky-950 text-sky-200 border border-sky-700 px-2 py-0.5 rounded text-[10px] font-mono">ID 1: ${escapeHtml(vp.item_a_id || "N/A")} (${escapeHtml(vp.item_a_file || "N/A")}) 🎯</button></div>` +
+              `<div><button onclick="copyAndIsolateInRevit('${escapeHtml(vp.project_name)}', '${escapeHtml(vp.item_b_id)}', '${escapeHtml(vp.item_a_id)}', '${escapeHtml(vp.item_b_file)}', '${escapeHtml(vp.item_a_file)}', 'Element 2', 'Element 1')" class="bg-emerald-950 text-emerald-200 border border-emerald-700 px-2 py-0.5 rounded text-[10px] font-mono">ID 2: ${escapeHtml(vp.item_b_id || "N/A")} (${escapeHtml(vp.item_b_file || "N/A")}) 🎯</button></div>` +
+            `</td>` +
+            `<td class="p-2 bg-sky-950/10 border-l border-r border-slate-800">${bimVpHtml}</td>` +
+            `<td class="p-2 bg-teal-950/10 border-r border-slate-800">${teamVpHtml}</td>` +
+            `<td class="p-2">${buildChatCellHtml(vp.vp_key, vp.comments_json, "viewpoints")}</td>`;
+          tbody.appendChild(tr);
+        });
+      });
+    }
+
+    function toggleVpFolderCollapse(folderName) {
+      if (collapsedVpFolders.has(folderName)) collapsedVpFolders.delete(folderName);
+      else collapsedVpFolders.add(folderName);
+      renderViewpointsTable();
+    }
+
+    function expandCollapseAllVpFolders(collapse) {
+      if (collapse) allViewpoints.forEach(v => { if (v.folder_name) collapsedVpFolders.add(v.folder_name); });
+      else collapsedVpFolders.clear();
+      renderViewpointsTable();
+    }
+
+    async function updateViewpointBimStatus(vpKey, newBimStatus) {
+      if (!canEditBimStatus()) return;
       await fetch(`${SUPABASE_URL}/rest/v1/viewpoints?vp_key=eq.${encodeURIComponent(vpKey)}`, {
         method: "PATCH",
-        headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ [fieldName]: newValue, updated_at: new Date().toISOString() })
+        headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY, "Content-Type": "application/json" },
+        body: JSON.stringify({ item_b_name: newBimStatus, updated_at: new Date().toISOString() })
       });
+      const vp = allViewpoints.find(v => v.vp_key === vpKey);
+      if (vp) vp.item_b_name = newBimStatus;
+      showToast("✓ Viewpoint BIM status updated!", "emerald");
+      renderViewpointsTable();
     }
 
-    // Batch Selection & Role-Aware Apply
-    function onRowSelectToggle(roundGuid, checked) {
-      if (checked) selectedRowGuids.add(roundGuid);
-      else selectedRowGuids.delete(roundGuid);
-      document.getElementById("lblBatchSelectedCount").textContent = `${selectedRowGuids.size} Sel:`;
-    }
-
-    function toggleSelectAllVisibleRows(checked) {
-      filteredClashes.forEach(c => {
-        if (checked) selectedRowGuids.add(c.round_guid);
-        else selectedRowGuids.delete(c.round_guid);
-      });
-      document.getElementById("lblBatchSelectedCount").textContent = `${selectedRowGuids.size} Sel:`;
-      renderClashesRows();
-    }
-
-    async function applyBatchStatusUpdate() {
-      if (selectedRowGuids.size === 0) return;
-      const newVal = document.getElementById("cmbBatchAction").value;
-      const targetField = isBimCoordinatorOrLead() ? "navis_status" : "team_response";
-
-      for (const rGuid of selectedRowGuids) {
-        const row = rawClashes.find(c => c.round_guid === rGuid);
-        if (row) {
-          await onInlineClashStatusChange(row.round_guid, row.guid, Boolean(row.is_group_header), targetField, newVal);
-        }
-      }
-      selectedRowGuids.clear();
-      document.getElementById("lblBatchSelectedCount").textContent = "0 Sel:";
-      document.getElementById("chkSelectAllRows").checked = false;
-      renderClashesRows();
-    }
-
-    async function sendRowComment(roundGuid) {
-      const inp = document.getElementById(`chat_${roundGuid}`);
-      if (!inp || !inp.value.trim()) return;
-      const c = rawClashes.find(x => x.round_guid === roundGuid);
-      if (!c) return;
-
-      let list = [];
-      try { list = JSON.parse(c.comments_json || "[]"); } catch (e) {}
-      list.push({
-        author: currentUser.fullName,
-        role: currentUser.role,
-        text: inp.value.trim(),
-        time: new Date().toISOString().slice(0, 16).replace("T", " ")
-      });
-      c.comments_json = JSON.stringify(list);
-      inp.value = "";
-
-      await fetch(`${SUPABASE_URL}/rest/v1/clashes?round_guid=eq.${encodeURIComponent(roundGuid)}`, {
+    async function updateViewpointStatus(vpKey, newStatus) {
+      if (!canEditTeamStatus()) return;
+      await fetch(`${SUPABASE_URL}/rest/v1/viewpoints?vp_key=eq.${encodeURIComponent(vpKey)}`, {
         method: "PATCH",
-        headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ comments_json: c.comments_json, updated_at: new Date().toISOString() })
+        headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY, "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus, updated_at: new Date().toISOString() })
       });
-      renderClashesRows();
+      const vp = allViewpoints.find(v => v.vp_key === vpKey);
+      if (vp) vp.status = newStatus;
+      showToast("✓ Viewpoint Team status updated!", "emerald");
+      renderViewpointsTable();
     }
 
-    // =========================================================================
-    // 6. MULTI-PORT REVIT LIVE BRIDGE ISOLATION
-    // =========================================================================
-    async function isolateElementInRevit(primaryId, primaryFile, secondaryId, secondaryFile) {
-      const statusEl = document.getElementById("revitBridgeStatusInline");
-      statusEl.textContent = `⏳ Sending Element ${primaryId} to Revit Live Bridge...`;
-      statusEl.className = "text-[11px] text-amber-400 font-bold";
+    // MULTI-SESSION & HOST/LINK PRIORITY REVIT BRIDGE
+    async function copyAndIsolateInRevit(projectName, primaryId, secondaryId, primaryFile, secondaryFile, primaryName = "", secondaryName = "") {
+      if (primaryId && primaryId !== "N/A") {
+        try { await navigator.clipboard.writeText(primaryId); } catch {}
+      }
 
       const payload = {
+        ProjectName: projectName || lockedProjectName || "",
         PrimaryId: String(primaryId),
-        PrimaryFile: String(primaryFile || ""),
         SecondaryId: String(secondaryId || ""),
-        SecondaryFile: String(secondaryFile || "")
+        PrimaryFile: String(primaryFile || ""),
+        SecondaryFile: String(secondaryFile || ""),
+        PrimaryName: primaryName,
+        SecondaryName: secondaryName,
+        Mode: "query_or_isolate"
       };
 
-      for (const port of REVIT_PORTS) {
+      const matches = [];
+      await Promise.allSettled(REVIT_PORTS.map(async (port) => {
         try {
+          const controller = new AbortController();
+          const timer = setTimeout(() => controller.abort(), 1400);
           const res = await fetch(`http://localhost:${port}/isolate`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
+            body: JSON.stringify(payload),
+            signal: controller.signal
           });
+          clearTimeout(timer);
           if (res.ok) {
             const data = await res.json();
-            if (data && data.Isolated) {
-              statusEl.textContent = `🟢 Isolated ID ${primaryId} in Revit 3D Section Box (Port ${port})`;
-              statusEl.className = "text-[11px] text-emerald-400 font-bold";
-              return;
+            const cands = data?.candidates || data?.Candidates;
+            const isIso = data?.isolated || data?.Isolated;
+            const dTitle = data?.docTitle || data?.DocTitle || primaryFile;
+            if (Array.isArray(cands) && cands.length > 0) {
+              cands.forEach(c => matches.push({
+                port,
+                docTitle: c.docTitle || c.DocTitle || dTitle,
+                isHost: Boolean(c.isHost ?? c.IsHost),
+                alreadyIsolated: Boolean(c.alreadyIsolated ?? c.AlreadyIsolated ?? isIso)
+              }));
+            } else if (isIso) {
+              matches.push({ port, docTitle: dTitle, isHost: true, alreadyIsolated: true });
             }
           }
-        } catch (e) {}
+        } catch {}
+      }));
+
+      if (matches.length === 0) {
+        showToast(`📋 Copied ID [${primaryId}] — ⚠️ No open Revit model matches (${primaryFile}).`, "amber");
+        return;
       }
 
-      statusEl.textContent = `🔴 Revit Live Bridge not detected — Ensure Revit is open with the project model.`;
-      statusEl.className = "text-[11px] text-rose-400 font-bold";
-    }
+      if (matches.length === 1) {
+        if (!matches[0].alreadyIsolated) {
+          await triggerSpecificRevitTarget(matches[0].port, matches[0].docTitle, payload);
+        } else {
+          showToast(`🎯 Isolated Element [${primaryId}] in Revit (${matches[0].docTitle})!`, "emerald");
+        }
+        return;
+      }
 
-    // =========================================================================
-    // 7. EXCEL COLUMN FILTER POPUP & UI CONTROLS
-    // =========================================================================
-    function openColFilter(evt, colName) {
-      evt.stopPropagation();
-      activePopupCol = colName;
-      const popup = document.getElementById("colFilterPopup");
-      popup.style.left = `${Math.min(window.innerWidth - 270, evt.clientX - 100)}px`;
-      popup.style.top = `${evt.clientY + 8}px`;
-      popup.classList.remove("hidden");
+      matches.sort((a, b) => (b.isHost ? 1 : 0) - (a.isHost ? 1 : 0));
 
-      const source = currentTab === "clashes" ? rawClashes : rawViewpoints;
-      const uniqueVals = [...new Set(source.map(r => String(r[colName] ?? "")))].sort();
-      const existingSet = columnFilters[colName] || new Set();
-
-      document.getElementById("colFilterList").innerHTML = uniqueVals.map(v => `
-        <label class="flex items-center gap-2 px-1.5 py-1 hover:bg-slate-800/80 rounded cursor-pointer col-opt-item">
-          <input type="checkbox" value="${escapeAttr(v)}" ${existingSet.size === 0 || existingSet.has(v) ? "checked" : ""} class="rounded bg-slate-900 border-slate-700" />
-          <span class="truncate">${escapeHtml(v || "(Blank)")}</span>
-        </label>
+      const listEl = document.getElementById("revitTargetsList");
+      listEl.innerHTML = matches.map(m => `
+        <div onclick='triggerSpecificRevitTarget(${m.port}, ${JSON.stringify(m.docTitle)}, ${JSON.stringify(payload)})' class="p-3 rounded-xl bg-[#070b12] hover:bg-sky-950/60 border ${m.isHost ? 'border-emerald-600' : 'border-slate-700'} cursor-pointer flex items-center justify-between transition">
+          <div>
+            <div class="font-bold text-white text-xs">${m.isHost ? '⭐ Priority 1 (Host RVT): ' : '🔗 Priority 2 (Linked RVT in): '} ${escapeHtml(m.docTitle)}</div>
+            <div class="text-[10px] text-slate-400">Revit Session Port: ${m.port} • Target ID: ${escapeHtml(primaryId)}</div>
+          </div>
+          <span class="px-2.5 py-1 rounded-lg bg-sky-600 text-white font-bold text-[10px]">Isolate 3D 🎯</span>
+        </div>
       `).join("");
+      document.getElementById("revitTargetPickerModal").classList.remove("hidden");
     }
 
-    function filterColPopupOptions() {
-      const q = document.getElementById("colFilterSearch").value.toLowerCase();
-      document.querySelectorAll(".col-opt-item").forEach(el => {
-        el.classList.toggle("hidden", !el.textContent.toLowerCase().includes(q));
+    async function triggerSpecificRevitTarget(port, targetDocTitle, basePayload) {
+      document.getElementById("revitTargetPickerModal").classList.add("hidden");
+      try {
+        const res = await fetch(`http://localhost:${port}/isolate`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...basePayload, TargetDocTitle: targetDocTitle, Mode: "force_isolate" })
+        });
+        if (res.ok) {
+          showToast(`🎯 3D Section Box created in [${targetDocTitle}]!`, "emerald");
+        }
+      } catch {
+        showToast("⚠️ Failed to reach selected Revit session.", "rose");
+      }
+    }
+
+    function buildChatCellHtml(recordKey, commentsJson, tableType) {
+      let messages = [];
+      try { messages = JSON.parse(commentsJson || "[]"); } catch { messages = []; }
+      const chatItemsHtml = messages.length === 0
+        ? `<div class="text-[10px] text-slate-500 italic">No comments. Type @ to mention team/member.</div>`
+        : messages.map(m => {
+            const formatted = escapeHtml(m.text || "").replace(/(@[\w\.\-]+)/g, '<span class="bg-sky-900/90 text-sky-200 px-1 rounded font-bold">$1</span>');
+            const rIcon = getRoleIcon(m.role || "Engineer");
+            return `<div class="mb-1 border-b border-slate-800/80 pb-0.5"><span class="text-sky-300 font-bold text-[10px]">${rIcon} ${escapeHtml(m.author || "Eng")}: </span><span class="text-slate-200 text-[11px]">${formatted}</span></div>`;
+          }).join("");
+
+      return `<div class="bg-[#070b12] border border-slate-800 rounded-lg p-1.5 max-h-16 overflow-y-auto mb-1">${chatItemsHtml}</div>` +
+        `<div class="flex gap-1 relative">` +
+          `<input id="chatInput_${recordKey}" type="text" autocomplete="off" placeholder="Comment or @mention..." ` +
+            `oninput="onCommentInputMention(event, 'chatInput_${escapeHtml(recordKey)}')" ` +
+            `onkeydown="onCommentKeyDown(event, '${escapeHtml(recordKey)}', '${tableType}')" ` +
+            `class="bg-[#070b12] border border-slate-700 rounded px-2 py-1 text-[11px] text-white flex-1 focus:border-sky-500 focus:outline-none" />` +
+          `<button onclick="postChatMessage('${escapeHtml(recordKey)}', '${tableType}')" class="bg-sky-600 hover:bg-sky-500 text-white px-2 py-1 rounded text-[11px] font-bold">Send</button>` +
+        `</div>`;
+    }
+
+    function getAllMentionCandidates() {
+      const items = [];
+      const seen = new Set();
+      const addCandidate = (tag, icon, sub) => {
+        const cleanTag = tag.replace(/\s+/g, ".");
+        if (seen.has(cleanTag.toUpperCase())) return;
+        seen.add(cleanTag.toUpperCase());
+        items.push({ tag: cleanTag, icon, sub });
+      };
+
+      projectMembers.forEach(m => {
+        const rNorm = normalizeRoleName(m.role);
+        const icon = getRoleIcon(rNorm);
+        if (m.member_name) addCandidate(m.member_name, icon, `${rNorm} • ${m.discipline_team || 'Team'}`);
+        if (m.discipline_team) addCandidate(m.discipline_team, "👥", `Entire ${m.discipline_team} Team`);
+      });
+
+      ["AR-TEAM", "ST-TEAM", "MEP-TEAM", "HVAC-TEAM", "EL-TEAM", "PL-TEAM", "BIM-TEAM"].forEach(t => {
+        addCandidate(t, "👥", "Discipline Group");
+      });
+      return items;
+    }
+
+    function onCommentInputMention(event, inputId) {
+      const inp = document.getElementById(inputId);
+      const pop = document.getElementById("mentionAutocompletePopup");
+      if (!inp || !pop) return;
+
+      const val = inp.value;
+      const cursorPos = inp.selectionStart || val.length;
+      const match = val.slice(0, cursorPos).match(/@([\w\.\-]*)$/);
+      if (!match) { pop.classList.add("hidden"); return; }
+
+      const query = match[1].toLowerCase();
+      const candidates = getAllMentionCandidates().filter(c =>
+        c.tag.toLowerCase().startsWith(query) || c.tag.toLowerCase().includes(query) || c.sub.toLowerCase().includes(query)
+      );
+
+      if (candidates.length === 0) { pop.classList.add("hidden"); return; }
+
+      activeMentionInputId = inputId;
+      pop.innerHTML = `<div class="px-2.5 py-1 text-[9px] font-bold text-slate-400 border-b border-slate-800 uppercase">Mention Member or Team</div>` +
+        candidates.map(c =>
+          `<div onclick="selectMentionCandidate('${escapeHtml(c.tag)}')" class="px-3 py-1.5 hover:bg-sky-900/60 cursor-pointer flex justify-between items-center">` +
+            `<span class="font-bold text-sky-300">${c.icon} @${escapeHtml(c.tag)}</span>` +
+            `<span class="text-[10px] text-slate-400 truncate max-w-[120px]">${escapeHtml(c.sub)}</span>` +
+          `</div>`
+        ).join("");
+
+      const rect = inp.getBoundingClientRect();
+      pop.style.left = Math.min(window.innerWidth - 290, rect.left) + "px";
+      pop.style.top = Math.max(10, rect.top - Math.min(210, candidates.length * 32 + 30)) + "px";
+      pop.classList.remove("hidden");
+    }
+
+    function selectMentionCandidate(tag) {
+      const pop = document.getElementById("mentionAutocompletePopup");
+      const inp = document.getElementById(activeMentionInputId);
+      if (!inp) return;
+      const cursorPos = inp.selectionStart || inp.value.length;
+      inp.value = inp.value.slice(0, cursorPos).replace(/@([\w\.\-]*)$/, "@" + tag + " ") + inp.value.slice(cursorPos);
+      pop.classList.add("hidden");
+      inp.focus();
+    }
+
+    function onCommentKeyDown(event, recordKey, tableType) {
+      const pop = document.getElementById("mentionAutocompletePopup");
+      if (event.key === "Escape") { pop.classList.add("hidden"); return; }
+      if (event.key === "Enter") { pop.classList.add("hidden"); postChatMessage(recordKey, tableType); }
+    }
+
+    async function postChatMessage(recordKey, tableType) {
+      const inp = document.getElementById("chatInput_" + recordKey);
+      if (!inp || !inp.value.trim()) return;
+      const text = inp.value.trim();
+      const isClash = tableType === "clashes";
+      const list = isClash ? allClashes : allViewpoints;
+      const keyCol = isClash ? "round_guid" : "vp_key";
+      const record = list.find(x => x[keyCol] === recordKey);
+      if (!record) return;
+
+      let messages = [];
+      try { messages = JSON.parse(record.comments_json || "[]"); } catch { messages = []; }
+      messages.push({
+        author: currentUser.name,
+        role: currentUser.role,
+        text: text,
+        time: new Date().toISOString().slice(0, 16).replace("T", " ")
+      });
+      const updatedJson = JSON.stringify(messages);
+
+      await fetch(`${SUPABASE_URL}/rest/v1/${tableType}?${keyCol}=eq.${encodeURIComponent(recordKey)}`, {
+        method: "PATCH",
+        headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY, "Content-Type": "application/json" },
+        body: JSON.stringify({ comments_json: updatedJson, updated_at: new Date().toISOString() })
+      });
+      record.comments_json = updatedJson;
+      inp.value = "";
+      if (isClash) renderClashesTable(); else renderViewpointsTable();
+      updateNotificationsList();
+    }
+
+    function handleGroupCheckboxClick(event, groupRoundGuid, groupGuid, round) {
+      const isChecked = event.target.checked;
+      if (isChecked) selectedRowKeys.add(groupRoundGuid);
+      else selectedRowKeys.delete(groupRoundGuid);
+      allClashes.forEach(c => {
+        if (c.parent_group_guid === groupGuid && c.round === round) {
+          if (isChecked) selectedRowKeys.add(c.round_guid);
+          else selectedRowKeys.delete(c.round_guid);
+        }
+      });
+      document.getElementById("selectedCountLabel").textContent = selectedRowKeys.size;
+      renderClashesTable();
+    }
+
+    function handleRowCheckboxClick(event, key, currentIndex) {
+      const visibleRows = filteredClashes.filter(c => !c.parent_group_guid || !collapsedGroups.has(c.parent_group_guid));
+      if (event.shiftKey && lastCheckedIndex !== null) {
+        const start = Math.min(lastCheckedIndex, currentIndex);
+        const end = Math.max(lastCheckedIndex, currentIndex);
+        for (let i = start; i <= end; i++) {
+          if (visibleRows[i]) {
+            if (event.target.checked) selectedRowKeys.add(visibleRows[i].round_guid);
+            else selectedRowKeys.delete(visibleRows[i].round_guid);
+          }
+        }
+        renderClashesTable();
+      } else {
+        if (event.target.checked) selectedRowKeys.add(key);
+        else selectedRowKeys.delete(key);
+      }
+      lastCheckedIndex = currentIndex;
+      document.getElementById("selectedCountLabel").textContent = selectedRowKeys.size;
+    }
+
+    function toggleSelectAllVisible(masterChk) {
+      const visibleRows = filteredClashes.filter(c => !c.parent_group_guid || !collapsedGroups.has(c.parent_group_guid));
+      visibleRows.forEach(r => {
+        if (masterChk.checked) selectedRowKeys.add(r.round_guid);
+        else selectedRowKeys.delete(r.round_guid);
+      });
+      document.getElementById("selectedCountLabel").textContent = selectedRowKeys.size;
+      renderClashesTable();
+    }
+
+    function toggleGroupCollapse(groupGuid) {
+      if (collapsedGroups.has(groupGuid)) collapsedGroups.delete(groupGuid);
+      else collapsedGroups.add(groupGuid);
+      renderClashesTable();
+    }
+
+    function expandCollapseAllGroups(collapse) {
+      if (collapse) allClashes.filter(c => c.is_group_header).forEach(g => collapsedGroups.add(g.guid));
+      else collapsedGroups.clear();
+      renderClashesTable();
+    }
+
+    function openExcelFilterMenu(event, colName, datasetName) {
+      event.stopPropagation();
+      currentPopupCol = colName;
+      currentPopupDataset = datasetName;
+      const pop = document.getElementById("excelFilterPopover");
+      document.getElementById("excelFilterTitle").textContent = "Filter: " + colName.toUpperCase();
+      document.getElementById("excelFilterSearch").value = "";
+
+      const sourceData = datasetName === "clashes" ? allClashes : allViewpoints;
+      const uniqueVals = [...new Set(sourceData.map(item => String(item[colName] ?? "")))].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+      const existingSet = activeColumnFilters[datasetName][colName];
+      document.getElementById("excelFilterValuesList").innerHTML = uniqueVals.map(val => {
+        const checked = !existingSet || existingSet.has(val) ? "checked" : "";
+        return `<label class="flex items-center gap-1.5 px-1 py-0.5 hover:bg-slate-800 rounded cursor-pointer excel-val-row" data-val="${escapeHtml(val.toLowerCase())}">
+          <input type="checkbox" class="excel-val-chk" value="${escapeHtml(val)}" ${checked} />
+          <span class="truncate">${val === "" ? "(Blank)" : escapeHtml(val)}</span></label>`;
+      }).join("");
+
+      const rect = event.currentTarget.getBoundingClientRect();
+      pop.style.top = Math.min(window.innerHeight - 320, rect.bottom + 6) + "px";
+      pop.style.left = Math.min(window.innerWidth - 270, Math.max(10, rect.left - 100)) + "px";
+      pop.classList.remove("hidden");
+    }
+
+    function filterExcelUniqueList() {
+      const q = document.getElementById("excelFilterSearch").value.toLowerCase();
+      document.querySelectorAll(".excel-val-row").forEach(row => row.classList.toggle("hidden", !row.dataset.val.includes(q)));
+    }
+
+    function toggleExcelSelectAll(checked) {
+      document.querySelectorAll(".excel-val-chk").forEach(cb => {
+        if (!cb.closest(".excel-val-row").classList.contains("hidden")) cb.checked = checked;
       });
     }
 
-    function toggleColPopupAll(state) {
-      document.querySelectorAll("#colFilterList input[type='checkbox']").forEach(chk => chk.checked = state);
-    }
-
-    function applySingleColFilter() {
-      const checked = [...document.querySelectorAll("#colFilterList input:checked")].map(i => i.value);
-      columnFilters[activePopupCol] = new Set(checked);
-      const btn = document.getElementById(`fbtn_${activePopupCol}`);
-      if (btn) btn.classList.add("active-filter");
-      closeColFilter();
+    function applyExcelColumnFilter() {
+      const checkedVals = new Set();
+      document.querySelectorAll(".excel-val-chk:checked").forEach(cb => checkedVals.add(cb.value));
+      activeColumnFilters[currentPopupDataset][currentPopupCol] = checkedVals;
+      closeExcelFilterMenu();
       currentPage = 1;
-      applyAllFiltersAndRender();
+      if (currentPopupDataset === "clashes") applyFilters(); else applyVpFilters();
     }
 
-    function resetSingleColFilter() {
-      delete columnFilters[activePopupCol];
-      const btn = document.getElementById(`fbtn_${activePopupCol}`);
-      if (btn) btn.classList.remove("active-filter");
-      closeColFilter();
-      currentPage = 1;
-      applyAllFiltersAndRender();
+    function clearSingleColumnFilter() {
+      delete activeColumnFilters[currentPopupDataset][currentPopupCol];
+      closeExcelFilterMenu();
+      if (currentPopupDataset === "clashes") applyFilters(); else applyVpFilters();
     }
 
-    function closeColFilter() {
-      document.getElementById("colFilterPopup").classList.add("hidden");
+    function clearAllColumnFilters() {
+      activeColumnFilters = { clashes: {}, viewpoints: {} };
+      document.getElementById("filterRound").value = "ALL";
+      document.getElementById("filterAssigned").value = "ALL";
+      document.getElementById("filterNavisStatus").value = "ALL";
+      document.getElementById("filterTeamResponse").value = "ALL";
+      document.getElementById("filterVpFolder").value = "ALL";
+      document.getElementById("filterVpStatus").value = "ALL";
+      document.getElementById("globalSearchInput").value = "";
+      applyFilters();
+      applyVpFilters();
     }
 
-    function resetAllFilters() {
-      document.getElementById("fltRound").value = "ALL";
-      document.getElementById("fltDiscipline").value = "ALL";
-      document.getElementById("fltBimStatus").value = "ALL";
-      document.getElementById("fltTeamStatus").value = "ALL";
-      document.getElementById("txtGlobalSearch").value = "";
-      columnFilters = {};
-      document.querySelectorAll(".col-filter-btn").forEach(b => b.classList.remove("active-filter"));
-      currentPage = 1;
-      applyAllFiltersAndRender();
+    function sortColumn(dir) {
+      activeSort = { dataset: currentPopupDataset, field: currentPopupCol, dir };
+      closeExcelFilterMenu();
+      if (currentPopupDataset === "clashes") applyFilters(); else applyVpFilters();
     }
 
-    function switchHubTab(tab) {
-      currentTab = tab;
-      document.getElementById("tblClashes").classList.toggle("hidden", tab !== "clashes");
-      document.getElementById("tblViewpoints").classList.toggle("hidden", tab !== "viewpoints");
-
-      document.getElementById("btnTabClashes").className = tab === "clashes"
-        ? "flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-bold bg-blue-600 text-white shadow transition"
-        : "flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-bold text-slate-400 hover:text-white transition";
-
-      document.getElementById("btnTabViewpoints").className = tab === "viewpoints"
-        ? "flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-bold bg-blue-600 text-white shadow transition"
-        : "flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-bold text-slate-400 hover:text-white transition";
-
-      renderMainTable();
+    function closeExcelFilterMenu() {
+      document.getElementById("excelFilterPopover").classList.add("hidden");
     }
 
-    function toggleAnalyticsSection() {
-      const sec = document.getElementById("analyticsSection");
-      const hidden = sec.classList.toggle("hidden");
-      document.getElementById("analyticsArrow").textContent = hidden ? "▼" : "▲";
+    function toggleNotificationsPanel() {
+      document.getElementById("notifDropdown").classList.toggle("hidden");
     }
 
-    function toggleAutoSync() {
-      isAutoSyncOn = !isAutoSyncOn;
-      document.getElementById("syncStateText").textContent = isAutoSyncOn ? "Sync: ON" : "Sync: OFF";
-      if (isAutoSyncOn) fetchAllCloudData(false);
+    function updateNotificationsList() {
+      const alerts = [];
+      filteredClashes.forEach(c => {
+        if (c.navis_status === "Rejected" || c.review_decision === "Rejected") {
+          alerts.push({ tab: "clashes", key: c.round_guid, title: "⚠️ Rejected by BIM: " + c.clash_name, sub: "Requires immediate fix in Revit" });
+        }
+        let msgs = [];
+        try { msgs = JSON.parse(c.comments_json || "[]"); } catch {}
+        msgs.forEach(m => {
+          if (m.text && m.text.includes("@")) alerts.push({ tab: "clashes", key: c.round_guid, title: `${m.author} in ${c.clash_name}`, sub: m.text });
+        });
+      });
+      document.getElementById("notifBadge").textContent = alerts.length;
+      document.getElementById("notifItemsList").innerHTML = alerts.length === 0
+        ? `<div class="p-4 text-xs text-slate-400 text-center">No @Mentions or alerts yet.</div>`
+        : alerts.map(a => `<div onclick="jumpToNotificationRow('${a.tab}', '${escapeHtml(a.key)}')" class="p-2.5 hover:bg-slate-800 cursor-pointer"><div class="text-xs font-bold text-sky-300">${escapeHtml(a.title)}</div><div class="text-[11px] text-slate-300">${escapeHtml(a.sub)}</div></div>`).join("");
     }
 
-    function onPageSizeChange() {
-      pageSize = parseInt(document.getElementById("cmbPageSize").value, 10) || 100;
-      currentPage = 1;
-      renderMainTable();
+    function jumpToNotificationRow(tab, rowKey) {
+      document.getElementById("notifDropdown").classList.add("hidden");
+      switchMainTab(tab);
+      const targetClash = allClashes.find(c => c.round_guid === rowKey);
+      if (targetClash && targetClash.parent_group_guid) {
+        collapsedGroups.delete(targetClash.parent_group_guid);
+        renderClashesTable();
+      }
+      setTimeout(() => {
+        const el = document.getElementById("row_" + rowKey);
+        if (el) { el.scrollIntoView({ behavior: "smooth", block: "center" }); el.classList.add("row-highlight-flash"); }
+      }, 150);
     }
 
-    function changePage(delta) {
-      currentPage = Math.max(1, currentPage + delta);
-      renderMainTable();
+    function updateKPIsAndCharts() {
+      const leafClashes = filteredClashes.filter(c => !c.is_group_header);
+      const kpiSource = leafClashes.length > 0 ? leafClashes : filteredClashes;
+
+      document.getElementById("kpiTotal").textContent = kpiSource.length;
+      document.getElementById("kpiGroupsSub").textContent = filteredClashes.filter(c => c.is_group_header).length + " Clash Groups";
+      document.getElementById("kpiActive").textContent = kpiSource.filter(c => c.navis_status === "Active" || c.navis_status === "New").length;
+      document.getElementById("kpiFixedRevit").textContent = kpiSource.filter(c => c.team_response === "Fixed in Revit (Pending NWC)").length;
+      document.getElementById("kpiApprovalReq").textContent = kpiSource.filter(c => c.team_response === "Request Approval (Valid Exception)" || c.team_response === "On Hold / RFI Pending").length;
+      document.getElementById("kpiRejected").textContent = kpiSource.filter(c => c.navis_status === "Rejected" || c.review_decision === "Rejected").length;
+      document.getElementById("kpiResolved").textContent = kpiSource.filter(c => c.navis_status === "Resolved" || c.navis_status === "Approved").length;
+
+      if (typeof Chart === "undefined") return;
+
+      const navisCounts = countByField(kpiSource, "navis_status");
+      if (chartNavis) chartNavis.destroy();
+      chartNavis = new Chart(document.getElementById("chartNavisStatus"), {
+        type: "doughnut",
+        data: { labels: Object.keys(navisCounts), datasets: [{ data: Object.values(navisCounts), backgroundColor: ["#f43f5e", "#f97316", "#eab308", "#0ea5e9", "#10b981", "#e11d48"], borderWidth: 0 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "right", labels: { color: "#cbd5e1", boxWidth: 10, font: { size: 9 } } } } }
+      });
+
+      const respCounts = {};
+      TEAM_UNIFIED_STATUSES.forEach(s => respCounts[s] = 0);
+      kpiSource.forEach(c => { respCounts[c.team_response] = (respCounts[c.team_response] || 0) + 1; });
+
+      if (chartTeam) chartTeam.destroy();
+      chartTeam = new Chart(document.getElementById("chartTeamResponse"), {
+        type: "doughnut",
+        data: { labels: Object.keys(respCounts), datasets: [{ data: Object.values(respCounts), backgroundColor: ["#64748b", "#0ea5e9", "#10b981", "#f59e0b", "#8b5cf6"], borderWidth: 0 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "right", labels: { color: "#cbd5e1", boxWidth: 10, font: { size: 9 } } } } }
+      });
+
+      const discCounts = countByField(kpiSource, "assigned_to");
+      if (chartDisc) chartDisc.destroy();
+      chartDisc = new Chart(document.getElementById("chartDiscipline"), {
+        type: "bar",
+        data: { labels: Object.keys(discCounts), datasets: [{ data: Object.values(discCounts), backgroundColor: "#0ea5e9", borderRadius: 4 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+      });
+
+      const roundCounts = countByField(kpiSource, "round");
+      if (chartRound) chartRound.destroy();
+      chartRound = new Chart(document.getElementById("chartRounds"), {
+        type: "bar",
+        data: { labels: Object.keys(roundCounts).map(r => "R-" + r), datasets: [{ data: Object.values(roundCounts), backgroundColor: "#14b8a6", borderRadius: 4 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+      });
     }
 
-    function openTeamModal() {
-      const fProj = document.getElementById("fltProject").value;
-      const list = fProj === "ALL" ? projectMembers : projectMembers.filter(m => m.project_name === fProj);
-      const body = document.getElementById("teamModalBody");
-      body.innerHTML = list.length
-        ? list.map(m => `
-            <div class="py-2.5 flex items-center justify-between">
-              <div>
-                <div class="font-bold text-white">${escapeHtml(m.member_name)}</div>
-                <div class="text-[11px] text-slate-400">${escapeHtml(m.email)}</div>
-              </div>
-              <div class="flex items-center gap-2">
-                <span class="px-2 py-0.5 rounded bg-slate-800 text-sky-300 font-bold">${escapeHtml(m.discipline_team)}</span>
-                <span class="px-2 py-0.5 rounded bg-amber-950/80 text-amber-400 border border-amber-700/60 font-bold">${escapeHtml(m.role)} 🔒</span>
-              </div>
-            </div>`).join("")
-        : `<div class="py-6 text-center text-slate-500">No team members synced for this project yet.</div>`;
-      document.getElementById("teamModal").classList.remove("hidden");
+    function countByField(arr, field) {
+      const map = {};
+      arr.forEach(item => { const k = item[field] || "Unspecified"; map[k] = (map[k] || 0) + 1; });
+      return map;
     }
 
-    function closeTeamModal() { document.getElementById("teamModal").classList.add("hidden"); }
-
-    function toggleNotificationsDrawer() {
-      const qBox = document.getElementById("txtGlobalSearch");
-      qBox.value = qBox.value === "@" ? "" : "@";
-      onSearchInput();
+    function openExportModal() {
+      document.getElementById("expModule").value = currentTab;
+      document.getElementById("exportModal").classList.remove("hidden");
     }
 
-    function openSnapshotModal(src, title) {
-      document.getElementById("snapshotModalImg").src = src;
-      document.getElementById("snapshotModalTitle").textContent = title || "3D Coordination Snapshot";
-      document.getElementById("snapshotModal").classList.remove("hidden");
+    function closeExportModal() {
+      document.getElementById("exportModal").classList.add("hidden");
     }
 
-    function closeSnapshotModal() { document.getElementById("snapshotModal").classList.add("hidden"); }
-
-    function toggleFullScreen() {
-      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
-      else document.exitFullscreen();
+    function getExportDataset(moduleName, scope) {
+      if (moduleName === "viewpoints") {
+        let base = scope === "current_filtered" ? [...filteredViewpoints] : [...allViewpoints];
+        if (scope === "only_active") base = base.filter(v => normalizeTeamStatus(v.status) === "Pending Action");
+        if (scope === "only_fixed_revit") base = base.filter(v => v.status === "Fixed in Revit (Pending NWC)");
+        return base;
+      } else {
+        let base = scope === "current_filtered" ? [...filteredClashes] : [...allClashes];
+        if (scope === "only_active") base = base.filter(c => c.navis_status === "Active" || c.navis_status === "New");
+        if (scope === "only_fixed_revit") base = base.filter(c => c.team_response === "Fixed in Revit (Pending NWC)");
+        if (scope === "only_approval") base = base.filter(c => c.team_response === "Request Approval (Valid Exception)" || c.team_response === "On Hold / RFI Pending");
+        if (scope === "only_resolved") base = base.filter(c => c.navis_status === "Resolved" || c.navis_status === "Approved");
+        return base;
+      }
     }
 
-    function exportFilteredCsv() {
-      const rows = currentTab === "clashes" ? filteredClashes : filteredViewpoints;
-      if (!rows.length) return;
-      const keys = Object.keys(rows[0]).filter(k => k !== "image_base64");
-      const csv = [keys.join(","), ...rows.map(r => keys.map(k => `"${String(r[k] ?? "").replace(/"/g, '""')}"`).join(","))].join("\n");
-      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = `ACC_BIM_Hub_${currentTab}.csv`;
-      a.click();
+    function executeExport(format) {
+      const moduleName = document.getElementById("expModule").value;
+      const scope = document.getElementById("expScope").value;
+      const splitMode = document.getElementById("expSplitMode").value;
+      closeExportModal();
+
+      const data = getExportDataset(moduleName, scope);
+      if (data.length === 0) { showToast("No records match the selected export filter.", "amber"); return; }
+      const groupKeyField = moduleName === "clashes" ? "assigned_to" : "folder_name";
+
+      if (format === "excel") {
+        if (typeof XLSX === "undefined") { showToast("Excel library loading...", "amber"); return; }
+        const wb = XLSX.utils.book_new();
+        const buildSheet = (rows) => {
+          const headers = ["Round", "Project", "Clash Test", "Clash / Group", "Discipline", "Element A", "ID A", "File A", "Element B", "ID B", "File B", "Level", "Distance", "BIM Status", "Team Status"];
+          const aoa = [headers, ...rows.map(r => ["R-" + r.round, r.project_name, r.test_name, r.clash_name, r.assigned_to, r.item_a_name, r.item_a_id, r.item_a_file, r.item_b_name, r.item_b_id, r.item_b_file, r.level_grid, r.distance, r.navis_status, r.team_response])];
+          return XLSX.utils.aoa_to_sheet(aoa);
+        };
+        if (splitMode === "split_by_group") {
+          const groups = {};
+          data.forEach(d => { const k = d[groupKeyField] || "Other"; (groups[k] = groups[k] || []).push(d); });
+          Object.entries(groups).forEach(([k, rows]) => XLSX.utils.book_append_sheet(wb, buildSheet(rows), k.slice(0, 28)));
+        } else {
+          XLSX.utils.book_append_sheet(wb, buildSheet(data), "BIM_Report");
+        }
+        XLSX.writeFile(wb, `ACC_BIM_${lockedProjectName || 'Master'}_${new Date().toISOString().slice(0, 10)}.xlsx`);
+      } else if (format === "pdf" || format === "html") {
+        const htmlDoc = buildCleanReportHtmlDocument(data, moduleName, lockedProjectName || "Master");
+        if (format === "html") {
+          const blob = new Blob([htmlDoc], { type: "text/html;charset=utf-8" });
+          const a = document.createElement("a");
+          a.href = URL.createObjectURL(blob);
+          a.download = `ACC_BIM_${lockedProjectName || 'Report'}.html`;
+          a.click();
+        } else {
+          const w = window.open("", "_blank");
+          if (w) { w.document.write(htmlDoc); w.document.close(); setTimeout(() => w.print(), 500); }
+        }
+      }
     }
 
-    function escapeHtml(s) {
-      return String(s ?? "").replace(/[&<>"']/g, m => ({ "&": "&", "<": "<", ">": ">", '"': """, "'": "'" }[m]));
+    function buildCleanReportHtmlDocument(data, moduleName, reportTitle) {
+      const rowsHtml = data.map(r => `<tr>
+        <td><b>R-${escapeHtml(r.round || "01")}</b></td>
+        <td>${escapeHtml(r.test_name || "-")}</td>
+        <td><b>${escapeHtml(r.clash_name || r.description || "-")}</b></td>
+        <td>${escapeHtml(r.assigned_to || r.folder_name || "-")}</td>
+        <td>A: ${escapeHtml(r.item_a_name || "")} [${escapeHtml(r.item_a_id)}] (${escapeHtml(r.item_a_file)})<br>B: ${escapeHtml(r.item_b_name || "")} [${escapeHtml(r.item_b_id)}] (${escapeHtml(r.item_b_file)})</td>
+        <td><b>${escapeHtml(r.navis_status || "Active")}</b></td>
+        <td><b>${escapeHtml(r.team_response || r.status || "Pending Action")}</b></td>
+      </tr>`).join("");
+      return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>ACC Report</title><style>body{font-family:'Segoe UI',sans-serif;margin:20px}table{width:100%;border-collapse:collapse;font-size:11px}th,td{border:1px solid #cbd5e1;padding:6px;text-align:left}th{background:#0d2763;color:#fff}</style></head><body><div style="display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid #008529;padding-bottom:10px;margin-bottom:15px"><h2>ACC Enterprise BIM Report — ${escapeHtml(reportTitle)}</h2>${ACC_SVG_RAW}</div><table><thead><tr><th>Round</th><th>Test</th><th>Clash / Item</th><th>Discipline</th><th>Elements & NWC</th><th>BIM Status</th><th>Team Status</th></tr></thead><tbody>${rowsHtml}</tbody></table></body></html>`;
     }
-    function escapeAttr(s) { return escapeHtml(s); }
+
+    function changePageSize(val) { pageSize = parseInt(val, 10) || 100; currentPage = 1; renderClashesTable(); }
+    function changePage(delta) { currentPage = Math.max(1, currentPage + delta); renderClashesTable(); }
+    function showModal(src, caption = "") {
+      document.getElementById("modalImg").src = src;
+      document.getElementById("modalCaption").textContent = caption;
+      document.getElementById("imgModal").classList.remove("hidden");
+    }
+    function showToast(msg, color = "sky") {
+      const t = document.getElementById("toastAlert");
+      t.textContent = msg;
+      t.className = `fixed bottom-5 right-5 bg-slate-900 border-2 border-${color}-500 text-white px-4 py-3 rounded-xl shadow-2xl z-50 text-xs font-semibold max-w-md`;
+      t.classList.remove("hidden");
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => t.classList.add("hidden"), 4500);
+    }
+
+    // FIXED SYNTAX ERROR: Safe HTML escaping using hex character codes so copy/paste never breaks quotes
+    function escapeHtml(str) {
+      return String(str ?? "")
+        .replace(/&/g, "&")
+        .replace(/</g, "<")
+        .replace(/>/g, ">")
+        .replace(/\x22/g, """)
+        .replace(/\x27/g, "'");
+    }
+
+    // INITIALIZATION
+    (async function initHub() {
+      const params = new URLSearchParams(window.location.search);
+      const qProject = params.get("project");
+      const qRound = params.get("round");
+      const qTab = params.get("tab");
+
+      if (qProject) {
+        lockedProjectName = qProject;
+        document.getElementById("projectBadge").textContent = "🔒 NWF: " + qProject;
+      } else {
+        document.getElementById("projectBadge").textContent = "All Projects";
+      }
+
+      const hasVerifiedUser = resolveUserIdentityFromUrlOrStorage();
+      await reloadAllCloudData(qProject, qRound, false);
+
+      if (!hasVerifiedUser) {
+        promptIdentityVerificationModal();
+      }
+
+      if (qTab === "viewpoints") switchMainTab("viewpoints");
+      startAutoSyncLoop();
+
+      document.addEventListener("click", (e) => {
+        const pop = document.getElementById("excelFilterPopover");
+        if (pop && !pop.classList.contains("hidden") && !pop.contains(e.target) && !e.target.closest("button")) closeExcelFilterMenu();
+        const mentionPop = document.getElementById("mentionAutocompletePopup");
+        if (mentionPop && !mentionPop.classList.contains("hidden") && !mentionPop.contains(e.target)) mentionPop.classList.add("hidden");
+      });
+    })();
   </script>
 </body>
 </html>
