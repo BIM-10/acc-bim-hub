@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ACC Enterprise BIM Coordination Hub</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
       background-color: #070b12;
@@ -15,123 +16,182 @@
     ::-webkit-scrollbar-track { background: #070b12; }
     ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
     ::-webkit-scrollbar-thumb:hover { background: #334155; }
-    .tab-active {
-      background: linear-gradient(180deg, rgba(14,116,144,0.45) 0%, rgba(13,21,38,0.95) 100%);
-      border-top: 3px solid #38bdf8;
+    .tab-pill-active {
+      background: linear-gradient(135deg, #0284c7 0%, #0d9488 100%);
       color: #ffffff;
+      box-shadow: 0 0 14px rgba(56, 189, 248, 0.35);
     }
-    .tab-inactive {
+    .tab-pill-inactive {
       background-color: #0d1526;
-      border-top: 3px solid transparent;
       color: #94a3b8;
+      border: 1px solid #1e293b;
     }
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
-  <!-- TOP GLOBAL HEADER -->
-  <header class="bg-[#0d1526] border-b border-slate-800 px-6 py-3 sticky top-0 z-40 shadow-xl">
-    <div class="max-w-[1900px] mx-auto flex flex-wrap items-center justify-between gap-4">
-      <!-- Left: Brand Logo & Project Badge -->
+  <!-- ROW 1: ORIGINAL ACC TOP NAVBAR (ACC Logo on Left + Controls & Icons on Same Row) -->
+  <header class="bg-[#0d1526] border-b border-slate-800 px-5 py-2.5 sticky top-0 z-40 shadow-2xl">
+    <div class="max-w-[1920px] mx-auto flex flex-wrap items-center justify-between gap-3">
+      
+      <!-- Left: Official ACC Corporate Identity + Triad Icon -->
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-lg bg-[#070b12] border border-slate-800 flex items-center justify-center">
-          <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
-            <line x1="16" y1="6" x2="6" y2="25" stroke="#14b8a6" stroke-width="2.5"/>
-            <line x1="16" y1="6" x2="26" y2="25" stroke="#14b8a6" stroke-width="2.5"/>
-            <line x1="6" y1="25" x2="26" y2="25" stroke="#14b8a6" stroke-width="2.5"/>
-            <circle cx="16" cy="6" r="3.5" fill="#38bdf8"/>
-            <circle cx="6" cy="25" r="3.5" fill="#38bdf8"/>
-            <circle cx="26" cy="25" r="3.5" fill="#38bdf8"/>
-          </svg>
+        <div class="flex items-center bg-white rounded-lg px-2.5 py-1 shadow border border-slate-300">
+          <span class="text-[#0d2763] font-black text-xl tracking-tighter leading-none">ACC</span>
+          <div class="w-[2px] h-5 bg-[#008529] mx-2"></div>
+          <div class="text-[8px] font-bold text-[#0d2763] leading-tight uppercase">
+            Advanced<br/>Consultancy<br/>Center
+          </div>
         </div>
-        <div>
-          <h1 class="text-base font-bold text-white tracking-wide">ACC BIM Coordination Hub</h1>
-          <div class="flex items-center gap-2 text-xs text-sky-400 font-semibold">
-            <span>Project:</span>
-            <select id="projectSelector" onchange="onProjectOrRoundChange()" class="bg-[#070b12] border border-slate-700 text-sky-300 rounded px-2 py-0.5 text-xs focus:outline-none focus:border-sky-500"></select>
-            <span class="text-slate-600">|</span>
-            <span>Round:</span>
-            <select id="roundSelector" onchange="onProjectOrRoundChange()" class="bg-[#070b12] border border-slate-700 text-teal-300 rounded px-2 py-0.5 text-xs focus:outline-none focus:border-teal-500">
-              <option value="ALL">ALL</option>
-              <option value="1">R-1</option>
-              <option value="2">R-2</option>
-              <option value="3">R-3</option>
-              <option value="4">R-4</option>
-              <option value="5">R-5</option>
-            </select>
+
+        <div class="flex items-center gap-2">
+          <svg width="26" height="26" viewBox="0 0 32 32" fill="none">
+            <line x1="16" y1="5" x2="5" y2="26" stroke="#14b8a6" stroke-width="2.5"/>
+            <line x1="16" y1="5" x2="27" y2="26" stroke="#14b8a6" stroke-width="2.5"/>
+            <line x1="5" y1="26" x2="27" y2="26" stroke="#14b8a6" stroke-width="2.5"/>
+            <circle cx="16" cy="5" r="3.5" fill="#38bdf8"/>
+            <circle cx="5" cy="26" r="3.5" fill="#38bdf8"/>
+            <circle cx="27" cy="26" r="3.5" fill="#38bdf8"/>
+          </svg>
+          <div>
+            <div class="text-sm font-bold text-white leading-tight">BIM Coordination Hub</div>
+            <div class="text-[10px] text-sky-400 font-semibold">ISO 19650 Closed-Loop NWF ↔ Cloud ↔ Revit</div>
           </div>
         </div>
       </div>
 
-      <!-- Right: Locked User Identity & Revit Bridge Indicator -->
-      <div class="flex items-center gap-3">
-        <div id="revitBridgeBadge" class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#070b12] border border-slate-800 text-xs">
-          <span id="bridgeDot" class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
-          <span id="bridgeText" class="text-slate-300 font-medium">Revit Bridge: Ready</span>
+      <!-- Center: Project & Round Selectors + Main View Switcher on Same Row -->
+      <div class="flex flex-wrap items-center gap-2">
+        <div class="flex items-center gap-1.5 bg-[#070b12] border border-slate-700 rounded-lg px-2.5 py-1 text-xs">
+          <span class="text-slate-400 font-semibold">Project:</span>
+          <select id="projectSelector" onchange="onProjectOrRoundChange()" class="bg-transparent text-sky-300 font-bold focus:outline-none"></select>
         </div>
 
-        <div class="flex items-center gap-2 bg-[#070b12] border border-slate-700 rounded-lg px-3 py-1.5 text-xs">
-          <span class="text-slate-400">User:</span>
+        <div class="flex items-center gap-1.5 bg-[#070b12] border border-slate-700 rounded-lg px-2.5 py-1 text-xs">
+          <span class="text-slate-400 font-semibold">Round:</span>
+          <select id="roundSelector" onchange="onProjectOrRoundChange()" class="bg-transparent text-teal-300 font-bold focus:outline-none">
+            <option value="ALL">ALL</option>
+            <option value="1">Round 1</option>
+            <option value="2">Round 2</option>
+            <option value="3">Round 3</option>
+            <option value="4">Round 4</option>
+            <option value="5">Round 5</option>
+          </select>
+        </div>
+
+        <button id="tabBtnClashes" onclick="switchMainTab('clashes')" class="tab-pill-active px-3.5 py-1.5 rounded-lg text-xs font-bold transition">
+          Tests / Clashes (<span id="countClashesTab">0</span>)
+        </button>
+        <button id="tabBtnViewpoints" onclick="switchMainTab('viewpoints')" class="tab-pill-inactive px-3.5 py-1.5 rounded-lg text-xs font-bold transition">
+          Viewpoints (<span id="countViewpointsTab">0</span>)
+        </button>
+      </div>
+
+      <!-- Right: Locked User Identity + Revit Live Bridge Status + Sync & Export -->
+      <div class="flex flex-wrap items-center gap-2">
+        <div id="revitBridgeBadge" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#070b12] border border-slate-800 text-xs">
+          <span id="bridgeDot" class="w-2 h-2 rounded-full bg-emerald-400"></span>
+          <span id="bridgeText" class="text-slate-300 font-medium">Revit Bridge</span>
+        </div>
+
+        <div class="flex items-center gap-1.5 bg-[#070b12] border border-slate-700 rounded-lg px-2.5 py-1 text-xs" title="Your Role is strictly locked by your registered ACC BIM Profile">
           <span id="lockedUserName" class="font-bold text-white">Engineer</span>
           <span class="text-slate-600">|</span>
-          <span class="text-slate-400">Locked Role:</span>
-          <select id="userRoleSelect" disabled class="bg-slate-900 text-sky-300 font-bold px-2 py-0.5 rounded border border-slate-700 opacity-85 cursor-not-allowed" title="Role is strictly locked by your registered ACC BIM Profile">
+          <select id="userRoleSelect" disabled class="bg-slate-900 text-sky-300 font-bold px-1.5 py-0.5 rounded border border-slate-700 opacity-90 cursor-not-allowed">
             <option value="BIM Coordinator">BIM Coordinator</option>
             <option value="Lead">Lead</option>
             <option value="Engineer">Engineer</option>
           </select>
-          <span class="text-teal-400 font-bold" title="Role Locked">🔒</span>
+          <span class="text-teal-400 text-[11px]">🔒</span>
         </div>
 
-        <button onclick="refreshCloudData()" class="bg-sky-600 hover:bg-sky-500 text-white font-semibold text-xs px-3.5 py-2 rounded-lg transition shadow">
-          Refresh Data
+        <button onclick="refreshCloudData()" class="bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs px-3 py-1.5 rounded-lg transition">
+          Sync Cloud
+        </button>
+        <button onclick="exportCurrentTableCsv()" class="bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 font-bold text-xs px-3 py-1.5 rounded-lg transition">
+          Export CSV
         </button>
       </div>
+
     </div>
   </header>
 
-  <!-- MAIN WORKSPACE CONTAINER -->
-  <div class="max-w-[1900px] w-full mx-auto px-6 py-4 flex-1 flex flex-col gap-4">
+  <!-- MAIN CONTENT -->
+  <div class="max-w-[1920px] w-full mx-auto px-5 py-4 flex-1 flex flex-col gap-4">
 
-    <!-- KPI SUMMARY CARDS & TAB SWITCHER -->
-    <div class="flex flex-wrap items-center justify-between gap-4">
-      <!-- Illuminated Tab Buttons -->
-      <div class="flex items-center gap-1 bg-[#0d1526] p-1 rounded-lg border border-slate-800">
-        <button id="tabBtnClashes" onclick="switchMainTab('clashes')" class="tab-active px-5 py-2 rounded-md text-xs font-bold transition">
-          1. Clashes Matrix (<span id="countClashesTab">0</span>)
-        </button>
-        <button id="tabBtnViewpoints" onclick="switchMainTab('viewpoints')" class="tab-inactive px-5 py-2 rounded-md text-xs font-bold transition">
-          2. Saved Viewpoints (<span id="countViewpointsTab">0</span>)
-        </button>
+    <!-- ROW 2: KPI SUMMARY CARDS -->
+    <div class="grid grid-cols-2 md:grid-cols-6 gap-3">
+      <div class="bg-[#0d1526] border border-slate-800 rounded-xl p-3">
+        <div class="text-[11px] text-slate-400 font-semibold uppercase">Total Clashes</div>
+        <div id="kpiTotalClashes" class="text-2xl font-black text-white mt-0.5">0</div>
       </div>
-
-      <!-- Group Collapse / Expand & Search Controls -->
-      <div class="flex flex-wrap items-center gap-2">
-        <button onclick="toggleAllWebGroups(true)" class="bg-[#0d1526] hover:bg-slate-800 border border-slate-700 text-slate-200 text-xs font-semibold px-3 py-1.5 rounded-lg">
-          ▼ Expand Groups
-        </button>
-        <button onclick="toggleAllWebGroups(false)" class="bg-[#0d1526] hover:bg-slate-800 border border-slate-700 text-slate-200 text-xs font-semibold px-3 py-1.5 rounded-lg">
-          ▶ Collapse Groups
-        </button>
-        <button onclick="clearAllColumnFilters()" class="bg-[#0d1526] hover:bg-slate-800 border border-slate-700 text-sky-400 text-xs font-semibold px-3 py-1.5 rounded-lg">
-          Reset Filters
-        </button>
-        <input id="globalSearchInput" type="text" oninput="renderActiveTable()" placeholder="Search clash, element ID, discipline..." class="bg-[#0d1526] border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white w-64 focus:outline-none focus:border-sky-500" />
+      <div class="bg-[#0d1526] border border-slate-800 rounded-xl p-3">
+        <div class="text-[11px] text-sky-400 font-semibold uppercase">Clash Groups</div>
+        <div id="kpiClashGroups" class="text-2xl font-black text-sky-300 mt-0.5">0</div>
+      </div>
+      <div class="bg-[#0d1526] border border-slate-800 rounded-xl p-3">
+        <div class="text-[11px] text-rose-400 font-semibold uppercase">New / Active</div>
+        <div id="kpiActiveClashes" class="text-2xl font-black text-rose-400 mt-0.5">0</div>
+      </div>
+      <div class="bg-[#0d1526] border border-slate-800 rounded-xl p-3">
+        <div class="text-[11px] text-teal-400 font-semibold uppercase">Team Solved</div>
+        <div id="kpiTeamSolved" class="text-2xl font-black text-teal-300 mt-0.5">0</div>
+      </div>
+      <div class="bg-[#0d1526] border border-slate-800 rounded-xl p-3">
+        <div class="text-[11px] text-emerald-400 font-semibold uppercase">BIM Approved / Resolved</div>
+        <div id="kpiBimApproved" class="text-2xl font-black text-emerald-400 mt-0.5">0</div>
+      </div>
+      <div class="bg-[#0d1526] border border-slate-800 rounded-xl p-3">
+        <div class="text-[11px] text-amber-400 font-semibold uppercase">Saved Viewpoints</div>
+        <div id="kpiViewpoints" class="text-2xl font-black text-amber-300 mt-0.5">0</div>
       </div>
     </div>
 
-    <!-- CLASHES TABLE (Single-Line Compact Headers) -->
+    <!-- ROW 3: ANALYTICS CHARTS ROW (Original Professional Charts Design) -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div class="bg-[#0d1526] border border-slate-800 rounded-xl p-3.5 flex flex-col">
+        <div class="text-xs font-bold text-sky-300 mb-2">1. BIM Coordinator Status Breakdown</div>
+        <div class="h-44 relative"><canvas id="chartBimStatus"></canvas></div>
+      </div>
+      <div class="bg-[#0d1526] border border-slate-800 rounded-xl p-3.5 flex flex-col">
+        <div class="text-xs font-bold text-teal-300 mb-2">2. Engineering Team Response Progress</div>
+        <div class="h-44 relative"><canvas id="chartTeamStatus"></canvas></div>
+      </div>
+      <div class="bg-[#0d1526] border border-slate-800 rounded-xl p-3.5 flex flex-col">
+        <div class="text-xs font-bold text-slate-200 mb-2">3. Clashes Distribution by Discipline / Test</div>
+        <div class="h-44 relative"><canvas id="chartDiscipline"></canvas></div>
+      </div>
+    </div>
+
+    <!-- ROW 4: TABLE FILTER & HIERARCHY BAR -->
+    <div class="flex flex-wrap items-center justify-between gap-3 bg-[#0d1526] border border-slate-800 rounded-xl px-4 py-2.5">
+      <div class="flex flex-wrap items-center gap-2">
+        <button onclick="toggleAllWebTestsAndGroups(true)" class="bg-[#070b12] hover:bg-slate-800 border border-slate-700 text-sky-300 text-xs font-bold px-3 py-1.5 rounded-lg">
+          ▼ Expand All Tests &amp; Groups
+        </button>
+        <button onclick="toggleAllWebTestsAndGroups(false)" class="bg-[#070b12] hover:bg-slate-800 border border-slate-700 text-slate-300 text-xs font-bold px-3 py-1.5 rounded-lg">
+          ▶ Collapse All
+        </button>
+        <button onclick="clearAllColumnFilters()" class="bg-[#070b12] hover:bg-slate-800 border border-slate-700 text-teal-300 text-xs font-bold px-3 py-1.5 rounded-lg">
+          Reset Filters
+        </button>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <input id="globalSearchInput" type="text" oninput="renderActiveTable()" placeholder="Search test, clash, element ID, discipline..." class="bg-[#070b12] border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white w-72 focus:outline-none focus:border-sky-500" />
+      </div>
+    </div>
+
+    <!-- ROW 5: HIERARCHICAL CLASHES TABLE -->
     <div id="clashesTableContainer" class="bg-[#0d1526] border border-slate-800 rounded-xl shadow-2xl overflow-x-auto">
       <table class="w-full text-left border-collapse text-xs">
         <thead>
           <tr class="bg-[#0f2043] text-sky-300 border-b border-slate-700 uppercase text-[11px] font-bold tracking-wider select-none whitespace-nowrap">
-            <th class="p-2.5 w-8 text-center"><input type="checkbox" id="chkAllVisibleClashes" onclick="toggleSelectAllVisible(this)" /></th>
             <th class="p-2.5 w-24">Snapshot</th>
             <th class="p-2.5 w-20"><div class="flex items-center justify-between gap-1"><span>Round</span><button onclick="openExcelFilterMenu(event, 'round', 'clashes')" class="px-1 text-slate-300 hover:text-white">▾</button></div></th>
-            <th class="p-2.5 w-36"><div class="flex items-center justify-between gap-1"><span>Clash Test</span><button onclick="openExcelFilterMenu(event, 'test_name', 'clashes')" class="px-1 text-slate-300 hover:text-white">▾</button></div></th>
-            <th class="p-2.5 min-w-[170px]"><div class="flex items-center justify-between gap-1"><span>Clash Item</span><button onclick="openExcelFilterMenu(event, 'clash_name', 'clashes')" class="px-1 text-slate-300 hover:text-white">▾</button></div></th>
+            <th class="p-2.5 min-w-[230px]"><div class="flex items-center justify-between gap-1"><span>Test / Group / Clash (Click ▶)</span><button onclick="openExcelFilterMenu(event, 'test_name', 'clashes')" class="px-1 text-slate-300 hover:text-white">▾</button></div></th>
             <th class="p-2.5 w-28"><div class="flex items-center justify-between gap-1"><span>Discipline</span><button onclick="openExcelFilterMenu(event, 'assigned_to', 'clashes')" class="px-1 text-slate-300 hover:text-white">▾</button></div></th>
-            <th class="p-2.5 w-64"><div class="flex items-center justify-between gap-1"><span>Revit Elements</span><button onclick="openExcelFilterMenu(event, 'item_a_file', 'clashes')" class="px-1 text-slate-300 hover:text-white">▾</button></div></th>
+            <th class="p-2.5 w-64"><div class="flex items-center justify-between gap-1"><span>Revit Elements (3D Bridge)</span><button onclick="openExcelFilterMenu(event, 'item_a_file', 'clashes')" class="px-1 text-slate-300 hover:text-white">▾</button></div></th>
             <th class="p-2.5 w-28"><div class="flex items-center justify-between gap-1"><span>Level / Dist</span><button onclick="openExcelFilterMenu(event, 'level_grid', 'clashes')" class="px-1 text-slate-300 hover:text-white">▾</button></div></th>
             <th class="p-2.5 w-40 bg-sky-950/30 border-l border-r border-slate-700"><div class="flex items-center justify-between gap-1"><span class="text-sky-300">BIM Status</span><button onclick="openExcelFilterMenu(event, 'navis_status', 'clashes')" class="px-1 text-slate-300 hover:text-white">▾</button></div></th>
             <th class="p-2.5 w-44 bg-teal-950/30 border-r border-slate-700"><div class="flex items-center justify-between gap-1"><span class="text-teal-300">Team Status</span><button onclick="openExcelFilterMenu(event, 'team_response', 'clashes')" class="px-1 text-slate-300 hover:text-white">▾</button></div></th>
@@ -142,16 +202,15 @@
       </table>
     </div>
 
-    <!-- VIEWPOINTS TABLE (Single-Line Compact Headers) -->
+    <!-- VIEWPOINTS TABLE -->
     <div id="viewpointsTableContainer" class="hidden bg-[#0d1526] border border-slate-800 rounded-xl shadow-2xl overflow-x-auto">
       <table class="w-full text-left border-collapse text-xs">
         <thead>
           <tr class="bg-[#0f2043] text-sky-300 border-b border-slate-700 uppercase text-[11px] font-bold tracking-wider select-none whitespace-nowrap">
-            <th class="p-2.5 w-12"><div class="flex items-center justify-between gap-1"><span>#</span><button onclick="openExcelFilterMenu(event, 'sequence_num', 'viewpoints')" class="px-1 text-slate-300 hover:text-white">▾</button></div></th>
+            <th class="p-2.5 w-14">#</th>
             <th class="p-2.5 w-28">Snapshot</th>
-            <th class="p-2.5 w-40"><div class="flex items-center justify-between gap-1"><span>Folder</span><button onclick="openExcelFilterMenu(event, 'folder_name', 'viewpoints')" class="px-1 text-slate-300 hover:text-white">▾</button></div></th>
-            <th class="p-2.5 min-w-[170px]"><div class="flex items-center justify-between gap-1"><span>Viewpoint</span><button onclick="openExcelFilterMenu(event, 'description', 'viewpoints')" class="px-1 text-slate-300 hover:text-white">▾</button></div></th>
-            <th class="p-2.5 w-64"><div class="flex items-center justify-between gap-1"><span>Revit Elements</span><button onclick="openExcelFilterMenu(event, 'item_a_file', 'viewpoints')" class="px-1 text-slate-300 hover:text-white">▾</button></div></th>
+            <th class="p-2.5 min-w-[220px]"><div class="flex items-center justify-between gap-1"><span>Folder / Viewpoint (Click ▶)</span><button onclick="openExcelFilterMenu(event, 'description', 'viewpoints')" class="px-1 text-slate-300 hover:text-white">▾</button></div></th>
+            <th class="p-2.5 w-60"><div class="flex items-center justify-between gap-1"><span>Revit Elements</span><button onclick="openExcelFilterMenu(event, 'item_a_file', 'viewpoints')" class="px-1 text-slate-300 hover:text-white">▾</button></div></th>
             <th class="p-2.5 w-40 bg-sky-950/30 border-l border-r border-slate-700"><span class="text-sky-300">BIM Status</span></th>
             <th class="p-2.5 w-44 bg-teal-950/30 border-r border-slate-700"><div class="flex items-center justify-between gap-1"><span class="text-teal-300">Team Status</span><button onclick="openExcelFilterMenu(event, 'status', 'viewpoints')" class="px-1 text-slate-300 hover:text-white">▾</button></div></th>
             <th class="p-2.5 w-72">Discussion</th>
@@ -160,30 +219,31 @@
         <tbody id="viewpointsTableBody" class="divide-y divide-slate-800/70"></tbody>
       </table>
     </div>
+
   </div>
 
-  <!-- EXCEL FILTER POPUP MENU -->
+  <!-- EXCEL FILTER POPUP -->
   <div id="excelFilterPopup" class="hidden fixed z-50 bg-[#0d1526] border border-slate-700 rounded-xl shadow-2xl p-3 w-64 text-xs">
     <div class="font-bold text-sky-400 mb-2 flex items-center justify-between">
-      <span id="filterPopupTitle">Filter Column</span>
+      <span>Column Filter</span>
       <button onclick="closeExcelFilterMenu()" class="text-slate-400 hover:text-white">✕</button>
     </div>
-    <input id="filterPopupSearch" type="text" oninput="filterPopupChecklist()" placeholder="Search values..." class="w-full bg-[#070b12] border border-slate-700 rounded px-2 py-1 text-white mb-2 focus:outline-none" />
+    <input id="filterPopupSearch" type="text" oninput="filterPopupChecklist()" placeholder="Search..." class="w-full bg-[#070b12] border border-slate-700 rounded px-2 py-1 text-white mb-2 focus:outline-none" />
     <div id="filterPopupOptions" class="max-h-48 overflow-y-auto space-y-1 border-t border-b border-slate-800 py-2 my-1"></div>
     <div class="flex justify-end gap-2 mt-2">
-      <button onclick="clearCurrentColumnFilter()" class="px-2.5 py-1 rounded bg-slate-800 text-slate-300 hover:bg-slate-700">Clear</button>
-      <button onclick="applyCurrentColumnFilter()" class="px-3 py-1 rounded bg-sky-600 text-white font-semibold hover:bg-sky-500">Apply</button>
+      <button onclick="clearCurrentColumnFilter()" class="px-2.5 py-1 rounded bg-slate-800 text-slate-300">Clear</button>
+      <button onclick="applyCurrentColumnFilter()" class="px-3 py-1 rounded bg-sky-600 text-white font-semibold">Apply</button>
     </div>
   </div>
 
-  <!-- SNAPSHOT LIGHTBOX MODAL -->
+  <!-- SNAPSHOT LIGHTBOX -->
   <div id="snapshotModal" onclick="closeSnapshotModal()" class="hidden fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-6">
     <div onclick="event.stopPropagation()" class="bg-[#0d1526] border border-slate-700 rounded-xl p-4 max-w-3xl w-full shadow-2xl">
       <div class="flex items-center justify-between mb-3">
-        <h3 id="snapshotModalTitle" class="text-sm font-bold text-sky-400">3D Clash Snapshot</h3>
+        <h3 id="snapshotModalTitle" class="text-sm font-bold text-sky-400">3D Coordination Snapshot</h3>
         <button onclick="closeSnapshotModal()" class="text-slate-400 hover:text-white text-base font-bold">✕</button>
       </div>
-      <img id="snapshotModalImg" src="" alt="Snapshot" class="w-full rounded-lg border border-slate-800 max-h-[70vh] object-contain bg-black" />
+      <img id="snapshotModalImg" src="" alt="Snapshot" class="w-full rounded-lg border border-slate-800 max-h-[72vh] object-contain bg-black" />
     </div>
   </div>
 
@@ -197,12 +257,19 @@
     let currentRound = "ALL";
     let allClashes = [];
     let allViewpoints = [];
-    let expandedGroupGuids = new Set(); // Default: Collapsed (empty set)
+
+    let expandedWebTests = new Set();
+    let expandedGroupGuids = new Set();
+    let expandedVpFolders = new Set();
+
     let columnFilters = { clashes: {}, viewpoints: {} };
     let activeFilterCol = "";
     let activeFilterTable = "clashes";
 
-    // 1. Strict Locked User Profile & Role Initialization
+    let chartBimInstance = null;
+    let chartTeamInstance = null;
+    let chartDiscInstance = null;
+
     function initUserIdentityAndLockRole() {
       const params = new URLSearchParams(window.location.search);
       const urlProject = params.get("project");
@@ -214,12 +281,7 @@
       const urlDisc = params.get("udisc");
 
       if (urlName && urlRole) {
-        const lockedProfile = {
-          fullName: urlName,
-          role: urlRole,
-          email: urlEmail || "",
-          discipline: urlDisc || "ALL"
-        };
+        const lockedProfile = { fullName: urlName, role: urlRole, email: urlEmail || "", discipline: urlDisc || "ALL" };
         localStorage.setItem("acc_bim_locked_profile", JSON.stringify(lockedProfile));
       }
 
@@ -248,37 +310,39 @@
       return r === "BIM Coordinator" || r === "Lead";
     }
 
-    // 2. Fetch Projects & Cloud Data from Supabase
+    // Schema-Safe Project Discovery (checks both clashes and viewpoints tables without failing on missing columns)
     async function loadProjectsList() {
       try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/clashes?select=project_name`, {
-          headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` }
-        });
-        const data = await res.json();
-        const uniqueProjects = [...new Set((data || []).map(x => x.project_name).filter(Boolean))];
-        if (currentProject && !uniqueProjects.includes(currentProject)) {
-          uniqueProjects.unshift(currentProject);
-        }
+        const [cRes, vRes] = await Promise.all([
+          fetch(`${SUPABASE_URL}/rest/v1/clashes?select=project_name`, { headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` } }),
+          fetch(`${SUPABASE_URL}/rest/v1/viewpoints?select=project_name`, { headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` } })
+        ]);
+        const cData = cRes.ok ? await cRes.json() : [];
+        const vData = vRes.ok ? await vRes.json() : [];
+
+        const uniqueProjects = [...new Set([...cData, ...vData].map(x => x.project_name).filter(Boolean))];
+        if (currentProject && !uniqueProjects.includes(currentProject)) uniqueProjects.unshift(currentProject);
         if (uniqueProjects.length === 0) uniqueProjects.push("UNSPECIFIED_NWF");
-        if (!currentProject) currentProject = uniqueProjects[0];
+        if (!currentProject || !uniqueProjects.includes(currentProject)) currentProject = uniqueProjects[0];
 
         const sel = document.getElementById("projectSelector");
         sel.innerHTML = uniqueProjects.map(p => `<option value="${p}" ${p === currentProject ? "selected" : ""}>${p}</option>`).join("");
       } catch (e) {}
     }
 
+    // Schema-Safe Fetch (No order=sequence_num.asc in URL so it never returns HTTP 400 on existing Supabase tables)
     async function refreshCloudData() {
-      if (!currentProject) await loadProjectsList();
+      await loadProjectsList();
       currentProject = document.getElementById("projectSelector").value || currentProject;
       currentRound = document.getElementById("roundSelector").value || "ALL";
 
       try {
-        let clashUrl = `${SUPABASE_URL}/rest/v1/clashes?project_name=eq.${encodeURIComponent(currentProject)}&select=*&order=sequence_num.asc`;
+        let clashUrl = `${SUPABASE_URL}/rest/v1/clashes?project_name=eq.${encodeURIComponent(currentProject)}&select=*`;
         if (currentRound !== "ALL") clashUrl += `&round=eq.${encodeURIComponent(currentRound)}`;
 
         const [clashRes, vpRes] = await Promise.all([
           fetch(clashUrl, { headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` } }),
-          fetch(`${SUPABASE_URL}/rest/v1/viewpoints?project_name=eq.${encodeURIComponent(currentProject)}&select=*&order=sequence_num.asc`, {
+          fetch(`${SUPABASE_URL}/rest/v1/viewpoints?project_name=eq.${encodeURIComponent(currentProject)}&select=*`, {
             headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}` }
           })
         ]);
@@ -286,18 +350,125 @@
         allClashes = clashRes.ok ? await clashRes.json() : [];
         allViewpoints = vpRes.ok ? await vpRes.json() : [];
 
-        document.getElementById("countClashesTab").textContent = allClashes.length;
-        document.getElementById("countViewpointsTab").textContent = allViewpoints.length;
+        // Reconstruct ParentGroupGuid if table used legacy schema
+        const grpMap = {};
+        allClashes.filter(c => c.is_group_header).forEach(g => {
+          grpMap[`${g.test_name}::${g.group_name}`] = g.guid;
+        });
+        allClashes.forEach((c, idx) => {
+          if (!c.sequence_num) c.sequence_num = idx + 1;
+          if (!c.is_group_header && !c.parent_group_guid && c.group_name) {
+            c.parent_group_guid = grpMap[`${c.test_name}::${c.group_name}`] || "";
+          }
+        });
+        allClashes.sort((a, b) => (a.sequence_num || 0) - (b.sequence_num || 0));
+        allViewpoints.sort((a, b) => (a.sequence_num || 0) - (b.sequence_num || 0));
 
+        // Expand tests by default if there are few tests so user immediately sees data
+        if (expandedWebTests.size === 0 && allClashes.length > 0) {
+          allClashes.forEach(c => { if (c.test_name) expandedWebTests.add(c.test_name); });
+        }
+
+        updateKpisAndCharts();
         renderActiveTable();
       } catch (e) {
-        console.error("Failed fetching cloud data:", e);
+        console.error("Cloud fetch error:", e);
       }
+    }
+
+    function updateKpisAndCharts() {
+      const nonGroupClashes = allClashes.filter(c => !c.is_group_header);
+      const groupsCount = allClashes.filter(c => c.is_group_header).length;
+      const baseList = nonGroupClashes.length > 0 ? nonGroupClashes : allClashes;
+
+      const activeCnt = baseList.filter(c => ["new", "active"].includes(String(c.navis_status || "").toLowerCase())).length;
+      const solvedCnt = baseList.filter(c => String(c.team_response || "").toLowerCase().includes("solved")).length;
+      const approvedCnt = baseList.filter(c => ["approved", "resolved"].includes(String(c.navis_status || "").toLowerCase())).length;
+
+      document.getElementById("countClashesTab").textContent = baseList.length;
+      document.getElementById("countViewpointsTab").textContent = allViewpoints.length;
+
+      document.getElementById("kpiTotalClashes").textContent = baseList.length;
+      document.getElementById("kpiClashGroups").textContent = groupsCount;
+      document.getElementById("kpiActiveClashes").textContent = activeCnt;
+      document.getElementById("kpiTeamSolved").textContent = solvedCnt;
+      document.getElementById("kpiBimApproved").textContent = approvedCnt;
+      document.getElementById("kpiViewpoints").textContent = allViewpoints.length;
+
+      // 1. BIM Status Chart
+      const bimCounts = { New: 0, Active: 0, Reviewed: 0, Approved: 0, Resolved: 0 };
+      baseList.forEach(c => {
+        const st = Object.keys(bimCounts).find(k => k.toLowerCase() === String(c.navis_status || "").toLowerCase()) || "Active";
+        bimCounts[st]++;
+      });
+
+      if (chartBimInstance) chartBimInstance.destroy();
+      chartBimInstance = new Chart(document.getElementById("chartBimStatus"), {
+        type: "doughnut",
+        data: {
+          labels: Object.keys(bimCounts),
+          datasets: [{
+            data: Object.values(bimCounts),
+            backgroundColor: ["#f59e0b", "#ef4444", "#3b82f6", "#10b981", "#14b8a6"],
+            borderWidth: 0
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "right", labels: { color: "#cbd5e1", font: { size: 11 } } } } }
+      });
+
+      // 2. Team Status Chart
+      const teamCounts = { "Pending Action": 0, "Solved / Fixed": 0, "Not Our Scope": 0, "Need Workshop": 0 };
+      baseList.forEach(c => {
+        const st = Object.keys(teamCounts).find(k => k.toLowerCase() === String(c.team_response || "").toLowerCase()) || "Pending Action";
+        teamCounts[st]++;
+      });
+
+      if (chartTeamInstance) chartTeamInstance.destroy();
+      chartTeamInstance = new Chart(document.getElementById("chartTeamStatus"), {
+        type: "doughnut",
+        data: {
+          labels: Object.keys(teamCounts),
+          datasets: [{
+            data: Object.values(teamCounts),
+            backgroundColor: ["#64748b", "#14b8a6", "#f43f5e", "#eab308"],
+            borderWidth: 0
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "right", labels: { color: "#cbd5e1", font: { size: 11 } } } } }
+      });
+
+      // 3. Discipline / Test Bar Chart
+      const discMap = {};
+      baseList.forEach(c => {
+        const d = c.assigned_to || "ALL";
+        discMap[d] = (discMap[d] || 0) + 1;
+      });
+      const discLabels = Object.keys(discMap).slice(0, 6);
+      const discVals = discLabels.map(k => discMap[k]);
+
+      if (chartDiscInstance) chartDiscInstance.destroy();
+      chartDiscInstance = new Chart(document.getElementById("chartDiscipline"), {
+        type: "bar",
+        data: {
+          labels: discLabels,
+          datasets: [{ label: "Clashes", data: discVals, backgroundColor: "#0284c7", borderRadius: 4 }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { color: "#94a3b8", font: { size: 10 } }, grid: { display: false } },
+            y: { ticks: { color: "#94a3b8", font: { size: 10 } }, grid: { color: "#1e293b" } }
+          }
+        }
+      });
     }
 
     function onProjectOrRoundChange() {
       currentProject = document.getElementById("projectSelector").value;
       currentRound = document.getElementById("roundSelector").value;
+      expandedWebTests.clear();
       expandedGroupGuids.clear();
       refreshCloudData();
     }
@@ -306,16 +477,28 @@
       activeTab = tab;
       document.getElementById("clashesTableContainer").classList.toggle("hidden", tab !== "clashes");
       document.getElementById("viewpointsTableContainer").classList.toggle("hidden", tab !== "viewpoints");
-      document.getElementById("tabBtnClashes").className = (tab === "clashes" ? "tab-active" : "tab-inactive") + " px-5 py-2 rounded-md text-xs font-bold transition";
-      document.getElementById("tabBtnViewpoints").className = (tab === "viewpoints" ? "tab-active" : "tab-inactive") + " px-5 py-2 rounded-md text-xs font-bold transition";
+      document.getElementById("tabBtnClashes").className = (tab === "clashes" ? "tab-pill-active" : "tab-pill-inactive") + " px-3.5 py-1.5 rounded-lg text-xs font-bold transition";
+      document.getElementById("tabBtnViewpoints").className = (tab === "viewpoints" ? "tab-pill-active" : "tab-pill-inactive") + " px-3.5 py-1.5 rounded-lg text-xs font-bold transition";
       renderActiveTable();
     }
 
-    function toggleAllWebGroups(expand) {
+    function toggleAllWebTestsAndGroups(expand) {
+      expandedWebTests.clear();
       expandedGroupGuids.clear();
+      expandedVpFolders.clear();
       if (expand) {
-        allClashes.filter(c => c.is_group_header).forEach(g => expandedGroupGuids.add(g.guid));
+        allClashes.forEach(c => {
+          if (c.test_name) expandedWebTests.add(c.test_name);
+          if (c.is_group_header) expandedGroupGuids.add(c.guid);
+        });
+        allViewpoints.forEach(v => expandedVpFolders.add(v.folder_name || v.item_a_file || "General"));
       }
+      renderActiveTable();
+    }
+
+    function toggleWebTest(testName) {
+      if (expandedWebTests.has(testName)) expandedWebTests.delete(testName);
+      else expandedWebTests.add(testName);
       renderClashesTable();
     }
 
@@ -325,7 +508,12 @@
       renderClashesTable();
     }
 
-    // 3. Render Tables with Strict Role-Based Locks & Collapsible Groups
+    function toggleVpFolder(folder) {
+      if (expandedVpFolders.has(folder)) expandedVpFolders.delete(folder);
+      else expandedVpFolders.add(folder);
+      renderViewpointsTable();
+    }
+
     function renderActiveTable() {
       if (activeTab === "clashes") renderClashesTable();
       else renderViewpointsTable();
@@ -333,17 +521,12 @@
 
     function passesFilters(row, tableKey) {
       const q = (document.getElementById("globalSearchInput").value || "").trim().toLowerCase();
-      if (q) {
-        const hay = JSON.stringify(row).toLowerCase();
-        if (!hay.includes(q)) return false;
-      }
+      if (q && !JSON.stringify(row).toLowerCase().includes(q)) return false;
+
       const filters = columnFilters[tableKey] || {};
       for (const col of Object.keys(filters)) {
         const allowedSet = filters[col];
-        if (allowedSet && allowedSet.size > 0) {
-          const val = String(row[col] ?? "");
-          if (!allowedSet.has(val)) return false;
-        }
+        if (allowedSet && allowedSet.size > 0 && !allowedSet.has(String(row[col] ?? ""))) return false;
       }
       return true;
     }
@@ -356,132 +539,186 @@
       const bimStatuses = ["New", "Active", "Reviewed", "Approved", "Resolved"];
       const teamStatuses = ["Pending Action", "Solved / Fixed", "Not Our Scope", "Need Workshop"];
 
+      const filtered = allClashes.filter(c => passesFilters(c, "clashes"));
+      const byTest = {};
+      filtered.forEach(c => {
+        const t = c.test_name || "General Clash Test";
+        if (!byTest[t]) byTest[t] = [];
+        byTest[t].push(c);
+      });
+
       let html = "";
-      for (const c of allClashes) {
-        if (!passesFilters(c, "clashes")) continue;
-
-        if (!c.is_group_header && c.parent_group_guid && !expandedGroupGuids.has(c.parent_group_guid)) {
-          continue;
-        }
-
-        const isGrp = Boolean(c.is_group_header);
-        const isExpanded = isGrp && expandedGroupGuids.has(c.guid);
-        const rowBg = isGrp ? "bg-[#162b4d] font-bold text-sky-200" : (c.parent_group_guid ? "bg-[#0b121f]" : "bg-[#0d1526] hover:bg-slate-900/80");
-
-        const snapHtml = c.image_base64
-          ? `<img src="${c.image_base64}" onclick="openSnapshotModal('${c.image_base64}', '${escapeHtml(c.clash_name)}')" class="w-16 h-11 object-cover rounded border border-slate-700 cursor-pointer hover:scale-105 transition" />`
-          : `<span class="text-slate-600 text-[10px]">No Image</span>`;
-
-        const clashLabelHtml = isGrp
-          ? `<button onclick="toggleSingleGroup('${c.guid}')" class="flex items-center gap-1.5 text-sky-300 hover:text-white font-bold text-left">
-               <span>${isExpanded ? "▼" : "▶"}</span>
-               <span>[Group] ${escapeHtml(c.group_name || c.clash_name)}</span>
-             </button>`
-          : `<span class="${c.parent_group_guid ? 'pl-5 text-slate-300' : 'text-white font-medium'}">${c.parent_group_guid ? '↳ ' : ''}${escapeHtml(c.clash_name)}</span>`;
-
-        const elemButtonsHtml = isGrp
-          ? `<span class="text-xs text-sky-300">${escapeHtml(c.item_a_name || "Clash Group")}</span>`
-          : `<div class="space-y-1">
-               <div class="flex items-center justify-between gap-1 bg-[#070b12] px-2 py-1 rounded border border-slate-800">
-                 <span class="truncate max-w-[150px]" title="${escapeHtml(c.item_a_file)} - ${escapeHtml(c.item_a_name)}">${escapeHtml(c.item_a_name)}</span>
-                 <button onclick="isolateInRevit('${c.item_a_id}','${escapeHtml(c.item_a_file)}','${c.item_b_id}','${escapeHtml(c.item_b_file)}')" class="bg-sky-700 hover:bg-sky-600 text-white px-1.5 py-0.5 rounded text-[10px] font-bold whitespace-nowrap">ID ${escapeHtml(c.item_a_id)} 🎯</button>
-               </div>
-               <div class="flex items-center justify-between gap-1 bg-[#070b12] px-2 py-1 rounded border border-slate-800">
-                 <span class="truncate max-w-[150px]" title="${escapeHtml(c.item_b_file)} - ${escapeHtml(c.item_b_name)}">${escapeHtml(c.item_b_name)}</span>
-                 <button onclick="isolateInRevit('${c.item_b_id}','${escapeHtml(c.item_b_file)}','${c.item_a_id}','${escapeHtml(c.item_a_file)}')" class="bg-teal-700 hover:bg-teal-600 text-white px-1.5 py-0.5 rounded text-[10px] font-bold whitespace-nowrap">ID ${escapeHtml(c.item_b_id)} 🎯</button>
-               </div>
-             </div>`;
-
-        const bimOptions = bimStatuses.map(st => `<option value="${st}" ${String(c.navis_status).toLowerCase() === st.toLowerCase() ? "selected" : ""}>${st}</option>`).join("");
-        const teamOptions = teamStatuses.map(st => `<option value="${st}" ${String(c.team_response).toLowerCase() === st.toLowerCase() ? "selected" : ""}>${st}</option>`).join("");
-
-        let commentsList = [];
-        try { commentsList = JSON.parse(c.comments_json || "[]"); } catch (e) {}
-        const lastComment = commentsList.length > 0 ? `${commentsList[commentsList.length - 1].author}: ${commentsList[commentsList.length - 1].text}` : "No comments yet";
+      for (const testName of Object.keys(byTest)) {
+        const items = byTest[testName];
+        const isTestExp = expandedWebTests.has(testName);
+        const clashCount = items.filter(x => !x.is_group_header).length || items.length;
 
         html += `
-          <tr class="${rowBg} transition">
-            <td class="p-2.5 text-center"><input type="checkbox" class="row-chk" data-rguid="${c.round_guid}" /></td>
-            <td class="p-2.5">${snapHtml}</td>
-            <td class="p-2.5 font-semibold text-teal-300">R-${escapeHtml(c.round)}</td>
-            <td class="p-2.5 text-slate-300">${escapeHtml(c.test_name)}</td>
-            <td class="p-2.5">${clashLabelHtml}</td>
-            <td class="p-2.5"><span class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-sky-300 font-semibold">${escapeHtml(c.assigned_to || "ALL")}</span></td>
-            <td class="p-2.5">${elemButtonsHtml}</td>
-            <td class="p-2.5 text-slate-400 whitespace-nowrap">${escapeHtml(c.level_grid || "")} <br/><span class="text-[10px] text-slate-500">${escapeHtml(c.distance || "")}</span></td>
-            <td class="p-2.5 bg-sky-950/15 border-l border-r border-slate-800">
-              <select data-col="navis_status" onchange="updateClashStatus('${c.round_guid}', '${c.guid}', ${isGrp}, 'navis_status', this.value)" ${canEditBim ? "" : "disabled"} class="w-full bg-[#070b12] border border-slate-700 rounded px-2 py-1 text-xs text-sky-300 font-bold ${canEditBim ? 'cursor-pointer' : 'opacity-60 cursor-not-allowed'}">
-                ${bimOptions}
-              </select>
+          <tr class="bg-[#0f2447] text-sky-300 font-bold border-b border-slate-700">
+            <td class="p-2.5 text-center text-[10px] text-sky-400">TEST</td>
+            <td class="p-2.5">—</td>
+            <td class="p-2.5" colspan="4">
+              <button onclick="toggleWebTest('${escapeHtml(testName)}')" class="flex items-center gap-2 text-left hover:text-white">
+                <span class="text-sm">${isTestExp ? "▼" : "▶"}</span>
+                <span>[Clash Test] ${escapeHtml(testName)}</span>
+                <span class="px-2 py-0.5 text-[10px] rounded bg-sky-900/70 text-sky-200">${clashCount} Clashes</span>
+              </button>
             </td>
-            <td class="p-2.5 bg-teal-950/15 border-r border-slate-800">
-              <select data-col="team_response" onchange="updateClashStatus('${c.round_guid}', '${c.guid}', ${isGrp}, 'team_response', this.value)" ${canEditTeam ? "" : "disabled"} class="w-full bg-[#070b12] border border-slate-700 rounded px-2 py-1 text-xs text-teal-300 font-bold ${canEditTeam ? 'cursor-pointer' : 'opacity-60 cursor-not-allowed'}">
-                ${teamOptions}
-              </select>
-            </td>
-            <td class="p-2.5">
-              <div class="text-[11px] text-slate-300 truncate max-w-[240px] mb-1" title="${escapeHtml(lastComment)}">${escapeHtml(lastComment)}</div>
-              <div class="flex gap-1">
-                <input type="text" id="cmt_${c.round_guid}" placeholder="Write comment or @mention..." class="flex-1 bg-[#070b12] border border-slate-700 rounded px-2 py-1 text-[11px] text-white" />
-                <button onclick="postClashComment('${c.round_guid}')" class="bg-slate-700 hover:bg-sky-600 text-white px-2 py-1 rounded text-[11px] font-semibold">Send</button>
-              </div>
-            </td>
+            <td class="p-2.5" colspan="3"></td>
           </tr>`;
+
+        if (!isTestExp) continue;
+
+        for (const c of items) {
+          if (!c.is_group_header && c.parent_group_guid && !expandedGroupGuids.has(c.parent_group_guid)) continue;
+
+          const isGrp = Boolean(c.is_group_header);
+          const isExpanded = isGrp && expandedGroupGuids.has(c.guid);
+          const rowBg = isGrp ? "bg-[#162b4d] font-bold text-sky-200" : (c.parent_group_guid ? "bg-[#0b121f]" : "bg-[#0d1526] hover:bg-slate-900/80");
+
+          const snapHtml = c.image_base64
+            ? `<img src="${c.image_base64}" onclick="openSnapshotModal('${c.image_base64}', '${escapeHtml(c.clash_name)}')" class="w-16 h-11 object-cover rounded border border-slate-700 cursor-pointer hover:scale-105 transition" />`
+            : `<span class="text-slate-600 text-[10px]">No Image</span>`;
+
+          const clashLabelHtml = isGrp
+            ? `<button onclick="toggleSingleGroup('${c.guid}')" class="pl-4 flex items-center gap-1.5 text-sky-300 hover:text-white font-bold text-left">
+                 <span>${isExpanded ? "▼" : "▶"}</span>
+                 <span>[Group] ${escapeHtml(c.group_name || c.clash_name)}</span>
+               </button>`
+            : `<span class="${c.parent_group_guid ? 'pl-9 text-slate-300' : 'pl-4 text-white font-medium'}">${c.parent_group_guid ? '↳ ' : '• '}${escapeHtml(c.clash_name)}</span>`;
+
+          const elemButtonsHtml = isGrp
+            ? `<span class="text-xs text-sky-300">${escapeHtml(c.item_a_name || "Clash Group")}</span>`
+            : `<div class="space-y-1">
+                 <div class="flex items-center justify-between gap-1 bg-[#070b12] px-2 py-1 rounded border border-slate-800">
+                   <span class="truncate max-w-[145px]" title="${escapeHtml(c.item_a_file)} - ${escapeHtml(c.item_a_name)}">${escapeHtml(c.item_a_name)}</span>
+                   <button onclick="isolateInRevit('${c.item_a_id}','${escapeHtml(c.item_a_file)}','${c.item_b_id}','${escapeHtml(c.item_b_file)}')" class="bg-sky-700 hover:bg-sky-600 text-white px-1.5 py-0.5 rounded text-[10px] font-bold whitespace-nowrap">ID ${escapeHtml(c.item_a_id)} 🎯</button>
+                 </div>
+                 <div class="flex items-center justify-between gap-1 bg-[#070b12] px-2 py-1 rounded border border-slate-800">
+                   <span class="truncate max-w-[145px]" title="${escapeHtml(c.item_b_file)} - ${escapeHtml(c.item_b_name)}">${escapeHtml(c.item_b_name)}</span>
+                   <button onclick="isolateInRevit('${c.item_b_id}','${escapeHtml(c.item_b_file)}','${c.item_a_id}','${escapeHtml(c.item_a_file)}')" class="bg-teal-700 hover:bg-teal-600 text-white px-1.5 py-0.5 rounded text-[10px] font-bold whitespace-nowrap">ID ${escapeHtml(c.item_b_id)} 🎯</button>
+                 </div>
+               </div>`;
+
+          const bimOptions = bimStatuses.map(st => `<option value="${st}" ${String(c.navis_status).toLowerCase() === st.toLowerCase() ? "selected" : ""}>${st}</option>`).join("");
+          const teamOptions = teamStatuses.map(st => `<option value="${st}" ${String(c.team_response).toLowerCase() === st.toLowerCase() ? "selected" : ""}>${st}</option>`).join("");
+
+          let commentsList = [];
+          try { commentsList = JSON.parse(c.comments_json || "[]"); } catch (e) {}
+          const lastComment = commentsList.length > 0 ? `${commentsList[commentsList.length - 1].author}: ${commentsList[commentsList.length - 1].text}` : "No comments yet";
+
+          html += `
+            <tr class="${rowBg} transition">
+              <td class="p-2.5">${snapHtml}</td>
+              <td class="p-2.5 font-semibold text-teal-300">R-${escapeHtml(c.round)}</td>
+              <td class="p-2.5">${clashLabelHtml}</td>
+              <td class="p-2.5"><span class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-sky-300 font-semibold">${escapeHtml(c.assigned_to || "ALL")}</span></td>
+              <td class="p-2.5">${elemButtonsHtml}</td>
+              <td class="p-2.5 text-slate-400 whitespace-nowrap">${escapeHtml(c.level_grid || "")}<br/><span class="text-[10px] text-slate-500">${escapeHtml(c.distance || "")}</span></td>
+              <td class="p-2.5 bg-sky-950/15 border-l border-r border-slate-800">
+                <select onchange="updateClashStatus('${c.round_guid}', '${c.guid}', ${isGrp}, 'navis_status', this.value)" ${canEditBim ? "" : "disabled"} class="w-full bg-[#070b12] border border-slate-700 rounded px-2 py-1 text-xs text-sky-300 font-bold ${canEditBim ? 'cursor-pointer' : 'opacity-60 cursor-not-allowed'}">
+                  ${bimOptions}
+                </select>
+              </td>
+              <td class="p-2.5 bg-teal-950/15 border-r border-slate-800">
+                <select onchange="updateClashStatus('${c.round_guid}', '${c.guid}', ${isGrp}, 'team_response', this.value)" ${canEditTeam ? "" : "disabled"} class="w-full bg-[#070b12] border border-slate-700 rounded px-2 py-1 text-xs text-teal-300 font-bold ${canEditTeam ? 'cursor-pointer' : 'opacity-60 cursor-not-allowed'}">
+                  ${teamOptions}
+                </select>
+              </td>
+              <td class="p-2.5">
+                <div class="text-[11px] text-slate-300 truncate max-w-[230px] mb-1" title="${escapeHtml(lastComment)}">${escapeHtml(lastComment)}</div>
+                <div class="flex gap-1">
+                  <input type="text" id="cmt_${c.round_guid}" placeholder="Comment or @mention..." class="flex-1 bg-[#070b12] border border-slate-700 rounded px-2 py-1 text-[11px] text-white" />
+                  <button onclick="postClashComment('${c.round_guid}')" class="bg-slate-700 hover:bg-sky-600 text-white px-2 py-1 rounded text-[11px] font-semibold">Send</button>
+                </div>
+              </td>
+            </tr>`;
+        }
       }
 
-      tbody.innerHTML = html || `<tr><td colspan="11" class="p-8 text-center text-slate-500">No clashes found for this project/filter.</td></tr>`;
+      tbody.innerHTML = html || `<tr><td colspan="9" class="p-8 text-center text-slate-500">No clashes found for project [${escapeHtml(currentProject)}].</td></tr>`;
     }
 
     function renderViewpointsTable() {
       const tbody = document.getElementById("viewpointsTableBody");
-      const canEditTeam = !isUserBimOrLead();
+      const canEditBim = isUserBimOrLead();
+      const canEditTeam = !canEditBim;
+      const bimStatuses = ["New", "Active", "Reviewed", "Approved", "Resolved"];
       const teamStatuses = ["Pending Action", "Solved / Fixed", "Not Our Scope", "Need Workshop"];
 
-      let html = "";
-      for (const v of allViewpoints) {
-        if (!passesFilters(v, "viewpoints")) continue;
+      const filtered = allViewpoints.filter(v => passesFilters(v, "viewpoints"));
+      const byFolder = {};
+      filtered.forEach((v, i) => {
+        const f = v.folder_name || v.item_a_file || "Saved Viewpoints";
+        if (!byFolder[f]) byFolder[f] = [];
+        if (!v.sequence_num) v.sequence_num = i + 1;
+        byFolder[f].push(v);
+      });
 
-        const snapHtml = v.image_base64
-          ? `<img src="${v.image_base64}" onclick="openSnapshotModal('${v.image_base64}', '${escapeHtml(v.description)}')" class="w-16 h-11 object-cover rounded border border-slate-700 cursor-pointer" />`
-          : `<span class="text-slate-600 text-[10px]">No Image</span>`;
-
-        const teamOptions = teamStatuses.map(st => `<option value="${st}" ${String(v.status).toLowerCase() === st.toLowerCase() ? "selected" : ""}>${st}</option>`).join("");
-
-        html += `
-          <tr class="bg-[#0d1526] hover:bg-slate-900/80 transition">
-            <td class="p-2.5 font-bold text-sky-400">${v.sequence_num || "-"}</td>
-            <td class="p-2.5">${snapHtml}</td>
-            <td class="p-2.5 text-slate-300">${escapeHtml(v.folder_name || "General")}</td>
-            <td class="p-2.5 font-semibold text-white">${escapeHtml(v.description || "")}</td>
-            <td class="p-2.5 text-slate-400">${escapeHtml(v.item_a_name || "Viewpoint")}</td>
-            <td class="p-2.5 bg-sky-950/15 border-l border-r border-slate-800 text-sky-300 font-bold">Published</td>
-            <td class="p-2.5 bg-teal-950/15 border-r border-slate-800">
-              <select data-col="status" onchange="updateViewpointStatus('${v.vp_key}', this.value)" ${canEditTeam ? "" : "disabled"} class="w-full bg-[#070b12] border border-slate-700 rounded px-2 py-1 text-xs text-teal-300 font-bold ${canEditTeam ? 'cursor-pointer' : 'opacity-60 cursor-not-allowed'}">
-                ${teamOptions}
-              </select>
-            </td>
-            <td class="p-2.5 text-slate-400">Saved Viewpoint Review</td>
-          </tr>`;
+      if (expandedVpFolders.size === 0) {
+        Object.keys(byFolder).forEach(f => expandedVpFolders.add(f));
       }
 
-      tbody.innerHTML = html || `<tr><td colspan="8" class="p-8 text-center text-slate-500">No Saved Viewpoints published for this project.</td></tr>`;
+      let html = "";
+      for (const folder of Object.keys(byFolder)) {
+        const items = byFolder[folder];
+        const isExp = expandedVpFolders.has(folder);
+
+        html += `
+          <tr class="bg-[#162b4d] text-sky-200 font-bold border-b border-slate-700">
+            <td class="p-2.5">—</td>
+            <td class="p-2.5 text-[10px] text-sky-300">FOLDER</td>
+            <td class="p-2.5" colspan="5">
+              <button onclick="toggleVpFolder('${escapeHtml(folder)}')" class="flex items-center gap-2 text-left hover:text-white">
+                <span>${isExp ? "▼" : "▶"}</span>
+                <span>${escapeHtml(folder)} (${items.length} Viewpoints)</span>
+              </button>
+            </td>
+          </tr>`;
+
+        if (!isExp) continue;
+
+        for (const v of items) {
+          const snapHtml = v.image_base64
+            ? `<img src="${v.image_base64}" onclick="openSnapshotModal('${v.image_base64}', '${escapeHtml(v.description)}')" class="w-16 h-11 object-cover rounded border border-slate-700 cursor-pointer" />`
+            : `<span class="text-slate-600 text-[10px]">No Image</span>`;
+
+          const curBim = v.item_b_name && bimStatuses.some(s => s.toLowerCase() === String(v.item_b_name).toLowerCase()) ? v.item_b_name : "Active";
+          const bimOptions = bimStatuses.map(st => `<option value="${st}" ${curBim.toLowerCase() === st.toLowerCase() ? "selected" : ""}>${st}</option>`).join("");
+          const teamOptions = teamStatuses.map(st => `<option value="${st}" ${String(v.status).toLowerCase() === st.toLowerCase() ? "selected" : ""}>${st}</option>`).join("");
+
+          html += `
+            <tr class="bg-[#0d1526] hover:bg-slate-900/80 transition">
+              <td class="p-2.5 font-bold text-sky-400">${v.sequence_num}</td>
+              <td class="p-2.5">${snapHtml}</td>
+              <td class="p-2.5 pl-6 font-semibold text-white">↳ ${escapeHtml(v.description || "")}</td>
+              <td class="p-2.5 text-slate-400">${escapeHtml(v.item_a_name || "Viewpoint")}</td>
+              <td class="p-2.5 bg-sky-950/15 border-l border-r border-slate-800">
+                <select onchange="updateViewpointField('${v.vp_key}', 'item_b_name', this.value)" ${canEditBim ? "" : "disabled"} class="w-full bg-[#070b12] border border-slate-700 rounded px-2 py-1 text-xs text-sky-300 font-bold ${canEditBim ? 'cursor-pointer' : 'opacity-60 cursor-not-allowed'}">
+                  ${bimOptions}
+                </select>
+              </td>
+              <td class="p-2.5 bg-teal-950/15 border-r border-slate-800">
+                <select onchange="updateViewpointField('${v.vp_key}', 'status', this.value)" ${canEditTeam ? "" : "disabled"} class="w-full bg-[#070b12] border border-slate-700 rounded px-2 py-1 text-xs text-teal-300 font-bold ${canEditTeam ? 'cursor-pointer' : 'opacity-60 cursor-not-allowed'}">
+                  ${teamOptions}
+                </select>
+              </td>
+              <td class="p-2.5 text-slate-400">Saved Viewpoint Review</td>
+            </tr>`;
+        }
+      }
+
+      tbody.innerHTML = html || `<tr><td colspan="7" class="p-8 text-center text-slate-500">No Saved Viewpoints published for project [${escapeHtml(currentProject)}].</td></tr>`;
     }
 
-    // 4. Cloud Status Updates (Propagating Group Header Status to Children)
     async function updateClashStatus(roundGuid, guid, isGroup, fieldName, newValue) {
       const target = allClashes.find(c => c.round_guid === roundGuid);
       if (target) target[fieldName] = newValue;
 
       const patchPayload = { [fieldName]: newValue, updated_at: new Date().toISOString() };
-      if (fieldName === "navis_status") patchPayload.review_decision = newValue;
-
       await fetch(`${SUPABASE_URL}/rest/v1/clashes?round_guid=eq.${encodeURIComponent(roundGuid)}`, {
         method: "PATCH",
-        headers: {
-          "apikey": SUPABASE_KEY,
-          "Authorization": `Bearer ${SUPABASE_KEY}`,
-          "Content-Type": "application/json"
-        },
+        headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}`, "Content-Type": "application/json" },
         body: JSON.stringify(patchPayload)
       });
 
@@ -491,29 +728,22 @@
           ch[fieldName] = newValue;
           await fetch(`${SUPABASE_URL}/rest/v1/clashes?round_guid=eq.${encodeURIComponent(ch.round_guid)}`, {
             method: "PATCH",
-            headers: {
-              "apikey": SUPABASE_KEY,
-              "Authorization": `Bearer ${SUPABASE_KEY}`,
-              "Content-Type": "application/json"
-            },
+            headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}`, "Content-Type": "application/json" },
             body: JSON.stringify(patchPayload)
           });
         }
-        renderClashesTable();
       }
+      updateKpisAndCharts();
+      renderClashesTable();
     }
 
-    async function updateViewpointStatus(vpKey, newStatus) {
+    async function updateViewpointField(vpKey, fieldName, newValue) {
       const target = allViewpoints.find(v => v.vp_key === vpKey);
-      if (target) target.status = newStatus;
+      if (target) target[fieldName] = newValue;
       await fetch(`${SUPABASE_URL}/rest/v1/viewpoints?vp_key=eq.${encodeURIComponent(vpKey)}`, {
         method: "PATCH",
-        headers: {
-          "apikey": SUPABASE_KEY,
-          "Authorization": `Bearer ${SUPABASE_KEY}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ status: newStatus, updated_at: new Date().toISOString() })
+        headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ [fieldName]: newValue, updated_at: new Date().toISOString() })
       });
     }
 
@@ -536,29 +766,18 @@
 
       await fetch(`${SUPABASE_URL}/rest/v1/clashes?round_guid=eq.${encodeURIComponent(roundGuid)}`, {
         method: "PATCH",
-        headers: {
-          "apikey": SUPABASE_KEY,
-          "Authorization": `Bearer ${SUPABASE_KEY}`,
-          "Content-Type": "application/json"
-        },
+        headers: { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}`, "Content-Type": "application/json" },
         body: JSON.stringify({ comments_json: c.comments_json, updated_at: new Date().toISOString() })
       });
       renderClashesTable();
     }
 
-    // 5. Multi-Session Revit Live Bridge 3D Section Box Trigger
     async function isolateInRevit(primaryId, primaryFile, secondaryId, secondaryFile) {
       const dot = document.getElementById("bridgeDot");
       const txt = document.getElementById("bridgeText");
-      txt.textContent = `Isolating ID ${primaryId}...`;
+      txt.textContent = `Isolating ${primaryId}...`;
 
-      const payload = {
-        PrimaryId: String(primaryId),
-        PrimaryFile: String(primaryFile || ""),
-        SecondaryId: String(secondaryId || ""),
-        SecondaryFile: String(secondaryFile || "")
-      };
-
+      const payload = { PrimaryId: String(primaryId), PrimaryFile: String(primaryFile || ""), SecondaryId: String(secondaryId || ""), SecondaryFile: String(secondaryFile || "") };
       for (const port of CANDIDATE_PORTS) {
         try {
           const res = await fetch(`http://localhost:${port}/isolate`, {
@@ -569,19 +788,29 @@
           if (res.ok) {
             const data = await res.json();
             if (data && data.Isolated) {
-              dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400";
-              txt.textContent = `Isolated in Revit (Port ${port})`;
+              dot.className = "w-2 h-2 rounded-full bg-emerald-400";
+              txt.textContent = `Isolated (Port ${port})`;
               return;
             }
           }
         } catch (e) {}
       }
-
-      dot.className = "w-2.5 h-2.5 rounded-full bg-rose-500";
-      txt.textContent = "Revit Bridge Not Found (Open RVT Model)";
+      dot.className = "w-2 h-2 rounded-full bg-rose-500";
+      txt.textContent = "Open RVT Model";
     }
 
-    // 6. Excel-Style Column Filtering
+    function exportCurrentTableCsv() {
+      const rows = activeTab === "clashes" ? allClashes : allViewpoints;
+      if (!rows.length) return;
+      const keys = Object.keys(rows[0]).filter(k => k !== "image_base64");
+      const csv = [keys.join(","), ...rows.map(r => keys.map(k => `"${String(r[k] ?? "").replace(/"/g, '""')}"`).join(","))].join("\n");
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `ACC_${currentProject}_${activeTab}.csv`;
+      a.click();
+    }
+
     function openExcelFilterMenu(evt, colName, tableKey) {
       evt.stopPropagation();
       activeFilterCol = colName;
@@ -633,10 +862,6 @@
       document.getElementById("excelFilterPopup").classList.add("hidden");
     }
 
-    function toggleSelectAllVisible(masterChk) {
-      document.querySelectorAll(".row-chk").forEach(c => c.checked = masterChk.checked);
-    }
-
     function openSnapshotModal(base64, title) {
       document.getElementById("snapshotModalImg").src = base64;
       document.getElementById("snapshotModalTitle").textContent = title || "3D Snapshot";
@@ -648,12 +873,11 @@
     }
 
     function escapeHtml(str) {
-      return String(str ?? "").replace(/[&<>"']/g, m => ({ "&": "&", "<": "<", ">": ">", '"': """, "'": "'" }[m]));
+      return String(str ?? "").replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
     }
 
     window.addEventListener("DOMContentLoaded", async () => {
       initUserIdentityAndLockRole();
-      await loadProjectsList();
       await refreshCloudData();
     });
   </script>
