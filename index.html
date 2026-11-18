@@ -81,7 +81,7 @@
     </div>
   </div>
 
-  <!-- 1. TOP SINGLE-ROW BALANCED HEADER -->
+  <!-- 1. TOP SINGLE-ROW BALANCED HEADER (FROZEN DESIGN) -->
   <header class="w-full bg-[#0d1526] border-b border-slate-800 px-3 py-2 sticky top-0 z-40 shadow-lg">
     <div class="w-full flex items-center justify-between gap-3 flex-wrap xl:flex-nowrap">
       <!-- Left: Logo + Title + Locked Project Pill + Subtitle -->
@@ -172,7 +172,7 @@
     </div>
   </header>
 
-  <!-- 2. ANALYTICS & CHARTS SURFACE -->
+  <!-- 2. ANALYTICS & CHARTS SURFACE (FROZEN DESIGN) -->
   <div id="analyticsWrapper" class="w-full bg-gradient-to-b from-[#132038] to-[#0f192d] border-b-2 border-teal-900/60 px-3 py-2.5 shadow-inner">
     <section id="analyticsSection" class="grid grid-cols-1 xl:grid-cols-12 gap-2.5">
       <div class="xl:col-span-4 grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -229,12 +229,12 @@
     </section>
   </div>
 
-  <!-- 3. WORKSPACE & SINGLE-ROW FILTER BAR -->
+  <!-- 3. WORKSPACE & SINGLE-ROW FILTER BAR (FROZEN DESIGN) -->
   <div class="w-full px-3 py-2.5">
     <section class="bg-[#0d1526] border border-slate-800 rounded-xl p-2.5 mb-2.5 shadow">
       <div class="w-full flex items-end justify-between gap-2 flex-wrap xl:flex-nowrap">
         
-        <!-- Clash Filters (Compact Single-Row) -->
+        <!-- Clash Filters -->
         <div id="clashTopFilters" class="flex items-end gap-2 flex-wrap xl:flex-nowrap">
           <div>
             <label class="block text-[9px] uppercase text-slate-400 font-bold mb-0.5">Project NWF</label>
@@ -286,7 +286,7 @@
           </div>
         </div>
 
-        <!-- Viewpoints Filters (Compact Single-Row) -->
+        <!-- Viewpoints Filters (Dedicated ISO 19650 / BCF Viewpoint Statuses) -->
         <div id="vpTopFilters" class="hidden items-end gap-2 flex-wrap xl:flex-nowrap">
           <div>
             <label class="block text-[9px] uppercase text-slate-400 font-bold mb-0.5">Folder</label>
@@ -295,14 +295,25 @@
             </select>
           </div>
           <div>
+            <label class="block text-[9px] uppercase text-slate-400 font-bold mb-0.5">BIM Status</label>
+            <select id="filterVpBimStatus" onchange="applyVpFilters()" class="bg-[#070b12] border border-slate-700 rounded-lg px-2.5 py-1 text-[11px] text-white">
+              <option value="ALL">All VP BIM States</option>
+              <option value="Open Issue">Open Issue</option>
+              <option value="Under Review">Under Review</option>
+              <option value="Action Required">Action Required</option>
+              <option value="Closed / Verified">Closed / Verified</option>
+              <option value="For Info (FYI)">For Info (FYI)</option>
+            </select>
+          </div>
+          <div>
             <label class="block text-[9px] uppercase text-slate-400 font-bold mb-0.5">Team Status</label>
             <select id="filterVpStatus" onchange="applyVpFilters()" class="bg-[#070b12] border border-slate-700 rounded-lg px-2.5 py-1 text-[11px] text-white">
-              <option value="ALL">All Team Actions (5)</option>
-              <option value="Pending Action">1. Pending Action</option>
-              <option value="Fixed in Revit (Pending NWC)">2. Fixed in Revit</option>
-              <option value="Request Approval (Valid Exception)">3. Request Approval</option>
-              <option value="Re-assign Request">4. Re-assign Request</option>
-              <option value="On Hold / RFI Pending">5. On Hold / RFI</option>
+              <option value="ALL">All VP Team Actions (5)</option>
+              <option value="Pending Review">1. Pending Review</option>
+              <option value="Updated in Model">2. Updated in Model</option>
+              <option value="Technical Clarification">3. Technical Clarification</option>
+              <option value="Need Workshop / RFI">4. Need Workshop / RFI</option>
+              <option value="Not Our Scope">5. Not Our Scope</option>
             </select>
           </div>
           <div>
@@ -322,7 +333,6 @@
           </div>
           <button onclick="clearAllColumnFilters()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 px-2 py-1 rounded-lg text-[11px] font-semibold">✕ Reset</button>
 
-          <!-- Bulk Action Bar (Adapts to BIM Coordinator / Lead vs Engineer) -->
           <div id="bulkActionContainer" class="flex items-center gap-1.5 bg-sky-950/40 border border-sky-800/70 rounded-lg px-2 py-0.5">
             <span class="text-[11px] font-bold text-sky-300"><span id="selectedCountLabel">0</span> Sel:</span>
             <select id="bulkResponseSelect" class="bg-[#070b12] border border-slate-700 rounded px-1.5 py-0.5 text-[11px] text-white"></select>
@@ -384,7 +394,7 @@
             <th class="p-2.5 w-28">Snapshot</th>
             <th class="p-2.5 w-40"><div class="flex items-center justify-between gap-1"><span>Folder</span><button onclick="openExcelFilterMenu(event, 'folder_name', 'viewpoints')" class="px-1">🔽</button></div></th>
             <th class="p-2.5 min-w-[160px]"><div class="flex items-center justify-between gap-1"><span>Viewpoint</span><button onclick="openExcelFilterMenu(event, 'description', 'viewpoints')" class="px-1">🔽</button></div></th>
-            <th class="p-2.5 w-64"><div class="flex items-center justify-between gap-1"><span>Revit Elements</span><button onclick="openExcelFilterMenu(event, 'item_a_file', 'viewpoints')" class="px-1">🔽</button></div></th>
+            <th class="p-2.5 w-64"><div class="flex items-center justify-between gap-1"><span>Details & Elements</span><button onclick="openExcelFilterMenu(event, 'item_a_name', 'viewpoints')" class="px-1">🔽</button></div></th>
             <th class="p-2.5 w-40 bg-sky-950/20 border-l border-r border-slate-800"><span class="text-sky-300">🛡️ BIM Status</span></th>
             <th class="p-2.5 w-44 bg-teal-950/20 border-r border-slate-800"><div class="flex items-center justify-between gap-1"><span class="text-teal-300">🔧 Team Status</span><button onclick="openExcelFilterMenu(event, 'status', 'viewpoints')" class="px-1">🔽</button></div></th>
             <th class="p-2.5 w-72">Discussion</th>
@@ -476,6 +486,7 @@
     const SUPABASE_KEY = "sb_publishable_R96kfu1_6AJrLGw9zD8E5Q_L6vO8VDf";
     const REVIT_PORTS = [51965, 51966, 51967, 51968, 51969, 51970, 51971, 51972, 51973, 51974];
 
+    // Clashes Statuses (Untouched)
     const TEAM_UNIFIED_STATUSES = [
       "Pending Action",
       "Fixed in Revit (Pending NWC)",
@@ -493,6 +504,23 @@
       "Rejected"
     ];
 
+    // Dedicated Viewpoints Engineering Statuses (ISO 19650 / BCF Best Practice)
+    const VP_BIM_STATUSES = [
+      "Open Issue",
+      "Under Review",
+      "Action Required",
+      "Closed / Verified",
+      "For Info (FYI)"
+    ];
+
+    const VP_TEAM_STATUSES = [
+      "Pending Review",
+      "Updated in Model",
+      "Technical Clarification",
+      "Need Workshop / RFI",
+      "Not Our Scope"
+    ];
+
     const ACC_SVG_RAW = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 360" width="120" height="64">
       <text x="665" y="76" text-anchor="end" fill="#334155" font-family="'Segoe UI', Tahoma, sans-serif" font-size="56" font-weight="700">مركز الإستشارات المتقدم</text>
       <text x="665" y="134" text-anchor="end" fill="#475569" font-family="'Segoe UI', Arial, sans-serif" font-size="38" font-weight="700">Advanced Consultancy Center</text>
@@ -505,6 +533,8 @@
     let lockedProjectName = null;
     let currentUser = { name: "Unverified", email: "", role: "BIM Coordinator", discipline: "ALL" };
     let allClashes = [], filteredClashes = [], allViewpoints = [], filteredViewpoints = [], projectMembers = [];
+    let allKpiSummaries = []; // Full-project KPI metadata records published by Navisworks
+    let pendingChatImages = {}; // Pasted PNG/JPEG base64 per recordKey before sending
     let currentTab = "clashes", collapsedGroups = new Set(), collapsedVpFolders = new Set(), selectedRowKeys = new Set(), lastCheckedIndex = null;
     let hasInitializedDefaultCollapse = false;
     let hasInitializedVpDefaultCollapse = false;
@@ -740,8 +770,9 @@
         if (!autoSyncEnabled) return;
         const activeEl = document.activeElement;
         if (activeEl && (activeEl.tagName === "INPUT" || activeEl.tagName === "SELECT")) return;
+        if (Object.keys(pendingChatImages).length > 0) return;
         await reloadAllCloudData(null, null, true);
-      }, 5000);
+      }, 6000);
     }
 
     function toggleAutoSync() {
@@ -749,6 +780,7 @@
       document.getElementById("btnAutoSync").textContent = autoSyncEnabled ? "⚡ Sync: ON" : "⏸️ Sync: OFF";
     }
 
+    // Clash Status Normalizers (Untouched)
     function normalizeTeamStatus(rawStatus) {
       if (!rawStatus) return "Pending Action";
       if (TEAM_UNIFIED_STATUSES.includes(rawStatus)) return rawStatus;
@@ -765,6 +797,31 @@
       const found = BIM_COORDINATOR_STATUSES.find(s => s.toLowerCase() === String(rawNavis || "").trim().toLowerCase());
       if (found) return found;
       return "Active";
+    }
+
+    // Viewpoints Dedicated Engineering Status Normalizers
+    function normalizeVpBimStatus(raw) {
+      if (!raw) return "Open Issue";
+      const exact = VP_BIM_STATUSES.find(s => s.toLowerCase() === String(raw).trim().toLowerCase());
+      if (exact) return exact;
+      const s = String(raw).toLowerCase();
+      if (s.includes("closed") || s.includes("verified") || s.includes("approved") || s.includes("resolved")) return "Closed / Verified";
+      if (s.includes("action") || s.includes("rejected")) return "Action Required";
+      if (s.includes("review")) return "Under Review";
+      if (s.includes("fyi") || s.includes("info")) return "For Info (FYI)";
+      return "Open Issue";
+    }
+
+    function normalizeVpTeamStatus(raw) {
+      if (!raw) return "Pending Review";
+      const exact = VP_TEAM_STATUSES.find(s => s.toLowerCase() === String(raw).trim().toLowerCase());
+      if (exact) return exact;
+      const s = String(raw).toLowerCase();
+      if (s.includes("updated") || s.includes("fixed") || s.includes("solved")) return "Updated in Model";
+      if (s.includes("clarif") || s.includes("approval") || s.includes("valid")) return "Technical Clarification";
+      if (s.includes("workshop") || s.includes("rfi") || s.includes("hold")) return "Need Workshop / RFI";
+      if (s.includes("scope") || s.includes("re-assign")) return "Not Our Scope";
+      return "Pending Review";
     }
 
     function normalizeClashRecord(raw, idx) {
@@ -817,7 +874,8 @@
         sequence_num: typeof raw.sequence_num === "number" ? raw.sequence_num : (idx + 1),
         folder_name: folder,
         description: desc,
-        status: raw.status || "Pending Action"
+        item_b_name: normalizeVpBimStatus(raw.item_b_name),
+        status: normalizeVpTeamStatus(raw.status)
       };
     }
 
@@ -845,7 +903,26 @@
         } catch {}
 
         const rawClashes = await clashRes.json();
-        const newClashes = rawClashes.map((r, i) => normalizeClashRecord(r, i));
+
+        // Separate Full-Project KPI Metadata rows from actual Clash table rows
+        const kpiMetaRows = [];
+        const actualRawClashes = [];
+        for (const r of rawClashes) {
+          if (r.guid === "__KPI_SUMMARY__" || r.test_name === "__KPI_SUMMARY__") {
+            try {
+              const parsed = JSON.parse(r.comments_json || "{}");
+              kpiMetaRows.push({
+                project_name: r.project_name || "",
+                round: String(r.round || "1"),
+                summary: parsed
+              });
+            } catch {}
+          } else {
+            actualRawClashes.push(r);
+          }
+        }
+
+        const newClashes = actualRawClashes.map((r, i) => normalizeClashRecord(r, i));
 
         const groupLookup = {};
         newClashes.filter(c => c.is_group_header && c.group_name).forEach(g => {
@@ -865,12 +942,13 @@
         newClashes.sort((a, b) => (a.sequence_num || 0) - (b.sequence_num || 0));
         vpList.sort((a, b) => (a.sequence_num || 0) - (b.sequence_num || 0));
 
-        const sig = newClashes.length + "_" + vpList.length + "_" + memList.length + "_" +
+        const sig = newClashes.length + "_" + vpList.length + "_" + memList.length + "_" + kpiMetaRows.length + "_" +
           (newClashes[0]?.updated_at || "") + "_" + (newClashes[newClashes.length - 1]?.updated_at || "");
 
         if (isSilentAutoPoll && sig === lastDataSignature) return;
         lastDataSignature = sig;
 
+        allKpiSummaries = kpiMetaRows;
         allClashes = newClashes;
         allViewpoints = vpList;
         projectMembers = memList;
@@ -916,7 +994,11 @@
 
     function populateDynamicDropdowns(preselectProject, preselectRound) {
       const projSelect = document.getElementById("filterProject");
-      const projects = [...new Set([...allClashes.map(c => c.project_name), ...allViewpoints.map(v => v.project_name)].filter(Boolean))];
+      const projects = [...new Set([
+        ...allClashes.map(c => c.project_name),
+        ...allViewpoints.map(v => v.project_name),
+        ...allKpiSummaries.map(k => k.project_name)
+      ].filter(Boolean))];
 
       const matchedLockedProj = lockedProjectName
         ? projects.find(p => p.toLowerCase() === lockedProjectName.toLowerCase())
@@ -945,12 +1027,15 @@
       const scopeVps = activeProjVal === "ALL" ? allViewpoints : allViewpoints.filter(v => v.project_name === activeProjVal);
       const scopeMembers = activeProjVal === "ALL" ? projectMembers : projectMembers.filter(m => m.project_name === activeProjVal);
 
-      document.getElementById("tabCountClashes").textContent = scopeClashes.length;
+      document.getElementById("tabCountClashes").textContent = scopeClashes.filter(c => !c.is_group_header).length || scopeClashes.length;
       document.getElementById("tabCountViewpoints").textContent = scopeVps.length;
       document.getElementById("teamCountBadge").textContent = scopeMembers.length;
 
       const roundSelect = document.getElementById("filterRound");
-      const rounds = [...new Set(scopeClashes.map(c => c.round).filter(Boolean))].sort();
+      const rounds = [...new Set([
+        ...scopeClashes.map(c => c.round),
+        ...allKpiSummaries.filter(k => activeProjVal === "ALL" || k.project_name === activeProjVal).map(k => k.round)
+      ].filter(Boolean))].sort();
       let currentRound = preselectRound || roundSelect.value || "ALL";
       if (currentRound !== "ALL" && !rounds.includes(currentRound)) currentRound = "ALL";
       roundSelect.innerHTML = `<option value="ALL">All Rounds (${rounds.length})</option>` +
@@ -1039,19 +1124,20 @@
     function applyVpFilters() {
       const proj = document.getElementById("filterProject").value;
       const folder = document.getElementById("filterVpFolder").value;
+      const bimSt = document.getElementById("filterVpBimStatus").value;
       const st = document.getElementById("filterVpStatus").value;
       const q = document.getElementById("globalSearchInput").value.trim().toLowerCase();
 
       filteredViewpoints = allViewpoints.filter(v => {
         if (proj !== "ALL" && v.project_name !== proj) return false;
         if (folder !== "ALL" && v.folder_name !== folder) return false;
-        const normSt = normalizeTeamStatus(v.status);
-        if (st !== "ALL" && normSt !== st) return false;
+        if (bimSt !== "ALL" && normalizeVpBimStatus(v.item_b_name) !== bimSt) return false;
+        if (st !== "ALL" && normalizeVpTeamStatus(v.status) !== st) return false;
         for (const [col, allowedSet] of Object.entries(activeColumnFilters.viewpoints)) {
           if (allowedSet && !allowedSet.has(String(v[col] ?? ""))) return false;
         }
         if (q) {
-          const hay = [v.folder_name, v.description, v.item_a_id, v.item_b_id, v.item_a_file, v.item_b_file, v.comments_json].join(" ").toLowerCase();
+          const hay = [v.folder_name, v.description, v.item_a_id, v.item_b_id, v.item_a_name, v.item_a_file, v.item_b_file, v.comments_json].join(" ").toLowerCase();
           if (!hay.includes(q)) return false;
         }
         return true;
@@ -1080,7 +1166,7 @@
       const pageItems = visibleRows.slice(startIdx, startIdx + pageSize);
 
       document.getElementById("showingRangeLabel").textContent =
-        `Showing ${total === 0 ? 0 : startIdx + 1}-${Math.min(total, startIdx + pageSize)} of ${total} (${filteredClashes.length} filtered)`;
+        `Showing ${total === 0 ? 0 : startIdx + 1}-${Math.min(total, startIdx + pageSize)} of ${total} (${filteredClashes.length} published)`;
       document.getElementById("pageIndicator").textContent = `${currentPage} / ${totalPages}`;
 
       if (pageItems.length === 0) {
@@ -1111,7 +1197,7 @@
         }
 
         const imgHtml = c.image_base64 && c.image_base64.startsWith("data:image")
-          ? `<img src="${c.image_base64}" onclick="showModal('${c.image_base64}', '${escapeHtml(c.clash_name)}')" class="w-20 h-14 object-cover rounded-lg cursor-pointer border border-slate-700 hover:scale-105 transition" />`
+          ? `<img src="${c.image_base64}" onclick="showModal(this.src, '${escapeHtml(c.clash_name)}')" class="w-20 h-14 object-cover rounded-lg cursor-pointer border border-slate-700 hover:scale-105 transition" />`
           : `<div class="w-20 h-14 bg-slate-800 rounded-lg flex items-center justify-center text-[9px] text-slate-500">No Image</div>`;
 
         const collapseBtn = isGroup
@@ -1169,9 +1255,10 @@
     }
 
     function getBimStatusBadgeClass(status) {
-      if (status === "Resolved" || status === "Approved") return "bg-emerald-950 text-emerald-300 border-emerald-700";
-      if (status === "Rejected") return "bg-rose-950 text-rose-300 border-rose-600";
-      if (status === "Reviewed") return "bg-amber-950 text-amber-300 border-amber-700";
+      if (status === "Resolved" || status === "Approved" || status === "Closed / Verified") return "bg-emerald-950 text-emerald-300 border-emerald-700";
+      if (status === "Rejected" || status === "Action Required") return "bg-rose-950 text-rose-300 border-rose-600";
+      if (status === "Reviewed" || status === "Under Review") return "bg-amber-950 text-amber-300 border-amber-700";
+      if (status === "For Info (FYI)") return "bg-indigo-950 text-indigo-300 border-indigo-700";
       return "bg-rose-950/70 text-rose-300 border-rose-800";
     }
 
@@ -1319,6 +1406,10 @@
         groupedByFolder[f].push(vp);
       });
 
+      document.getElementById("showingRangeLabel").textContent =
+        `Showing ${filteredViewpoints.length} Saved Viewpoints (${Object.keys(groupedByFolder).length} Folders)`;
+      document.getElementById("pageIndicator").textContent = `1 / 1`;
+
       Object.entries(groupedByFolder).forEach(([folderName, vps]) => {
         const isCollapsed = collapsedVpFolders.has(folderName);
 
@@ -1341,25 +1432,32 @@
 
         vps.forEach(vp => {
           const imgHtml = vp.image_base64 && vp.image_base64.startsWith("data:image")
-            ? `<img src="${vp.image_base64}" onclick="showModal('${vp.image_base64}', '${escapeHtml(vp.description)}')" class="w-24 h-16 object-cover rounded-lg cursor-pointer border border-slate-700" />`
+            ? `<img src="${vp.image_base64}" onclick="showModal(this.src, '${escapeHtml(vp.description)}')" class="w-24 h-16 object-cover rounded-lg cursor-pointer border border-slate-700" />`
             : `<div class="w-24 h-16 bg-slate-800 rounded-lg flex items-center justify-center text-[10px] text-slate-500">No Image</div>`;
 
-          const currentVpTeamVal = normalizeTeamStatus(vp.status);
-          const bimVpState = (vp.item_b_name && BIM_COORDINATOR_STATUSES.includes(vp.item_b_name))
-            ? vp.item_b_name
-            : ((vp.status || "").includes("Approved") ? "Approved" : ((vp.status || "").includes("Unreviewed") ? "Rejected" : "Active"));
+          const bimVpState = normalizeVpBimStatus(vp.item_b_name);
+          const teamVpState = normalizeVpTeamStatus(vp.status);
 
           const bimVpHtml = allowBimEdit
             ? `<select onchange="updateViewpointBimStatus('${escapeHtml(vp.vp_key)}', this.value)" class="w-full bg-[#070b12] border border-sky-700 rounded-lg px-2 py-1 text-[11px] font-bold text-sky-200">
-                ${BIM_COORDINATOR_STATUSES.map(st => `<option value="${st}" ${bimVpState === st ? "selected" : ""}>🛡️ ${st}</option>`).join("")}
+                ${VP_BIM_STATUSES.map(st => `<option value="${st}" ${bimVpState === st ? "selected" : ""}>🛡️ ${st}</option>`).join("")}
                </select>`
-            : `<div class="px-2 py-1 rounded-lg border ${getBimStatusBadgeClass(bimVpState)} text-[11px] font-bold flex justify-between"><span>${bimVpState}</span><span>🔒</span></div>`;
+            : `<div class="px-2 py-1 rounded-lg border ${getBimStatusBadgeClass(bimVpState)} text-[11px] font-bold flex justify-between"><span>${escapeHtml(bimVpState)}</span><span>🔒</span></div>`;
 
           const teamVpHtml = allowTeamEdit
             ? `<select onchange="updateViewpointStatus('${escapeHtml(vp.vp_key)}', this.value)" class="w-full bg-[#070b12] border border-teal-700 rounded-lg px-2 py-1 text-[11px] font-bold text-teal-200">
-                ${TEAM_UNIFIED_STATUSES.map(st => `<option value="${st}" ${currentVpTeamVal === st ? "selected" : ""}>🔧 ${st}</option>`).join("")}
+                ${VP_TEAM_STATUSES.map(st => `<option value="${st}" ${teamVpState === st ? "selected" : ""}>🔧 ${st}</option>`).join("")}
                </select>`
-            : `<div class="px-2 py-1 rounded-lg border border-slate-700 bg-[#070b12] text-slate-200 text-[11px] font-bold flex justify-between"><span class="truncate">${escapeHtml(currentVpTeamVal)}</span><span>🔒</span></div>`;
+            : `<div class="px-2 py-1 rounded-lg border border-slate-700 bg-[#070b12] text-slate-200 text-[11px] font-bold flex justify-between"><span class="truncate">${escapeHtml(teamVpState)}</span><span>🔒</span></div>`;
+
+          const hasValidIdA = vp.item_a_id && vp.item_a_id !== "N/A" && vp.item_a_id !== "0";
+          const hasValidIdB = vp.item_b_id && vp.item_b_id !== "N/A" && vp.item_b_id !== "0";
+
+          const detailsHtml = `
+            <div class="text-[11px] text-slate-200 font-medium mb-1 leading-snug">${escapeHtml(vp.item_a_name || "3D Saved Viewpoint")}</div>
+            ${hasValidIdA ? `<div class="mb-1"><button onclick="copyAndIsolateInRevit('${escapeHtml(vp.project_name)}', '${escapeHtml(vp.item_a_id)}', '${escapeHtml(vp.item_b_id)}', '${escapeHtml(vp.item_a_file)}', '${escapeHtml(vp.item_b_file)}', 'Element 1', 'Element 2')" class="bg-sky-950 text-sky-200 border border-sky-700 px-2 py-0.5 rounded text-[10px] font-mono">ID 1: ${escapeHtml(vp.item_a_id)} 🎯</button></div>` : ""}
+            ${hasValidIdB ? `<div><button onclick="copyAndIsolateInRevit('${escapeHtml(vp.project_name)}', '${escapeHtml(vp.item_b_id)}', '${escapeHtml(vp.item_a_id)}', '${escapeHtml(vp.item_b_file)}', '${escapeHtml(vp.item_a_file)}', 'Element 2', 'Element 1')" class="bg-emerald-950 text-emerald-200 border border-emerald-700 px-2 py-0.5 rounded text-[10px] font-mono">ID 2: ${escapeHtml(vp.item_b_id)} 🎯</button></div>` : ""}
+          `;
 
           const tr = document.createElement("tr");
           tr.id = "row_" + vp.vp_key;
@@ -1369,10 +1467,7 @@
             `<td class="p-2">${imgHtml}</td>` +
             `<td class="p-2"><span class="px-2 py-0.5 rounded bg-slate-800 text-teal-300 border border-slate-700 font-bold text-[11px]">↳ 📁 ${escapeHtml(vp.folder_name || "Root")}</span></td>` +
             `<td class="p-2 font-bold text-white text-xs">${escapeHtml(vp.description || "-")}</td>` +
-            `<td class="p-2">` +
-              `<div class="mb-1"><button onclick="copyAndIsolateInRevit('${escapeHtml(vp.project_name)}', '${escapeHtml(vp.item_a_id)}', '${escapeHtml(vp.item_b_id)}', '${escapeHtml(vp.item_a_file)}', '${escapeHtml(vp.item_b_file)}', 'Element 1', 'Element 2')" class="bg-sky-950 text-sky-200 border border-sky-700 px-2 py-0.5 rounded text-[10px] font-mono">ID 1: ${escapeHtml(vp.item_a_id || "N/A")} (${escapeHtml(vp.item_a_file || "N/A")}) 🎯</button></div>` +
-              `<div><button onclick="copyAndIsolateInRevit('${escapeHtml(vp.project_name)}', '${escapeHtml(vp.item_b_id)}', '${escapeHtml(vp.item_a_id)}', '${escapeHtml(vp.item_b_file)}', '${escapeHtml(vp.item_a_file)}', 'Element 2', 'Element 1')" class="bg-emerald-950 text-emerald-200 border border-emerald-700 px-2 py-0.5 rounded text-[10px] font-mono">ID 2: ${escapeHtml(vp.item_b_id || "N/A")} (${escapeHtml(vp.item_b_file || "N/A")}) 🎯</button></div>` +
-            `</td>` +
+            `<td class="p-2">${detailsHtml}</td>` +
             `<td class="p-2 bg-sky-950/10 border-l border-r border-slate-800">${bimVpHtml}</td>` +
             `<td class="p-2 bg-teal-950/10 border-r border-slate-800">${teamVpHtml}</td>` +
             `<td class="p-2">${buildChatCellHtml(vp.vp_key, vp.comments_json, "viewpoints")}</td>`;
@@ -1511,25 +1606,95 @@
       }
     }
 
+    // SMART DISCUSSION CELL WITH CTRL+V PNG SCREENSHOT SUPPORT
     function buildChatCellHtml(recordKey, commentsJson, tableType) {
       let messages = [];
       try { messages = JSON.parse(commentsJson || "[]"); } catch { messages = []; }
       const chatItemsHtml = messages.length === 0
-        ? `<div class="text-[10px] text-slate-500 italic">No comments. Type @ to mention team/member.</div>`
+        ? `<div class="text-[10px] text-slate-500 italic">No comments. Type @ or Ctrl+V screenshot.</div>`
         : messages.map(m => {
             const formatted = escapeHtml(m.text || "").replace(/(@[\w\.\-]+)/g, '<span class="bg-sky-900/90 text-sky-200 px-1 rounded font-bold">$1</span>');
             const rIcon = getRoleIcon(m.role || "Engineer");
-            return `<div class="mb-1 border-b border-slate-800/80 pb-0.5"><span class="text-sky-300 font-bold text-[10px]">${rIcon} ${escapeHtml(m.author || "Eng")}: </span><span class="text-slate-200 text-[11px]">${formatted}</span></div>`;
+            const imgBlock = (m.image && String(m.image).startsWith("data:image"))
+              ? `<div class="mt-1"><img src="${m.image}" onclick="showModal(this.src, 'Attachment — ${escapeHtml(m.author || 'User')}')" class="max-h-14 rounded border border-sky-700/70 cursor-pointer hover:opacity-90 transition" title="Click to zoom screenshot" /></div>`
+              : "";
+            return `<div class="mb-1 border-b border-slate-800/80 pb-1"><span class="text-sky-300 font-bold text-[10px]">${rIcon} ${escapeHtml(m.author || "Eng")}: </span><span class="text-slate-200 text-[11px]">${formatted}</span>${imgBlock}</div>`;
           }).join("");
 
-      return `<div class="bg-[#070b12] border border-slate-800 rounded-lg p-1.5 max-h-16 overflow-y-auto mb-1">${chatItemsHtml}</div>` +
+      const pendingImg = pendingChatImages[recordKey] || "";
+      const previewBlock = pendingImg
+        ? `<div id="chatImgPreview_${recordKey}" class="mb-1 flex items-center gap-1.5 bg-sky-950/60 border border-sky-700/80 rounded px-1.5 py-1">
+             <img src="${pendingImg}" class="h-8 rounded border border-slate-600" />
+             <span class="text-[10px] text-sky-200 font-semibold flex-1 truncate">📷 Screenshot ready</span>
+             <button onclick="clearPendingChatImage('${escapeHtml(recordKey)}')" class="text-rose-400 hover:text-white text-[11px] font-bold px-1">✕</button>
+           </div>`
+        : `<div id="chatImgPreview_${recordKey}" class="hidden"></div>`;
+
+      return `<div class="bg-[#070b12] border border-slate-800 rounded-lg p-1.5 max-h-20 overflow-y-auto mb-1">${chatItemsHtml}</div>` +
+        previewBlock +
         `<div class="flex gap-1 relative">` +
-          `<input id="chatInput_${recordKey}" type="text" autocomplete="off" placeholder="Comment or @mention..." ` +
+          `<input id="chatInput_${recordKey}" type="text" autocomplete="off" placeholder="@mention or Ctrl+V img..." ` +
+            `onpaste="onCommentPasteImage(event, '${escapeHtml(recordKey)}')" ` +
             `oninput="onCommentInputMention(event, 'chatInput_${escapeHtml(recordKey)}')" ` +
             `onkeydown="onCommentKeyDown(event, '${escapeHtml(recordKey)}', '${tableType}')" ` +
             `class="bg-[#070b12] border border-slate-700 rounded px-2 py-1 text-[11px] text-white flex-1 focus:border-sky-500 focus:outline-none" />` +
           `<button onclick="postChatMessage('${escapeHtml(recordKey)}', '${tableType}')" class="bg-sky-600 hover:bg-sky-500 text-white px-2 py-1 rounded text-[11px] font-bold">Send</button>` +
         `</div>`;
+    }
+
+    function onCommentPasteImage(event, recordKey) {
+      const items = (event.clipboardData || window.clipboardData)?.items;
+      if (!items) return;
+      for (const item of items) {
+        if (item.type && item.type.startsWith("image/")) {
+          event.preventDefault();
+          const blob = item.getAsFile();
+          if (!blob) return;
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            compressImageDataUrl(ev.target.result, 900, 0.78, (compressedDataUrl) => {
+              pendingChatImages[recordKey] = compressedDataUrl;
+              const prevEl = document.getElementById("chatImgPreview_" + recordKey);
+              if (prevEl) {
+                prevEl.className = "mb-1 flex items-center gap-1.5 bg-sky-950/60 border border-sky-700/80 rounded px-1.5 py-1";
+                prevEl.innerHTML = `<img src="${compressedDataUrl}" class="h-8 rounded border border-slate-600" />
+                  <span class="text-[10px] text-sky-200 font-semibold flex-1 truncate">📷 Screenshot ready</span>
+                  <button onclick="clearPendingChatImage('${escapeHtml(recordKey)}')" class="text-rose-400 hover:text-white text-[11px] font-bold px-1">✕</button>`;
+              }
+              showToast("📷 Screenshot pasted! Press Enter or Send to post.", "sky");
+            });
+          };
+          reader.readAsDataURL(blob);
+          break;
+        }
+      }
+    }
+
+    function compressImageDataUrl(dataUrl, maxW, quality, callback) {
+      const img = new Image();
+      img.onload = () => {
+        let w = img.width, h = img.height;
+        if (w > maxW) {
+          h = Math.round(h * (maxW / w));
+          w = maxW;
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, w, h);
+        callback(canvas.toDataURL("image/jpeg", quality));
+      };
+      img.src = dataUrl;
+    }
+
+    function clearPendingChatImage(recordKey) {
+      delete pendingChatImages[recordKey];
+      const prevEl = document.getElementById("chatImgPreview_" + recordKey);
+      if (prevEl) {
+        prevEl.className = "hidden";
+        prevEl.innerHTML = "";
+      }
     }
 
     function getAllMentionCandidates() {
@@ -1605,8 +1770,10 @@
 
     async function postChatMessage(recordKey, tableType) {
       const inp = document.getElementById("chatInput_" + recordKey);
-      if (!inp || !inp.value.trim()) return;
-      const text = inp.value.trim();
+      const text = inp ? inp.value.trim() : "";
+      const pastedImg = pendingChatImages[recordKey] || "";
+      if (!text && !pastedImg) return;
+
       const isClash = tableType === "clashes";
       const list = isClash ? allClashes : allViewpoints;
       const keyCol = isClash ? "round_guid" : "vp_key";
@@ -1615,12 +1782,15 @@
 
       let messages = [];
       try { messages = JSON.parse(record.comments_json || "[]"); } catch { messages = []; }
-      messages.push({
+      const msgObj = {
         author: currentUser.name,
         role: currentUser.role,
-        text: text,
+        text: text || (pastedImg ? "[Screenshot Attached]" : ""),
         time: new Date().toISOString().slice(0, 16).replace("T", " ")
-      });
+      };
+      if (pastedImg) msgObj.image = pastedImg;
+
+      messages.push(msgObj);
       const updatedJson = JSON.stringify(messages);
 
       await fetch(`${SUPABASE_URL}/rest/v1/${tableType}?${keyCol}=eq.${encodeURIComponent(recordKey)}`, {
@@ -1629,7 +1799,9 @@
         body: JSON.stringify({ comments_json: updatedJson, updated_at: new Date().toISOString() })
       });
       record.comments_json = updatedJson;
-      inp.value = "";
+      if (inp) inp.value = "";
+      delete pendingChatImages[recordKey];
+
       if (isClash) renderClashesTable(); else renderViewpointsTable();
       updateNotificationsList();
     }
@@ -1747,6 +1919,7 @@
       document.getElementById("filterNavisStatus").value = "ALL";
       document.getElementById("filterTeamResponse").value = "ALL";
       document.getElementById("filterVpFolder").value = "ALL";
+      document.getElementById("filterVpBimStatus").value = "ALL";
       document.getElementById("filterVpStatus").value = "ALL";
       document.getElementById("globalSearchInput").value = "";
       applyFilters();
@@ -1776,7 +1949,9 @@
         let msgs = [];
         try { msgs = JSON.parse(c.comments_json || "[]"); } catch {}
         msgs.forEach(m => {
-          if (m.text && m.text.includes("@")) alerts.push({ tab: "clashes", key: c.round_guid, title: `${m.author} in ${c.clash_name}`, sub: m.text });
+          if ((m.text && m.text.includes("@")) || m.image) {
+            alerts.push({ tab: "clashes", key: c.round_guid, title: `${m.author} in ${c.clash_name}`, sub: m.image ? `📷 ${m.text}` : m.text });
+          }
         });
       });
       document.getElementById("notifBadge").textContent = alerts.length;
@@ -1799,31 +1974,91 @@
       }, 150);
     }
 
+    // HYBRID FULL-PROJECT KPI & 4 CHARTS ENGINE
+    // Automatically merges Live Published Clashes + Unpublished Statuses from __KPI_SUMMARY__ so Top Cards & Charts ALWAYS reflect 100% of the Project!
     function updateKPIsAndCharts() {
+      const proj = document.getElementById("filterProject").value;
+      const round = document.getElementById("filterRound").value;
+      const assigned = document.getElementById("filterAssigned").value;
+      const navisSt = document.getElementById("filterNavisStatus").value;
+      const teamResp = document.getElementById("filterTeamResponse").value;
+      const q = document.getElementById("globalSearchInput").value.trim();
+      const hasColFilters = Object.keys(activeColumnFilters.clashes).length > 0;
+
       const leafClashes = filteredClashes.filter(c => !c.is_group_header);
       const kpiSource = leafClashes.length > 0 ? leafClashes : filteredClashes;
 
-      document.getElementById("kpiTotal").textContent = kpiSource.length;
-      document.getElementById("kpiGroupsSub").textContent = filteredClashes.filter(c => c.is_group_header).length + " Clash Groups";
-      document.getElementById("kpiActive").textContent = kpiSource.filter(c => c.navis_status === "Active" || c.navis_status === "New").length;
-      document.getElementById("kpiFixedRevit").textContent = kpiSource.filter(c => c.team_response === "Fixed in Revit (Pending NWC)").length;
-      document.getElementById("kpiApprovalReq").textContent = kpiSource.filter(c => c.team_response === "Request Approval (Valid Exception)" || c.team_response === "On Hold / RFI Pending").length;
-      document.getElementById("kpiRejected").textContent = kpiSource.filter(c => c.navis_status === "Rejected" || c.review_decision === "Rejected").length;
-      document.getElementById("kpiResolved").textContent = kpiSource.filter(c => c.navis_status === "Resolved" || c.navis_status === "Approved").length;
+      // Live counts from table rows
+      const navisCounts = countByField(kpiSource, "navis_status");
+      const respCounts = {};
+      TEAM_UNIFIED_STATUSES.forEach(s => respCounts[s] = 0);
+      kpiSource.forEach(c => { respCounts[c.team_response] = (respCounts[c.team_response] || 0) + 1; });
+      const discCounts = countByField(kpiSource, "assigned_to");
+      const roundCounts = countByField(kpiSource, "round");
+
+      let totalAll = kpiSource.length;
+      let totalGroups = filteredClashes.filter(c => c.is_group_header).length;
+      let activeNewCount = kpiSource.filter(c => c.navis_status === "Active" || c.navis_status === "New").length;
+      let fixedRevitCount = kpiSource.filter(c => c.team_response === "Fixed in Revit (Pending NWC)").length;
+      let approvalHoldCount = kpiSource.filter(c => c.team_response === "Request Approval (Valid Exception)" || c.team_response === "On Hold / RFI Pending").length;
+      let rejectedCount = kpiSource.filter(c => c.navis_status === "Rejected" || c.review_decision === "Rejected").length;
+      let resolvedCount = kpiSource.filter(c => c.navis_status === "Resolved" || c.navis_status === "Approved").length;
+
+      // Merge Full-Project Unpublished Statuses when viewing Project/Round level (no narrow row filter active)
+      const isFullScopeView = (assigned === "ALL" && navisSt === "ALL" && teamResp === "ALL" && !q && !hasColFilters);
+      const matchingMetas = allKpiSummaries.filter(m =>
+        (proj === "ALL" || m.project_name === proj) &&
+        (round === "ALL" || m.round === round)
+      );
+
+      if (isFullScopeView && matchingMetas.length > 0) {
+        let extraUnpublishedTotal = 0;
+        let metaGroupsTotal = 0;
+
+        matchingMetas.forEach(m => {
+          const s = m.summary || {};
+          const pubSet = new Set((s.publishedStatuses || []).map(x => String(x).toLowerCase()));
+          metaGroupsTotal += (s.totalGroups || 0);
+
+          // Add counts ONLY for statuses that were NOT published to the table (so live edits on published rows stay 100% live!)
+          const byBim = s.byBimStatus || {};
+          Object.entries(byBim).forEach(([stKey, cnt]) => {
+            if (!pubSet.has(stKey.toLowerCase()) && cnt > 0) {
+              navisCounts[stKey] = (navisCounts[stKey] || 0) + cnt;
+              extraUnpublishedTotal += cnt;
+              if (stKey === "Active" || stKey === "New") activeNewCount += cnt;
+              if (stKey === "Approved" || stKey === "Resolved") resolvedCount += cnt;
+              if (stKey === "Rejected") rejectedCount += cnt;
+              roundCounts[m.round] = (roundCounts[m.round] || 0) + cnt;
+            }
+          });
+
+          const byDiscUnpub = s.unpublishedByDiscipline || {};
+          Object.entries(byDiscUnpub).forEach(([dKey, cnt]) => {
+            if (cnt > 0) discCounts[dKey] = (discCounts[dKey] || 0) + cnt;
+          });
+        });
+
+        totalAll += extraUnpublishedTotal;
+        if (metaGroupsTotal > totalGroups) totalGroups = metaGroupsTotal;
+      }
+
+      document.getElementById("kpiTotal").textContent = totalAll;
+      document.getElementById("kpiGroupsSub").textContent = totalGroups + " Clash Groups";
+      document.getElementById("kpiActive").textContent = activeNewCount;
+      document.getElementById("kpiFixedRevit").textContent = fixedRevitCount;
+      document.getElementById("kpiApprovalReq").textContent = approvalHoldCount;
+      document.getElementById("kpiRejected").textContent = rejectedCount;
+      document.getElementById("kpiResolved").textContent = resolvedCount;
 
       if (typeof Chart === "undefined") return;
 
-      const navisCounts = countByField(kpiSource, "navis_status");
       if (chartNavis) chartNavis.destroy();
       chartNavis = new Chart(document.getElementById("chartNavisStatus"), {
         type: "doughnut",
         data: { labels: Object.keys(navisCounts), datasets: [{ data: Object.values(navisCounts), backgroundColor: ["#f43f5e", "#f97316", "#eab308", "#0ea5e9", "#10b981", "#e11d48"], borderWidth: 0 }] },
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "right", labels: { color: "#cbd5e1", boxWidth: 10, font: { size: 9 } } } } }
       });
-
-      const respCounts = {};
-      TEAM_UNIFIED_STATUSES.forEach(s => respCounts[s] = 0);
-      kpiSource.forEach(c => { respCounts[c.team_response] = (respCounts[c.team_response] || 0) + 1; });
 
       if (chartTeam) chartTeam.destroy();
       chartTeam = new Chart(document.getElementById("chartTeamResponse"), {
@@ -1832,7 +2067,6 @@
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "right", labels: { color: "#cbd5e1", boxWidth: 10, font: { size: 9 } } } } }
       });
 
-      const discCounts = countByField(kpiSource, "assigned_to");
       if (chartDisc) chartDisc.destroy();
       chartDisc = new Chart(document.getElementById("chartDiscipline"), {
         type: "bar",
@@ -1840,11 +2074,10 @@
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
       });
 
-      const roundCounts = countByField(kpiSource, "round");
       if (chartRound) chartRound.destroy();
       chartRound = new Chart(document.getElementById("chartRounds"), {
         type: "bar",
-        data: { labels: Object.keys(roundCounts).map(r => "R-" + r), datasets: [{ data: Object.values(roundCounts), backgroundColor: "#14b8a6", borderRadius: 4 }] },
+        data: { labels: Object.keys(roundCounts).sort().map(r => "R-" + r), datasets: [{ data: Object.keys(roundCounts).sort().map(r => roundCounts[r]), backgroundColor: "#14b8a6", borderRadius: 4 }] },
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
       });
     }
@@ -1867,8 +2100,9 @@
     function getExportDataset(moduleName, scope) {
       if (moduleName === "viewpoints") {
         let base = scope === "current_filtered" ? [...filteredViewpoints] : [...allViewpoints];
-        if (scope === "only_active") base = base.filter(v => normalizeTeamStatus(v.status) === "Pending Action");
-        if (scope === "only_fixed_revit") base = base.filter(v => v.status === "Fixed in Revit (Pending NWC)");
+        if (scope === "only_active") base = base.filter(v => normalizeVpBimStatus(v.item_b_name) === "Open Issue" || normalizeVpBimStatus(v.item_b_name) === "Action Required");
+        if (scope === "only_fixed_revit") base = base.filter(v => normalizeVpTeamStatus(v.status) === "Updated in Model");
+        if (scope === "only_resolved") base = base.filter(v => normalizeVpBimStatus(v.item_b_name) === "Closed / Verified");
         return base;
       } else {
         let base = scope === "current_filtered" ? [...filteredClashes] : [...allClashes];
@@ -1894,6 +2128,11 @@
         if (typeof XLSX === "undefined") { showToast("Excel library loading...", "amber"); return; }
         const wb = XLSX.utils.book_new();
         const buildSheet = (rows) => {
+          if (moduleName === "viewpoints") {
+            const headers = ["#", "Project", "Folder", "Viewpoint", "Details / Annotations", "BIM Status", "Team Status"];
+            const aoa = [headers, ...rows.map(r => [r.sequence_num, r.project_name, r.folder_name, r.description, r.item_a_name, r.item_b_name, r.status])];
+            return XLSX.utils.aoa_to_sheet(aoa);
+          }
           const headers = ["Round", "Project", "Clash Test", "Clash / Group", "Discipline", "Element A", "ID A", "File A", "Element B", "ID B", "File B", "Level", "Distance", "BIM Status", "Team Status"];
           const aoa = [headers, ...rows.map(r => ["R-" + r.round, r.project_name, r.test_name, r.clash_name, r.assigned_to, r.item_a_name, r.item_a_id, r.item_a_file, r.item_b_name, r.item_b_id, r.item_b_file, r.level_grid, r.distance, r.navis_status, r.team_response])];
           return XLSX.utils.aoa_to_sheet(aoa);
@@ -1923,15 +2162,15 @@
 
     function buildCleanReportHtmlDocument(data, moduleName, reportTitle) {
       const rowsHtml = data.map(r => `<tr>
-        <td><b>R-${escapeHtml(r.round || "01")}</b></td>
-        <td>${escapeHtml(r.test_name || "-")}</td>
+        <td><b>${moduleName === "viewpoints" ? ("#" + r.sequence_num) : ("R-" + escapeHtml(r.round || "01"))}</b></td>
+        <td>${escapeHtml(r.test_name || r.folder_name || "-")}</td>
         <td><b>${escapeHtml(r.clash_name || r.description || "-")}</b></td>
         <td>${escapeHtml(r.assigned_to || r.folder_name || "-")}</td>
-        <td>A: ${escapeHtml(r.item_a_name || "")} [${escapeHtml(r.item_a_id)}] (${escapeHtml(r.item_a_file)})<br>B: ${escapeHtml(r.item_b_name || "")} [${escapeHtml(r.item_b_id)}] (${escapeHtml(r.item_b_file)})</td>
-        <td><b>${escapeHtml(r.navis_status || "Active")}</b></td>
+        <td>${moduleName === "viewpoints" ? escapeHtml(r.item_a_name || "-") : `A: ${escapeHtml(r.item_a_name || "")} [${escapeHtml(r.item_a_id)}] (${escapeHtml(r.item_a_file)})<br>B: ${escapeHtml(r.item_b_name || "")} [${escapeHtml(r.item_b_id)}] (${escapeHtml(r.item_b_file)})`}</td>
+        <td><b>${escapeHtml(moduleName === "viewpoints" ? r.item_b_name : (r.navis_status || "Active"))}</b></td>
         <td><b>${escapeHtml(r.team_response || r.status || "Pending Action")}</b></td>
       </tr>`).join("");
-      return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>ACC Report</title><style>body{font-family:'Segoe UI',sans-serif;margin:20px}table{width:100%;border-collapse:collapse;font-size:11px}th,td{border:1px solid #cbd5e1;padding:6px;text-align:left}th{background:#0d2763;color:#fff}</style></head><body><div style="display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid #008529;padding-bottom:10px;margin-bottom:15px"><h2>ACC Enterprise BIM Report — ${escapeHtml(reportTitle)}</h2>${ACC_SVG_RAW}</div><table><thead><tr><th>Round</th><th>Test</th><th>Clash / Item</th><th>Discipline</th><th>Elements & NWC</th><th>BIM Status</th><th>Team Status</th></tr></thead><tbody>${rowsHtml}</tbody></table></body></html>`;
+      return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>ACC Report</title><style>body{font-family:'Segoe UI',sans-serif;margin:20px}table{width:100%;border-collapse:collapse;font-size:11px}th,td{border:1px solid #cbd5e1;padding:6px;text-align:left}th{background:#0d2763;color:#fff}</style></head><body><div style="display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid #008529;padding-bottom:10px;margin-bottom:15px"><h2>ACC Enterprise BIM Report — ${escapeHtml(reportTitle)}</h2>${ACC_SVG_RAW}</div><table><thead><tr><th>Round / #</th><th>Test / Folder</th><th>Item</th><th>Discipline / Folder</th><th>Details & Elements</th><th>BIM Status</th><th>Team Status</th></tr></thead><tbody>${rowsHtml}</tbody></table></body></html>`;
     }
 
     function changePageSize(val) { pageSize = parseInt(val, 10) || 100; currentPage = 1; renderClashesTable(); }
@@ -1950,7 +2189,6 @@
       window._toastTimer = setTimeout(() => t.classList.add("hidden"), 4500);
     }
 
-    // Copy-Paste Safe HTML Escaping (Using split strings so chat/markdown never unescapes entities into raw quotes)
     function escapeHtml(str) {
       const eAmp = '&' + 'amp;';
       const eLt = '&' + 'lt;';
