@@ -18,9 +18,36 @@
       50% { background-color: rgba(14, 165, 233, 0.08); }
     }
     .row-highlight-flash { animation: pulseHighlight 1.5s ease-in-out 3; }
+
+    /* Crisp CSS Tree-Grid Connectors for Group Child Rows */
+    .tree-branch-cell { position: relative; padding-left: 24px; }
+    .tree-branch-cell::before {
+      content: "";
+      position: absolute;
+      left: 10px;
+      top: -10px;
+      bottom: -10px;
+      width: 2px;
+      background: rgba(20, 184, 166, 0.45);
+    }
+    .tree-branch-last::before {
+      bottom: 50%;
+    }
+    .tree-branch-cell::after {
+      content: "";
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      width: 10px;
+      height: 2px;
+      background: rgba(20, 184, 166, 0.55);
+    }
   </style>
 </head>
 <body class="bg-[#070b12] text-slate-200 min-h-screen font-sans antialiased overflow-x-hidden">
+
+  <!-- Hidden shared file input for chat image attachment -->
+  <input id="globalChatFileInput" type="file" accept="image/*" class="hidden" onchange="onGlobalChatFileSelected(event)" />
 
   <!-- Identity Gate Modal -->
   <div id="identityGateModal" class="hidden fixed inset-0 bg-[#070b12]/95 backdrop-blur-md flex items-center justify-center p-4 z-50">
@@ -84,7 +111,6 @@
   <!-- 1. TOP SINGLE-ROW BALANCED HEADER -->
   <header class="w-full bg-[#0d1526] border-b border-slate-800 px-3 py-2 sticky top-0 z-40 shadow-lg">
     <div class="w-full flex items-center justify-between gap-3 flex-wrap xl:flex-nowrap">
-      <!-- Left: Logo + Title + Locked Project Pill + Subtitle -->
       <div class="flex items-center gap-2.5 min-w-0">
         <div class="w-10 h-10 rounded-xl bg-white border border-slate-300 shadow-md flex items-center justify-center p-1 shrink-0" title="Advanced Consultancy Center (ACC)">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 360" class="w-full h-full">
@@ -107,9 +133,7 @@
         </div>
       </div>
 
-      <!-- Right: All Action Controls in the Same Single Row -->
       <div class="flex items-center gap-1.5 flex-wrap sm:flex-nowrap shrink-0">
-        <!-- Module Tabs -->
         <div class="bg-[#070b12] p-0.5 rounded-lg border border-slate-800 flex gap-1">
           <button id="tabBtnClashes" onclick="switchMainTab('clashes')" class="px-2.5 py-1 rounded-md text-[11px] font-bold bg-sky-600 text-white transition">
             ⚡ Clashes (<span id="tabCountClashes">0</span>)
@@ -119,13 +143,11 @@
           </button>
         </div>
 
-        <!-- Team Directory Button -->
         <button onclick="toggleTeamDirectoryModal()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-teal-300 px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1" title="View Project Team Directory & Roles">
           <span>👥 Team</span>
           <span id="teamCountBadge" class="px-1.5 rounded-full text-[9px] bg-teal-950 text-teal-300 border border-teal-700">0</span>
         </button>
 
-        <!-- STRICT READ-ONLY LOCKED USER & ROLE BADGE -->
         <div class="flex items-center gap-1.5 bg-[#070b12] border border-slate-700 rounded-lg px-2.5 py-1 select-none" title="Verified Identity & Role (Read-Only Locked)">
           <span id="activeRoleIcon" class="text-xs">🛡️</span>
           <span id="activeUserDisplay" class="text-[11px] font-extrabold text-white truncate max-w-[125px]">Verifying...</span>
@@ -133,7 +155,6 @@
           <span class="text-[10px] text-slate-500" title="Identity Locked">🔒</span>
         </div>
 
-        <!-- Notifications Bell -->
         <div class="relative">
           <button onclick="toggleNotificationsPanel()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 px-2 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1" title="Mentions & Alerts">
             <span>🔔</span>
@@ -148,23 +169,19 @@
           </div>
         </div>
 
-        <!-- Charts Toggle -->
         <button id="btnToggleCharts" onclick="toggleAnalyticsSection()" class="bg-teal-950/90 hover:bg-teal-900 border border-teal-700 text-teal-200 px-2 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1 transition" title="Show / Hide Analytics Charts">
           <span>📊</span>
           <span id="chartsToggleIcon">▴</span>
         </button>
 
-        <!-- Auto-Sync -->
         <button id="btnAutoSync" onclick="toggleAutoSync()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-emerald-300 px-2 py-1 rounded-lg text-[11px] font-bold" title="Smart Cloud Auto-Sync (Metadata Only, Every 15s)">
           ⚡ Sync: ON
         </button>
 
-        <!-- Export -->
         <button onclick="openExportModal()" class="bg-teal-600 hover:bg-teal-500 text-white px-2.5 py-1 rounded-lg text-[11px] font-bold shadow">
           📥 Export
         </button>
 
-        <!-- Refresh -->
         <button onclick="reloadAllCloudData(null, null, false, true)" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white px-2 py-1 rounded-lg text-[11px] font-bold" title="Refresh Cloud Data">
           🔄
         </button>
@@ -234,7 +251,6 @@
     <section class="bg-[#0d1526] border border-slate-800 rounded-xl p-2.5 mb-2.5 shadow">
       <div class="w-full flex items-end justify-between gap-2 flex-wrap xl:flex-nowrap">
         
-        <!-- Clash Filters (Compact Single-Row) -->
         <div id="clashTopFilters" class="flex items-end gap-2 flex-wrap xl:flex-nowrap">
           <div>
             <label class="block text-[9px] uppercase text-slate-400 font-bold mb-0.5">Project NWF</label>
@@ -286,7 +302,6 @@
           </div>
         </div>
 
-        <!-- Viewpoints Filters (Compact Single-Row) -->
         <div id="vpTopFilters" class="hidden items-end gap-2 flex-wrap xl:flex-nowrap">
           <div>
             <label class="block text-[9px] uppercase text-slate-400 font-bold mb-0.5">Folder</label>
@@ -314,7 +329,6 @@
           </div>
         </div>
 
-        <!-- Right Side of Filter Row: Search + Reset + Role-Aware Bulk Action -->
         <div class="flex items-end gap-2 flex-wrap xl:flex-nowrap shrink-0">
           <div>
             <label class="block text-[9px] uppercase text-slate-400 font-bold mb-0.5">Search</label>
@@ -322,7 +336,6 @@
           </div>
           <button onclick="clearAllColumnFilters()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 px-2 py-1 rounded-lg text-[11px] font-semibold">✕ Reset</button>
 
-          <!-- Bulk Action Bar -->
           <div id="bulkActionContainer" class="flex items-center gap-1.5 bg-sky-950/40 border border-sky-800/70 rounded-lg px-2 py-0.5">
             <span class="text-[11px] font-bold text-sky-300"><span id="selectedCountLabel">0</span> Sel:</span>
             <select id="bulkResponseSelect" class="bg-[#070b12] border border-slate-700 rounded px-1.5 py-0.5 text-[11px] text-white"></select>
@@ -362,7 +375,7 @@
             <th class="p-2.5 w-24">Snapshot</th>
             <th class="p-2.5 w-20"><div class="flex items-center justify-between gap-1"><span>Round</span><button onclick="openExcelFilterMenu(event, 'round', 'clashes')" class="px-1">🔽</button></div></th>
             <th class="p-2.5 w-36"><div class="flex items-center justify-between gap-1"><span>Clash Test</span><button onclick="openExcelFilterMenu(event, 'test_name', 'clashes')" class="px-1">🔽</button></div></th>
-            <th class="p-2.5 min-w-[150px]"><div class="flex items-center justify-between gap-1"><span>Clash Item</span><button onclick="openExcelFilterMenu(event, 'clash_name', 'clashes')" class="px-1">🔽</button></div></th>
+            <th class="p-2.5 min-w-[160px]"><div class="flex items-center justify-between gap-1"><span>Clash Item</span><button onclick="openExcelFilterMenu(event, 'clash_name', 'clashes')" class="px-1">🔽</button></div></th>
             <th class="p-2.5 w-28"><div class="flex items-center justify-between gap-1"><span>Discipline</span><button onclick="openExcelFilterMenu(event, 'assigned_to', 'clashes')" class="px-1">🔽</button></div></th>
             <th class="p-2.5 w-64"><div class="flex items-center justify-between gap-1"><span>Revit Elements</span><button onclick="openExcelFilterMenu(event, 'item_a_file', 'clashes')" class="px-1">🔽</button></div></th>
             <th class="p-2.5 w-28"><div class="flex items-center justify-between gap-1"><span>Level / Dist</span><button onclick="openExcelFilterMenu(event, 'level_grid', 'clashes')" class="px-1">🔽</button></div></th>
@@ -476,7 +489,7 @@
     const SUPABASE_KEY = "sb_publishable_R96kfu1_6AJrLGw9zD8E5Q_L6vO8VDf";
     const REVIT_PORTS = [51965, 51966, 51967, 51968, 51969, 51970, 51971, 51972, 51973, 51974];
 
-    // Lightweight metadata column lists (excludes image_base64 to cut egress by >95%)
+    // Lightweight metadata column lists (excludes image_base64 to cut Supabase egress by >95%)
     const CLASH_META_COLS = "round_guid,guid,project_name,round,sequence_num,test_name,is_group_header,group_name,parent_group_guid,clash_name,assigned_to,level_grid,distance,item_a_id,item_a_name,item_a_file,item_b_id,item_b_name,item_b_file,navis_status,team_response,reassigned_to,review_decision,comments_json,updated_at";
     const VP_META_COLS = "vp_key,project_name,sequence_num,folder_name,description,item_a_id,item_a_name,item_a_file,item_b_id,item_b_name,item_b_file,status,comments_json,updated_at";
 
@@ -515,6 +528,10 @@
     const clashImageCache = new Map();
     const vpImageCache = new Map();
     const inFlightImageKeys = new Set();
+
+    // Pending pasted/selected chat screenshots per row key
+    const pendingChatImages = new Map();
+    let activeFilePickerKey = null;
 
     let currentUser = { name: "Unverified", email: "", role: "BIM Coordinator", discipline: "ALL" };
     let allClashes = [], filteredClashes = [], allViewpoints = [], filteredViewpoints = [], projectMembers = [];
@@ -645,7 +662,7 @@
         picker.innerHTML = projectMembers.map(m => {
           const rNorm = normalizeRoleName(m.role);
           const icon = getRoleIcon(rNorm);
-          return `<div onclick="selectVerifiedMember('${escapeHtml(m.member_name)}', '${escapeHtml(rNorm)}', '${escapeHtml(m.email || '')}', '${escapeHtml(m.discipline_team || 'ALL')}')" class="p-2.5 rounded-xl bg-[#070b12] hover:bg-sky-950/60 border border-slate-800 hover:border-sky-600 cursor-pointer flex items-center justify-between transition">
+          return `<div onclick="selectVerifiedMember('${escapeJsAttr(m.member_name)}', '${escapeJsAttr(rNorm)}', '${escapeJsAttr(m.email || '')}', '${escapeJsAttr(m.discipline_team || 'ALL')}')" class="p-2.5 rounded-xl bg-[#070b12] hover:bg-sky-950/60 border border-slate-800 hover:border-sky-600 cursor-pointer flex items-center justify-between transition">
             <div class="flex items-center gap-2">
               <span class="text-base">${icon}</span>
               <div>
@@ -747,7 +764,7 @@
     function startAutoSyncLoop() {
       if (autoSyncTimer) clearInterval(autoSyncTimer);
       autoSyncTimer = setInterval(async () => {
-        if (!autoSyncEnabled || document.hidden) return;
+        if (!autoSyncEnabled || document.hidden || pendingChatImages.size > 0) return;
         const activeEl = document.activeElement;
         if (activeEl && (activeEl.tagName === "INPUT" || activeEl.tagName === "SELECT")) return;
         await reloadAllCloudData(null, null, true, false);
@@ -851,12 +868,16 @@
         const set = new Set();
         if (cRes.ok) (await cRes.json()).forEach(r => { if (r.project_name) set.add(r.project_name); });
         if (vRes.ok) (await vRes.json()).forEach(r => { if (r.project_name) set.add(r.project_name); });
-        if (lockedProjectName) set.add(lockedProjectName);
+        if (lockedProjectName) {
+          const ciMatch = Array.from(set).find(p => p.toLowerCase() === lockedProjectName.toLowerCase());
+          if (ciMatch) lockedProjectName = ciMatch;
+          else set.add(lockedProjectName);
+        }
         knownProjectNames = Array.from(set).sort();
       } catch {}
     }
 
-    // Bandwidth-Optimized Metadata Sync with automatic HTTP 400 fallback
+    // Bandwidth-Optimized Metadata Sync with automatic HTTP 400 fallback & case-insensitive project match
     async function reloadAllCloudData(preselectProject = null, preselectRound = null, isSilentAutoPoll = false, forceImageCacheReset = false) {
       if (!isSilentAutoPoll) setCloudPill("⏳ Syncing...", "amber");
 
@@ -877,6 +898,11 @@
         const dropdownVal = document.getElementById("filterProject")?.value || "ALL";
         let targetProj = preselectProject || lockedProjectName || (dropdownVal !== "ALL" ? dropdownVal : null);
         if (targetProj === "ALL") targetProj = null;
+
+        if (targetProj && knownProjectNames.length > 0) {
+          const ci = knownProjectNames.find(p => p.toLowerCase() === targetProj.toLowerCase());
+          if (ci) targetProj = ci;
+        }
 
         const projFilterQuery = targetProj ? `&project_name=eq.${encodeURIComponent(targetProj)}` : "";
         const clashSelectExpr = useFullClashSelectFallback ? "*" : CLASH_META_COLS;
@@ -987,7 +1013,7 @@
           }
         }
 
-        populateDynamicDropdowns(preselectProject, preselectRound);
+        populateDynamicDropdowns(targetProj || preselectProject, preselectRound);
         applyFilters();
         applyVpFilters();
         updateNotificationsList();
@@ -1059,9 +1085,9 @@
 
     function updateThumbCellInDom(dataset, key, imgBase64, caption) {
       const cells = document.querySelectorAll(`[data-thumb-dataset="${dataset}"]`);
-      const sizeClass = dataset === "clashes" ? "w-20 h-14" : "w-24 h-16";
       for (const cell of cells) {
         if (cell.getAttribute("data-thumb-key") !== key) continue;
+        const sizeClass = cell.getAttribute("data-thumb-size") || (dataset === "clashes" ? "w-20 h-14" : "w-24 h-16");
         if (imgBase64 && imgBase64.startsWith("data:image")) {
           const img = document.createElement("img");
           img.src = imgBase64;
@@ -1242,6 +1268,13 @@
       arr.sort((a, b) => String(a[f] ?? "").localeCompare(String(b[f] ?? ""), undefined, { numeric: true }) * mul);
     }
 
+    function parseGroupDisplayTitle(rawName) {
+      const s = String(rawName || "");
+      const m = s.match(/^(.*?)\s*\((\d+\s*Clashes?)\)\s*$/i);
+      if (m) return { base: m[1].trim(), countLabel: m[2].trim() };
+      return { base: s, countLabel: "" };
+    }
+
     function renderClashesTable() {
       const tbody = document.getElementById("clashesTableBody");
       tbody.innerHTML = "";
@@ -1271,35 +1304,92 @@
         const isChecked = selectedRowKeys.has(c.round_guid);
         const isRejected = c.navis_status === "Rejected" || c.review_decision === "Rejected";
 
+        const prevRow = idx > 0 ? pageItems[idx - 1] : null;
+        const nextRow = idx < pageItems.length - 1 ? pageItems[idx + 1] : null;
+        const isNewTestBoundary = prevRow !== null && prevRow.test_name !== c.test_name;
+        const isLastChildInGroup = isSubClash && (!nextRow || nextRow.is_group_header || nextRow.parent_group_guid !== c.parent_group_guid);
+
         const tr = document.createElement("tr");
         tr.id = "row_" + c.round_guid;
 
+        const boundaryClass = isNewTestBoundary ? " border-t-2 border-t-sky-600/80" : "";
         if (isRejected) {
-          tr.className = "bg-rose-950/35 hover:bg-rose-900/40 border-l-4 border-rose-500";
+          tr.className = "bg-rose-950/35 hover:bg-rose-900/40 border-l-4 border-l-rose-500" + boundaryClass;
         } else if (isGroup) {
-          tr.className = "bg-gradient-to-r from-teal-950/80 via-slate-900/95 to-slate-900/90 hover:from-teal-900/80 border-l-4 border-teal-400 border-t border-b border-teal-800/50";
+          tr.className = "bg-[#0F253B] hover:bg-[#14314E] border-l-4 border-l-teal-400 border-t border-b border-sky-800/70" + boundaryClass;
         } else if (isSubClash) {
-          tr.className = "bg-[#070b12]/85 hover:bg-slate-800/50 border-l-4 border-slate-700";
+          tr.className = "bg-[#070D19] hover:bg-[#0E192E] border-l-4 border-l-teal-700/70" + boundaryClass;
         } else {
-          tr.className = "hover:bg-slate-800/50";
+          tr.className = "bg-[#0D1526] hover:bg-slate-800/60 border-l-4 border-l-transparent" + boundaryClass;
         }
 
+        const thumbSize = isSubClash ? "w-16 h-11" : "w-20 h-14";
         const hasCached = clashImageCache.has(c.round_guid);
         const cachedSrc = hasCached ? clashImageCache.get(c.round_guid) : (c.image_base64 || "");
         const imgHtml = cachedSrc && cachedSrc.startsWith("data:image")
-          ? `<img src="${cachedSrc}" onclick="showModalByKey('clashes', '${escapeHtml(c.round_guid)}', '${escapeHtml(c.clash_name)}')" class="w-20 h-14 object-cover rounded-lg cursor-pointer border border-slate-700 hover:scale-105 transition" />`
-          : `<div class="w-20 h-14 bg-slate-800 rounded-lg flex items-center justify-center text-[9px] text-slate-500">${hasCached ? "No Image" : "Loading..."}</div>`;
+          ? `<img src="${cachedSrc}" onclick="showModalByKey('clashes', '${escapeJsAttr(c.round_guid)}', '${escapeJsAttr(c.clash_name)}')" class="${thumbSize} object-cover rounded-lg cursor-pointer border border-slate-700 hover:scale-105 transition" />`
+          : `<div class="${thumbSize} bg-slate-800 rounded-lg flex items-center justify-center text-[9px] text-slate-500">${hasCached ? "No Image" : "Loading..."}</div>`;
 
-        const collapseBtn = isGroup
-          ? `<button onclick="toggleGroupCollapse('${escapeHtml(c.guid)}')" class="mr-1.5 px-1.5 py-0.5 rounded bg-teal-800 hover:bg-teal-700 text-teal-100 text-[10px] font-extrabold" title="Expand / Collapse Group">${collapsedGroups.has(c.guid) ? "▶" : "▼"}</button>`
-          : (isSubClash ? `<span class="text-teal-500 font-bold mr-1 pl-3">↳</span>` : "");
+        const snapCellExtra = isSubClash ? "pl-5" : "p-2";
 
         const checkboxOnClick = isGroup
-          ? `onclick="handleGroupCheckboxClick(event, '${escapeHtml(c.round_guid)}', '${escapeHtml(c.guid)}', '${escapeHtml(c.round)}')"`
-          : `onclick="handleRowCheckboxClick(event, '${escapeHtml(c.round_guid)}', ${startIdx + idx})"`;
+          ? `onclick="handleGroupCheckboxClick(event, '${escapeJsAttr(c.round_guid)}', '${escapeJsAttr(c.guid)}', '${escapeJsAttr(c.round)}')"`
+          : `onclick="handleRowCheckboxClick(event, '${escapeJsAttr(c.round_guid)}', ${startIdx + idx})"`;
+
+        // Clash Test column: muted indicator on sub-clashes so hierarchy stays clean
+        const testColHtml = isSubClash
+          ? `<div class="text-[10px] text-slate-500 italic" title="${escapeHtml(c.test_name)}">Sub-clash</div>`
+          : `<div class="font-medium ${isGroup ? 'text-sky-200 font-semibold' : 'text-slate-200'} text-[11px] break-words">${escapeHtml(c.test_name)}</div>`;
+
+        // Clash Item column: distinct Group badge + count pill vs recessed Tree-Connected Sub-clash vs Standalone
+        let clashItemHtml = "";
+        if (isGroup) {
+          const parsedGrp = parseGroupDisplayTitle(c.clash_name);
+          const countPill = parsedGrp.countLabel
+            ? `<span class="ml-1.5 px-1.5 py-0.5 rounded-full bg-sky-950/90 text-sky-300 border border-sky-700/80 text-[9px] font-bold shrink-0">${escapeHtml(parsedGrp.countLabel)}</span>`
+            : "";
+          clashItemHtml =
+            `<div class="flex items-center flex-wrap gap-y-1">` +
+              `<button onclick="toggleGroupCollapse('${escapeJsAttr(c.guid)}')" class="mr-1.5 px-1.5 py-0.5 rounded bg-teal-700 hover:bg-teal-600 text-white text-[10px] font-extrabold shadow-sm" title="Expand / Collapse Group">${collapsedGroups.has(c.guid) ? "▶" : "▼"}</button>` +
+              `<span class="mr-1.5 px-1.5 py-0.5 rounded bg-teal-500/20 text-teal-300 border border-teal-400/50 text-[9px] font-black tracking-wider uppercase shrink-0">GROUP</span>` +
+              `<span onclick="toggleGroupCollapse('${escapeJsAttr(c.guid)}')" class="text-white font-extrabold text-[11.5px] cursor-pointer hover:text-teal-200 transition">${escapeHtml(parsedGrp.base)}</span>` +
+              countPill +
+            `</div>`;
+        } else if (isSubClash) {
+          clashItemHtml =
+            `<div class="tree-branch-cell ${isLastChildInGroup ? 'tree-branch-last' : ''} py-0.5">` +
+              `<span class="text-slate-100 font-semibold text-[11px]">${escapeHtml(c.clash_name)}</span>` +
+            `</div>`;
+        } else {
+          clashItemHtml = `<div class="text-white font-bold text-[11px]">${escapeHtml(c.clash_name)}</div>`;
+        }
+
+        // Revit Elements column: clean Group Container card instead of non-functional ID: GROUP buttons
+        let elementsColHtml = "";
+        if (isGroup) {
+          const isExp = !collapsedGroups.has(c.guid);
+          elementsColHtml =
+            `<div onclick="toggleGroupCollapse('${escapeJsAttr(c.guid)}')" class="bg-[#081524] hover:bg-[#0D2138] border border-sky-800/70 rounded-lg px-2.5 py-1.5 cursor-pointer flex items-center justify-between gap-2 transition" title="Expand group to inspect and isolate Revit Element IDs">` +
+              `<div class="min-w-0">` +
+                `<div class="text-[10px] font-bold text-teal-300 truncate">${escapeHtml(c.item_a_name || "Grouped Clashes")}</div>` +
+                `<div class="text-[9px] text-slate-400">Expand group to isolate Revit IDs</div>` +
+              `</div>` +
+              `<span class="px-1.5 py-0.5 rounded bg-sky-950 text-sky-300 border border-sky-700/80 text-[9px] font-bold shrink-0">${isExp ? "Hide" : "Expand"}</span>` +
+            `</div>`;
+        } else {
+          elementsColHtml =
+            `<div class="bg-[#070b12] border border-slate-800 rounded p-1 mb-1 flex items-center justify-between gap-1">` +
+              `<span class="text-rose-400 font-bold truncate max-w-[115px] text-[10px]" title="${escapeHtml(c.item_a_file)}">A: ${escapeHtml(c.item_a_name)}</span>` +
+              `<button onclick="copyAndIsolateInRevit('${escapeJsAttr(c.project_name)}', '${escapeJsAttr(c.item_a_id)}', '${escapeJsAttr(c.item_b_id)}', '${escapeJsAttr(c.item_a_file)}', '${escapeJsAttr(c.item_b_file)}', '${escapeJsAttr(c.item_a_name)}', '${escapeJsAttr(c.item_b_name)}')" class="bg-sky-950 hover:bg-sky-800 text-sky-200 border border-sky-700 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold">ID: ${escapeHtml(c.item_a_id)} 🎯</button>` +
+            `</div>` +
+            `<div class="bg-[#070b12] border border-slate-800 rounded p-1 flex items-center justify-between gap-1">` +
+              `<span class="text-emerald-400 font-bold truncate max-w-[115px] text-[10px]" title="${escapeHtml(c.item_b_file)}">B: ${escapeHtml(c.item_b_name)}</span>` +
+              `<button onclick="copyAndIsolateInRevit('${escapeJsAttr(c.project_name)}', '${escapeJsAttr(c.item_b_id)}', '${escapeJsAttr(c.item_a_id)}', '${escapeJsAttr(c.item_b_file)}', '${escapeJsAttr(c.item_a_file)}', '${escapeJsAttr(c.item_b_name)}', '${escapeJsAttr(c.item_a_name)}')" class="bg-emerald-950 hover:bg-emerald-800 text-emerald-200 border border-emerald-700 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold">ID: ${escapeHtml(c.item_b_id)} 🎯</button>` +
+            `</div>`;
+        }
 
         const bimStatusHtml = allowBimEdit
-          ? `<select onchange="updateClashBimStatus('${escapeHtml(c.round_guid)}', this.value, ${isGroup}, '${escapeHtml(c.guid)}')" class="w-full bg-[#070b12] border border-sky-700/80 rounded-lg px-2 py-1 text-[11px] font-bold text-sky-200 focus:outline-none">
+          ? `<select onchange="updateClashBimStatus('${escapeJsAttr(c.round_guid)}', this.value, ${isGroup}, '${escapeJsAttr(c.guid)}')" class="w-full bg-[#070b12] border border-sky-700/80 rounded-lg px-2 py-1 text-[11px] font-bold text-sky-200 focus:outline-none">
               ${BIM_COORDINATOR_STATUSES.map(st => `<option value="${st}" ${c.navis_status === st ? "selected" : ""}>🛡️ ${st}</option>`).join("")}
              </select>
              <div id="bimSync_${escapeHtml(c.round_guid)}" class="text-[9px] text-slate-400 mt-1">✓ BIM Control</div>`
@@ -1309,7 +1399,7 @@
              </div>`;
 
         const teamStatusHtml = allowTeamEdit
-          ? `<select onchange="updateClashTeamResponse('${escapeHtml(c.round_guid)}', this.value, ${isGroup}, '${escapeHtml(c.guid)}')" class="w-full bg-[#070b12] border border-teal-700/80 rounded-lg px-2 py-1 text-[11px] font-bold text-teal-200 focus:outline-none">
+          ? `<select onchange="updateClashTeamResponse('${escapeJsAttr(c.round_guid)}', this.value, ${isGroup}, '${escapeJsAttr(c.guid)}')" class="w-full bg-[#070b12] border border-teal-700/80 rounded-lg px-2 py-1 text-[11px] font-bold text-teal-200 focus:outline-none">
               ${TEAM_UNIFIED_STATUSES.map(st => `<option value="${st}" ${c.team_response === st ? "selected" : ""}>🔧 ${st}</option>`).join("")}
              </select>
              <div id="syncStatus_${escapeHtml(c.round_guid)}" class="text-[9px] text-slate-400 mt-1">✓ Eng Control</div>`
@@ -1320,21 +1410,12 @@
 
         tr.innerHTML =
           `<td class="p-2 text-center"><input type="checkbox" class="w-3.5 h-3.5 accent-teal-500 cursor-pointer" ${isChecked ? "checked" : ""} ${checkboxOnClick} /></td>` +
-          `<td class="p-2" data-thumb-dataset="clashes" data-thumb-key="${escapeHtml(c.round_guid)}">${imgHtml}</td>` +
+          `<td class="${snapCellExtra} py-2" data-thumb-dataset="clashes" data-thumb-key="${escapeHtml(c.round_guid)}" data-thumb-size="${thumbSize}">${imgHtml}</td>` +
           `<td class="p-2"><span class="px-1.5 py-0.5 rounded bg-slate-800 text-teal-300 border border-slate-700 font-bold text-[11px]">R-${escapeHtml(c.round)}</span><div class="text-[9px] text-slate-400 mt-0.5 truncate max-w-[80px]">${escapeHtml(c.project_name)}</div></td>` +
-          `<td class="p-2 font-medium text-slate-200 text-[11px] break-words">${escapeHtml(c.test_name)}</td>` +
-          `<td class="p-2"><div class="flex items-center">${collapseBtn}<span class="${isGroup ? 'text-teal-200 font-black cursor-pointer' : 'text-white font-semibold'} text-[11px]" ${isGroup ? `onclick="toggleGroupCollapse('${escapeHtml(c.guid)}')"` : ""}>${escapeHtml(c.clash_name)}</span></div></td>` +
+          `<td class="p-2">${testColHtml}</td>` +
+          `<td class="p-2">${clashItemHtml}</td>` +
           `<td class="p-2"><span class="px-2 py-0.5 rounded bg-sky-950 text-sky-300 border border-sky-800 font-bold text-[11px]">${escapeHtml(c.assigned_to)}</span></td>` +
-          `<td class="p-2">` +
-            `<div class="bg-[#070b12] border border-slate-800 rounded p-1 mb-1 flex items-center justify-between gap-1">` +
-              `<span class="text-rose-400 font-bold truncate max-w-[115px] text-[10px]" title="${escapeHtml(c.item_a_file)}">A: ${escapeHtml(c.item_a_name)}</span>` +
-              `<button onclick="copyAndIsolateInRevit('${escapeHtml(c.project_name)}', '${escapeHtml(c.item_a_id)}', '${escapeHtml(c.item_b_id)}', '${escapeHtml(c.item_a_file)}', '${escapeHtml(c.item_b_file)}', '${escapeHtml(c.item_a_name)}', '${escapeHtml(c.item_b_name)}')" class="bg-sky-950 hover:bg-sky-800 text-sky-200 border border-sky-700 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold">ID: ${escapeHtml(c.item_a_id)} 🎯</button>` +
-            `</div>` +
-            `<div class="bg-[#070b12] border border-slate-800 rounded p-1 flex items-center justify-between gap-1">` +
-              `<span class="text-emerald-400 font-bold truncate max-w-[115px] text-[10px]" title="${escapeHtml(c.item_b_file)}">B: ${escapeHtml(c.item_b_name)}</span>` +
-              `<button onclick="copyAndIsolateInRevit('${escapeHtml(c.project_name)}', '${escapeHtml(c.item_b_id)}', '${escapeHtml(c.item_a_id)}', '${escapeHtml(c.item_b_file)}', '${escapeHtml(c.item_a_file)}', '${escapeHtml(c.item_b_name)}', '${escapeHtml(c.item_a_name)}')" class="bg-emerald-950 hover:bg-emerald-800 text-emerald-200 border border-emerald-700 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold">ID: ${escapeHtml(c.item_b_id)} 🎯</button>` +
-            `</div>` +
-          `</td>` +
+          `<td class="p-2">${elementsColHtml}</td>` +
           `<td class="p-2 text-[11px]"><div class="font-bold text-slate-200">${escapeHtml(c.level_grid)}</div><div class="text-slate-400 text-[10px]">${escapeHtml(c.distance)}</div></td>` +
           `<td class="p-2 bg-sky-950/10 border-l border-r border-slate-800/80">${bimStatusHtml}</td>` +
           `<td class="p-2 bg-teal-950/10 border-r border-slate-800/80">${teamStatusHtml}</td>` +
@@ -1507,28 +1588,29 @@
         const isCollapsed = collapsedVpFolders.has(folderName);
 
         const folderTr = document.createElement("tr");
-        folderTr.className = "bg-gradient-to-r from-teal-950/80 via-slate-900/95 to-slate-900/90 hover:from-teal-900/80 border-l-4 border-teal-400 border-t border-b border-teal-800/50 cursor-pointer";
+        folderTr.className = "bg-[#0F253B] hover:bg-[#14314E] border-l-4 border-l-teal-400 border-t border-b border-sky-800/70 cursor-pointer";
         folderTr.onclick = () => toggleVpFolderCollapse(folderName);
         folderTr.innerHTML =
           `<td class="p-2 text-center font-bold text-teal-300">-</td>` +
           `<td class="p-2 text-[10px] font-extrabold text-teal-400 uppercase">FOLDER</td>` +
           `<td class="p-2" colspan="6">` +
             `<div class="flex items-center gap-2">` +
-              `<button class="px-1.5 py-0.5 rounded bg-teal-800 hover:bg-teal-700 text-teal-100 text-[10px] font-extrabold">${isCollapsed ? "▶" : "▼"}</button>` +
-              `<span class="text-teal-200 font-black text-xs">📁 ${escapeHtml(folderName)}</span>` +
-              `<span class="px-2 py-0.5 rounded-full bg-slate-800 text-sky-300 text-[10px] font-bold border border-slate-700">${vps.length} Viewpoints</span>` +
+              `<button class="px-1.5 py-0.5 rounded bg-teal-700 hover:bg-teal-600 text-white text-[10px] font-extrabold">${isCollapsed ? "▶" : "▼"}</button>` +
+              `<span class="text-white font-extrabold text-xs">📁 ${escapeHtml(folderName)}</span>` +
+              `<span class="px-2 py-0.5 rounded-full bg-sky-950 text-sky-300 text-[10px] font-bold border border-sky-700/80">${vps.length} Viewpoints</span>` +
             `</div>` +
           `</td>`;
         tbody.appendChild(folderTr);
 
         if (isCollapsed) return;
 
-        vps.forEach(vp => {
+        vps.forEach((vp, vIdx) => {
           visibleVps.push(vp);
+          const isLastVp = vIdx === vps.length - 1;
           const hasCached = vpImageCache.has(vp.vp_key);
           const cachedSrc = hasCached ? vpImageCache.get(vp.vp_key) : (vp.image_base64 || "");
           const imgHtml = cachedSrc && cachedSrc.startsWith("data:image")
-            ? `<img src="${cachedSrc}" onclick="showModalByKey('viewpoints', '${escapeHtml(vp.vp_key)}', '${escapeHtml(vp.description)}')" class="w-24 h-16 object-cover rounded-lg cursor-pointer border border-slate-700" />`
+            ? `<img src="${cachedSrc}" onclick="showModalByKey('viewpoints', '${escapeJsAttr(vp.vp_key)}', '${escapeJsAttr(vp.description)}')" class="w-24 h-16 object-cover rounded-lg cursor-pointer border border-slate-700" />`
             : `<div class="w-24 h-16 bg-slate-800 rounded-lg flex items-center justify-center text-[10px] text-slate-500">${hasCached ? "No Image" : "Loading..."}</div>`;
 
           const currentVpTeamVal = normalizeTeamStatus(vp.status);
@@ -1537,28 +1619,28 @@
             : ((vp.status || "").includes("Approved") ? "Approved" : ((vp.status || "").includes("Unreviewed") ? "Rejected" : "Active"));
 
           const bimVpHtml = allowBimEdit
-            ? `<select onchange="updateViewpointBimStatus('${escapeHtml(vp.vp_key)}', this.value)" class="w-full bg-[#070b12] border border-sky-700 rounded-lg px-2 py-1 text-[11px] font-bold text-sky-200">
+            ? `<select onchange="updateViewpointBimStatus('${escapeJsAttr(vp.vp_key)}', this.value)" class="w-full bg-[#070b12] border border-sky-700 rounded-lg px-2 py-1 text-[11px] font-bold text-sky-200">
                 ${BIM_COORDINATOR_STATUSES.map(st => `<option value="${st}" ${bimVpState === st ? "selected" : ""}>🛡️ ${st}</option>`).join("")}
                </select>`
             : `<div class="px-2 py-1 rounded-lg border ${getBimStatusBadgeClass(bimVpState)} text-[11px] font-bold flex justify-between"><span>${bimVpState}</span><span>🔒</span></div>`;
 
           const teamVpHtml = allowTeamEdit
-            ? `<select onchange="updateViewpointStatus('${escapeHtml(vp.vp_key)}', this.value)" class="w-full bg-[#070b12] border border-teal-700 rounded-lg px-2 py-1 text-[11px] font-bold text-teal-200">
+            ? `<select onchange="updateViewpointStatus('${escapeJsAttr(vp.vp_key)}', this.value)" class="w-full bg-[#070b12] border border-teal-700 rounded-lg px-2 py-1 text-[11px] font-bold text-teal-200">
                 ${TEAM_UNIFIED_STATUSES.map(st => `<option value="${st}" ${currentVpTeamVal === st ? "selected" : ""}>🔧 ${st}</option>`).join("")}
                </select>`
             : `<div class="px-2 py-1 rounded-lg border border-slate-700 bg-[#070b12] text-slate-200 text-[11px] font-bold flex justify-between"><span class="truncate">${escapeHtml(currentVpTeamVal)}</span><span>🔒</span></div>`;
 
           const tr = document.createElement("tr");
           tr.id = "row_" + vp.vp_key;
-          tr.className = "bg-[#070b12]/85 hover:bg-slate-800/50 border-l-4 border-slate-700";
+          tr.className = "bg-[#070D19] hover:bg-[#0E192E] border-l-4 border-l-teal-700/70";
           tr.innerHTML =
             `<td class="p-2 font-black text-teal-400">#${vp.sequence_num}</td>` +
-            `<td class="p-2" data-thumb-dataset="viewpoints" data-thumb-key="${escapeHtml(vp.vp_key)}">${imgHtml}</td>` +
-            `<td class="p-2"><span class="px-2 py-0.5 rounded bg-slate-800 text-teal-300 border border-slate-700 font-bold text-[11px]">↳ 📁 ${escapeHtml(vp.folder_name || "Root")}</span></td>` +
+            `<td class="p-2" data-thumb-dataset="viewpoints" data-thumb-key="${escapeHtml(vp.vp_key)}" data-thumb-size="w-24 h-16">${imgHtml}</td>` +
+            `<td class="p-2"><div class="tree-branch-cell ${isLastVp ? 'tree-branch-last' : ''} py-0.5"><span class="px-2 py-0.5 rounded bg-slate-800 text-teal-300 border border-slate-700 font-bold text-[10px]">📁 ${escapeHtml(vp.folder_name || "Root")}</span></div></td>` +
             `<td class="p-2 font-bold text-white text-xs">${escapeHtml(vp.description || "-")}</td>` +
             `<td class="p-2">` +
-              `<div class="mb-1"><button onclick="copyAndIsolateInRevit('${escapeHtml(vp.project_name)}', '${escapeHtml(vp.item_a_id)}', '${escapeHtml(vp.item_b_id)}', '${escapeHtml(vp.item_a_file)}', '${escapeHtml(vp.item_b_file)}', 'Element 1', 'Element 2')" class="bg-sky-950 text-sky-200 border border-sky-700 px-2 py-0.5 rounded text-[10px] font-mono">ID 1: ${escapeHtml(vp.item_a_id || "N/A")} (${escapeHtml(vp.item_a_file || "N/A")}) 🎯</button></div>` +
-              `<div><button onclick="copyAndIsolateInRevit('${escapeHtml(vp.project_name)}', '${escapeHtml(vp.item_b_id)}', '${escapeHtml(vp.item_a_id)}', '${escapeHtml(vp.item_b_file)}', '${escapeHtml(vp.item_a_file)}', 'Element 2', 'Element 1')" class="bg-emerald-950 text-emerald-200 border border-emerald-700 px-2 py-0.5 rounded text-[10px] font-mono">ID 2: ${escapeHtml(vp.item_b_id || "N/A")} (${escapeHtml(vp.item_b_file || "N/A")}) 🎯</button></div>` +
+              `<div class="mb-1"><button onclick="copyAndIsolateInRevit('${escapeJsAttr(vp.project_name)}', '${escapeJsAttr(vp.item_a_id)}', '${escapeJsAttr(vp.item_b_id)}', '${escapeJsAttr(vp.item_a_file)}', '${escapeJsAttr(vp.item_b_file)}', 'Element 1', 'Element 2')" class="bg-sky-950 text-sky-200 border border-sky-700 px-2 py-0.5 rounded text-[10px] font-mono">ID 1: ${escapeHtml(vp.item_a_id || "N/A")} (${escapeHtml(vp.item_a_file || "N/A")}) 🎯</button></div>` +
+              `<div><button onclick="copyAndIsolateInRevit('${escapeJsAttr(vp.project_name)}', '${escapeJsAttr(vp.item_b_id)}', '${escapeJsAttr(vp.item_a_id)}', '${escapeJsAttr(vp.item_b_file)}', '${escapeJsAttr(vp.item_a_file)}', 'Element 2', 'Element 1')" class="bg-emerald-950 text-emerald-200 border border-emerald-700 px-2 py-0.5 rounded text-[10px] font-mono">ID 2: ${escapeHtml(vp.item_b_id || "N/A")} (${escapeHtml(vp.item_b_file || "N/A")}) 🎯</button></div>` +
             `</td>` +
             `<td class="p-2 bg-sky-950/10 border-l border-r border-slate-800">${bimVpHtml}</td>` +
             `<td class="p-2 bg-teal-950/10 border-r border-slate-800">${teamVpHtml}</td>` +
@@ -1703,28 +1785,135 @@
       }
     }
 
+    // Discussion Cell with Ctrl+V Screenshot Paste + File Attach + Inline Preview Strip
     function buildChatCellHtml(recordKey, commentsJson, tableType) {
       let messages = [];
       try { messages = JSON.parse(commentsJson || "[]"); } catch { messages = []; }
       const chatItemsHtml = messages.length === 0
-        ? `<div class="text-[10px] text-slate-500 italic">No comments. Type @ to mention team/member.</div>`
+        ? `<div class="text-[10px] text-slate-500 italic">No comments. Type @mention or press Ctrl+V to attach image.</div>`
         : messages.map(m => {
             const formatted = escapeHtml(m.text || "").replace(/(@[\w\.\-]+)/g, '<span class="bg-sky-900/90 text-sky-200 px-1 rounded font-bold">$1</span>');
             const rIcon = getRoleIcon(m.role || "Engineer");
             const imgTag = (m.image && String(m.image).startsWith("data:image"))
-              ? `<img src="${m.image}" onclick="showModal(this.src, 'Attachment - ${escapeHtml(m.author || "User")}')" class="mt-1 max-h-14 rounded border border-slate-700 cursor-pointer" />`
+              ? `<img src="${m.image}" onclick="showModal(this.src, 'Attachment - ${escapeJsAttr(m.author || "User")}')" class="mt-1 max-h-16 rounded border border-slate-700 cursor-pointer hover:border-sky-400 transition" />`
               : "";
             return `<div class="mb-1 border-b border-slate-800/80 pb-0.5"><span class="text-sky-300 font-bold text-[10px]">${rIcon} ${escapeHtml(m.author || "Eng")}: </span><span class="text-slate-200 text-[11px]">${formatted}</span>${imgTag}</div>`;
           }).join("");
 
-      return `<div class="bg-[#070b12] border border-slate-800 rounded-lg p-1.5 max-h-16 overflow-y-auto mb-1">${chatItemsHtml}</div>` +
+      const pendingImg = pendingChatImages.get(recordKey) || "";
+      const previewHtml = pendingImg
+        ? buildPendingPreviewInnerHtml(recordKey, pendingImg)
+        : "";
+      const previewClass = pendingImg
+        ? "flex items-center justify-between gap-2 bg-sky-950/70 border border-sky-700/80 rounded px-1.5 py-1 mb-1"
+        : "hidden items-center justify-between gap-2 bg-sky-950/70 border border-sky-700/80 rounded px-1.5 py-1 mb-1";
+
+      return `<div class="bg-[#070b12] border border-slate-800 rounded-lg p-1.5 max-h-20 overflow-y-auto mb-1">${chatItemsHtml}</div>` +
+        `<div id="chatPreview_${escapeHtml(recordKey)}" class="${previewClass}">${previewHtml}</div>` +
         `<div class="flex gap-1 relative">` +
-          `<input id="chatInput_${escapeHtml(recordKey)}" type="text" autocomplete="off" placeholder="Comment or @mention..." ` +
-            `oninput="onCommentInputMention(event, 'chatInput_${escapeHtml(recordKey)}')" ` +
-            `onkeydown="onCommentKeyDown(event, '${escapeHtml(recordKey)}', '${tableType}')" ` +
-            `class="bg-[#070b12] border border-slate-700 rounded px-2 py-1 text-[11px] text-white flex-1 focus:border-sky-500 focus:outline-none" />` +
-          `<button onclick="postChatMessage('${escapeHtml(recordKey)}', '${tableType}')" class="bg-sky-600 hover:bg-sky-500 text-white px-2 py-1 rounded text-[11px] font-bold">Send</button>` +
+          `<input id="chatInput_${escapeHtml(recordKey)}" type="text" autocomplete="off" placeholder="Comment, @mention, Ctrl+V img..." ` +
+            `onpaste="handleChatPaste(event, '${escapeJsAttr(recordKey)}')" ` +
+            `oninput="onCommentInputMention(event, 'chatInput_${escapeJsAttr(recordKey)}')" ` +
+            `onkeydown="onCommentKeyDown(event, '${escapeJsAttr(recordKey)}', '${tableType}')" ` +
+            `class="bg-[#070b12] border border-slate-700 rounded px-2 py-1 text-[11px] text-white flex-1 min-w-0 focus:border-sky-500 focus:outline-none" />` +
+          `<button onclick="triggerChatImagePicker('${escapeJsAttr(recordKey)}')" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-sky-300 px-1.5 py-1 rounded text-[11px] font-bold shrink-0" title="Attach screenshot image (or press Ctrl+V in box)">📎</button>` +
+          `<button onclick="postChatMessage('${escapeJsAttr(recordKey)}', '${tableType}')" class="bg-sky-600 hover:bg-sky-500 text-white px-2 py-1 rounded text-[11px] font-bold shrink-0">Send</button>` +
         `</div>`;
+    }
+
+    function buildPendingPreviewInnerHtml(recordKey, dataUrl) {
+      const kb = Math.max(1, Math.round((dataUrl.length * 0.75) / 1024));
+      return `<div class="flex items-center gap-1.5 min-w-0">` +
+        `<img src="${dataUrl}" onclick="showModal(this.src, 'Pending Screenshot Preview')" class="w-9 h-6 object-cover rounded border border-sky-500 cursor-pointer shrink-0" />` +
+        `<span class="text-[10px] text-sky-200 font-bold truncate">Screenshot (${kb} KB)</span>` +
+        `</div>` +
+        `<button onclick="clearPendingChatImage('${escapeJsAttr(recordKey)}')" class="text-rose-300 hover:text-white font-bold px-1 text-[11px] shrink-0" title="Remove attachment">✕</button>`;
+    }
+
+    function handleChatPaste(event, recordKey) {
+      const clip = event.clipboardData || window.clipboardData;
+      if (!clip || !clip.items) return;
+
+      for (let i = 0; i < clip.items.length; i++) {
+        const item = clip.items[i];
+        if (item.type && item.type.startsWith("image/")) {
+          event.preventDefault();
+          const file = item.getAsFile();
+          if (file) attachCompressedChatImage(recordKey, file);
+          return;
+        }
+      }
+    }
+
+    function triggerChatImagePicker(recordKey) {
+      activeFilePickerKey = recordKey;
+      const inp = document.getElementById("globalChatFileInput");
+      if (!inp) return;
+      inp.value = "";
+      inp.click();
+    }
+
+    function onGlobalChatFileSelected(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file || !activeFilePickerKey) return;
+      attachCompressedChatImage(activeFilePickerKey, file);
+      activeFilePickerKey = null;
+    }
+
+    function compressImageFileToDataUrl(file, maxWidth = 900, quality = 0.76) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = () => reject(new Error("Failed to read image file"));
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onerror = () => reject(new Error("Invalid image data"));
+          img.onload = () => {
+            let w = img.width;
+            let h = img.height;
+            if (w > maxWidth) {
+              h = Math.round(h * (maxWidth / w));
+              w = maxWidth;
+            }
+            const canvas = document.createElement("canvas");
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext("2d");
+            ctx.fillStyle = "#070b12";
+            ctx.fillRect(0, 0, w, h);
+            ctx.drawImage(img, 0, 0, w, h);
+            resolve(canvas.toDataURL("image/jpeg", quality));
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function attachCompressedChatImage(recordKey, file) {
+      try {
+        const dataUrl = await compressImageFileToDataUrl(file, 900, 0.76);
+        pendingChatImages.set(recordKey, dataUrl);
+        const box = document.getElementById("chatPreview_" + recordKey);
+        if (box) {
+          box.innerHTML = buildPendingPreviewInnerHtml(recordKey, dataUrl);
+          box.classList.remove("hidden");
+          box.classList.add("flex");
+        }
+        const inp = document.getElementById("chatInput_" + recordKey);
+        if (inp) inp.focus();
+      } catch (err) {
+        showToast("⚠️ Could not attach image: " + err.message, "rose");
+      }
+    }
+
+    function clearPendingChatImage(recordKey) {
+      pendingChatImages.delete(recordKey);
+      const box = document.getElementById("chatPreview_" + recordKey);
+      if (box) {
+        box.innerHTML = "";
+        box.classList.add("hidden");
+        box.classList.remove("flex");
+      }
     }
 
     function getAllMentionCandidates() {
@@ -1770,7 +1959,7 @@
       activeMentionInputId = inputId;
       pop.innerHTML = `<div class="px-2.5 py-1 text-[9px] font-bold text-slate-400 border-b border-slate-800 uppercase">Mention Member or Team</div>` +
         candidates.map(c =>
-          `<div onclick="selectMentionCandidate('${escapeHtml(c.tag)}')" class="px-3 py-1.5 hover:bg-sky-900/60 cursor-pointer flex justify-between items-center">` +
+          `<div onclick="selectMentionCandidate('${escapeJsAttr(c.tag)}')" class="px-3 py-1.5 hover:bg-sky-900/60 cursor-pointer flex justify-between items-center">` +
             `<span class="font-bold text-sky-300">${c.icon} @${escapeHtml(c.tag)}</span>` +
             `<span class="text-[10px] text-slate-400 truncate max-w-[120px]">${escapeHtml(c.sub)}</span>` +
           `</div>`
@@ -1800,8 +1989,10 @@
 
     async function postChatMessage(recordKey, tableType) {
       const inp = document.getElementById("chatInput_" + recordKey);
-      if (!inp || !inp.value.trim()) return;
-      const text = inp.value.trim();
+      const text = inp ? inp.value.trim() : "";
+      const imgData = pendingChatImages.get(recordKey) || "";
+      if (!text && !imgData) return;
+
       const isClash = tableType === "clashes";
       const list = isClash ? allClashes : allViewpoints;
       const keyCol = isClash ? "round_guid" : "vp_key";
@@ -1810,25 +2001,36 @@
 
       let messages = [];
       try { messages = JSON.parse(record.comments_json || "[]"); } catch { messages = []; }
-      messages.push({
+      const newMsg = {
         author: currentUser.name,
         role: currentUser.role,
-        text: text,
+        text: text || "[Screenshot Attached]",
         time: new Date().toISOString().slice(0, 16).replace("T", " ")
-      });
+      };
+      if (imgData) newMsg.image = imgData;
+      messages.push(newMsg);
+
       const updatedJson = JSON.stringify(messages);
       const nowIso = new Date().toISOString();
 
-      await fetch(`${SUPABASE_URL}/rest/v1/${tableType}?${keyCol}=eq.${encodeURIComponent(recordKey)}`, {
-        method: "PATCH",
-        headers: getSupabaseHeaders({ "Content-Type": "application/json" }),
-        body: JSON.stringify({ comments_json: updatedJson, updated_at: nowIso })
-      });
-      record.comments_json = updatedJson;
-      record.updated_at = nowIso;
-      inp.value = "";
-      if (isClash) renderClashesTable(); else renderViewpointsTable();
-      updateNotificationsList();
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/${tableType}?${keyCol}=eq.${encodeURIComponent(recordKey)}`, {
+          method: "PATCH",
+          headers: getSupabaseHeaders({ "Content-Type": "application/json" }),
+          body: JSON.stringify({ comments_json: updatedJson, updated_at: nowIso })
+        });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+
+        record.comments_json = updatedJson;
+        record.updated_at = nowIso;
+        pendingChatImages.delete(recordKey);
+        if (inp) inp.value = "";
+        if (isClash) renderClashesTable(); else renderViewpointsTable();
+        updateNotificationsList();
+        if (imgData) showToast("✓ Comment & screenshot synced to Cloud.", "emerald");
+      } catch (err) {
+        showToast("⚠️ Failed to send comment: " + err.message, "rose");
+      }
     }
 
     function handleGroupCheckboxClick(event, groupRoundGuid, groupGuid, round) {
@@ -1979,7 +2181,7 @@
       document.getElementById("notifBadge").textContent = alerts.length;
       document.getElementById("notifItemsList").innerHTML = alerts.length === 0
         ? `<div class="p-4 text-xs text-slate-400 text-center">No @Mentions or alerts yet.</div>`
-        : alerts.map(a => `<div onclick="jumpToNotificationRow('${a.tab}', '${escapeHtml(a.key)}')" class="p-2.5 hover:bg-slate-800 cursor-pointer"><div class="text-xs font-bold text-sky-300">${escapeHtml(a.title)}</div><div class="text-[11px] text-slate-300">${escapeHtml(a.sub)}</div></div>`).join("");
+        : alerts.map(a => `<div onclick="jumpToNotificationRow('${a.tab}', '${escapeJsAttr(a.key)}')" class="p-2.5 hover:bg-slate-800 cursor-pointer"><div class="text-xs font-bold text-sky-300">${escapeHtml(a.title)}</div><div class="text-[11px] text-slate-300">${escapeHtml(a.sub)}</div></div>`).join("");
     }
 
     function jumpToNotificationRow(tab, rowKey) {
@@ -2194,7 +2396,7 @@
       window._toastTimer = setTimeout(() => t.classList.add("hidden"), 4500);
     }
 
-    // Entity-decode-proof HTML escaper (never breaks on copy/paste)
+    // Entity-decode-proof HTML & inline-JS-attribute escapers
     function escapeHtml(str) {
       const amp = String.fromCharCode(38);
       return String(str ?? "")
@@ -2203,6 +2405,16 @@
         .replace(/>/g, amp + "gt;")
         .replace(/\x22/g, amp + "quot;")
         .replace(/\x27/g, amp + "#39;");
+    }
+
+    function escapeJsAttr(str) {
+      const s = String(str ?? "")
+        .replace(/\\/g, "\\\\")
+        .replace(/\x27/g, "\\\x27")
+        .replace(/\x22/g, "\\\x22")
+        .replace(/\r/g, "")
+        .replace(/\n/g, " ");
+      return escapeHtml(s);
     }
 
     // INITIALIZATION
