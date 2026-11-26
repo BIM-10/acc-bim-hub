@@ -322,7 +322,7 @@
           </div>
           <button onclick="clearAllColumnFilters()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 px-2 py-1 rounded-lg text-[11px] font-semibold">✕ Reset</button>
 
-          <!-- Bulk Action Bar (Adapts to BIM Coordinator / Lead vs Engineer) -->
+          <!-- Bulk Action Bar -->
           <div id="bulkActionContainer" class="flex items-center gap-1.5 bg-sky-950/40 border border-sky-800/70 rounded-lg px-2 py-0.5">
             <span class="text-[11px] font-bold text-sky-300"><span id="selectedCountLabel">0</span> Sel:</span>
             <select id="bulkResponseSelect" class="bg-[#070b12] border border-slate-700 rounded px-1.5 py-0.5 text-[11px] text-white"></select>
@@ -353,7 +353,7 @@
       </div>
     </div>
 
-    <!-- CLASHES TABLE (Single-Line Compact Headers) -->
+    <!-- CLASHES TABLE -->
     <div id="clashesTableContainer" class="bg-[#0d1526] border border-slate-800 rounded-xl shadow-2xl overflow-x-auto">
       <table class="w-full text-left border-collapse text-xs">
         <thead>
@@ -375,7 +375,7 @@
       </table>
     </div>
 
-    <!-- VIEWPOINTS TABLE (Single-Line Compact Headers) -->
+    <!-- VIEWPOINTS TABLE -->
     <div id="viewpointsTableContainer" class="hidden bg-[#0d1526] border border-slate-800 rounded-xl shadow-2xl overflow-x-auto">
       <table class="w-full text-left border-collapse text-xs">
         <thead>
@@ -476,7 +476,7 @@
     const SUPABASE_KEY = "sb_publishable_R96kfu1_6AJrLGw9zD8E5Q_L6vO8VDf";
     const REVIT_PORTS = [51965, 51966, 51967, 51968, 51969, 51970, 51971, 51972, 51973, 51974];
 
-    // Lightweight metadata column lists (excludes image_base64 to reduce Supabase egress by >95%)
+    // Lightweight metadata column lists (excludes image_base64 to cut egress by >95%)
     const CLASH_META_COLS = "round_guid,guid,project_name,round,sequence_num,test_name,is_group_header,group_name,parent_group_guid,clash_name,assigned_to,level_grid,distance,item_a_id,item_a_name,item_a_file,item_b_id,item_b_name,item_b_file,navis_status,team_response,reassigned_to,review_decision,comments_json,updated_at";
     const VP_META_COLS = "vp_key,project_name,sequence_num,folder_name,description,item_a_id,item_a_name,item_a_file,item_b_id,item_b_name,item_b_file,status,comments_json,updated_at";
 
@@ -510,6 +510,8 @@
     let lockedProjectName = null;
     let knownProjectNames = [];
     let kpiSummariesByKey = new Map();
+    let useFullClashSelectFallback = false;
+    let useFullVpSelectFallback = false;
     const clashImageCache = new Map();
     const vpImageCache = new Map();
     const inFlightImageKeys = new Set();
@@ -528,14 +530,13 @@
     let chartsVisible = true, activeMentionInputId = null;
 
     function getSupabaseHeaders(extra = {}) {
-      return {
-        "apikey": SUPABASE_KEY,
-        "Authorization": "Bearer " + SUPABASE_KEY,
-        ...extra
-      };
+      const h = { "apikey": SUPABASE_KEY, ...extra };
+      if (!SUPABASE_KEY.startsWith("sb_publishable_")) {
+        h["Authorization"] = "Bearer " + SUPABASE_KEY;
+      }
+      return h;
     }
 
-    // Role Normalization & Permission Helpers
     function normalizeRoleName(rawRole) {
       const r = String(rawRole || "").trim().toLowerCase();
       if (r.includes("coordinator") || r.includes("bim")) return "BIM Coordinator";
@@ -743,7 +744,6 @@
       }
     }
 
-    // Smart Auto-Sync: pauses when browser tab is hidden and fetches lightweight metadata only every 15s
     function startAutoSyncLoop() {
       if (autoSyncTimer) clearInterval(autoSyncTimer);
       autoSyncTimer = setInterval(async () => {
@@ -780,6 +780,9 @@
     function normalizeClashRecord(raw, idx) {
       const bimSt = normalizeBimStatus(raw.navis_status || raw.status, raw.review_decision);
       const rGuid = raw.round_guid || raw.guid || ("ROW_" + idx);
+      if (raw.image_base64 && !clashImageCache.has(rGuid)) {
+        clashImageCache.set(rGuid, raw.image_base64);
+      }
       const cachedImg = clashImageCache.has(rGuid) ? clashImageCache.get(rGuid) : (raw.image_base64 || "");
       return {
         round_guid: rGuid,
@@ -823,6 +826,9 @@
         }
       }
       const key = raw.vp_key || ("VP_" + idx);
+      if (raw.image_base64 && !vpImageCache.has(key)) {
+        vpImageCache.set(key, raw.image_base64);
+      }
       const cachedImg = vpImageCache.has(key) ? vpImageCache.get(key) : (raw.image_base64 || "");
       return {
         ...raw,
@@ -836,7 +842,6 @@
       };
     }
 
-    // One-time lightweight project directory discovery (project_name column only, no images)
     async function refreshKnownProjectNames(headers) {
       try {
         const [cRes, vRes] = await Promise.all([
@@ -851,7 +856,7 @@
       } catch {}
     }
 
-    // Bandwidth-Optimized Metadata Sync (>95% egress savings: active project filter + no image_base64 in sync polls)
+    // Bandwidth-Optimized Metadata Sync with automatic HTTP 400 fallback
     async function reloadAllCloudData(preselectProject = null, preselectRound = null, isSilentAutoPoll = false, forceImageCacheReset = false) {
       if (!isSilentAutoPoll) setCloudPill("⏳ Syncing...", "amber");
 
@@ -874,23 +879,32 @@
         if (targetProj === "ALL") targetProj = null;
 
         const projFilterQuery = targetProj ? `&project_name=eq.${encodeURIComponent(targetProj)}` : "";
+        const clashSelectExpr = useFullClashSelectFallback ? "*" : CLASH_META_COLS;
+        const vpSelectExpr = useFullVpSelectFallback ? "*" : VP_META_COLS;
 
-        // Fetch lightweight metadata only (image_base64 is lazy-loaded and cached on demand)
         const fetchTasks = [
-          fetch(`${SUPABASE_URL}/rest/v1/clashes?select=${CLASH_META_COLS}${projFilterQuery}`, { headers }),
-          fetch(`${SUPABASE_URL}/rest/v1/viewpoints?select=${VP_META_COLS}${projFilterQuery}`, { headers })
+          fetch(`${SUPABASE_URL}/rest/v1/clashes?select=${clashSelectExpr}${projFilterQuery}`, { headers }),
+          fetch(`${SUPABASE_URL}/rest/v1/viewpoints?select=${vpSelectExpr}${projFilterQuery}`, { headers })
         ];
 
-        // Team roster only changes rarely; skip re-fetching on silent background polls
         const shouldFetchMembers = !isSilentAutoPoll || projectMembers.length === 0;
         if (shouldFetchMembers) {
           fetchTasks.push(fetch(`${SUPABASE_URL}/rest/v1/project_members?select=*${projFilterQuery}`, { headers }));
         }
 
         const results = await Promise.all(fetchTasks);
-        const clashRes = results[0];
-        const vpRes = results[1];
+        let clashRes = results[0];
+        let vpRes = results[1];
         const memRes = shouldFetchMembers ? results[2] : null;
+
+        if (!clashRes.ok && clashRes.status === 400 && !useFullClashSelectFallback) {
+          useFullClashSelectFallback = true;
+          clashRes = await fetch(`${SUPABASE_URL}/rest/v1/clashes?select=*${projFilterQuery}`, { headers });
+        }
+        if (vpRes && !vpRes.ok && vpRes.status === 400 && !useFullVpSelectFallback) {
+          useFullVpSelectFallback = true;
+          vpRes = await fetch(`${SUPABASE_URL}/rest/v1/viewpoints?select=*${projFilterQuery}`, { headers });
+        }
 
         if (!clashRes.ok) throw new Error("HTTP " + clashRes.status);
 
@@ -898,7 +912,6 @@
         const vpRawList = vpRes && vpRes.ok ? await vpRes.json() : [];
         const memList = memRes && memRes.ok ? await memRes.json() : projectMembers;
 
-        // Separate __KPI_SUMMARY__ rows from visible clash records
         const nextKpiSummaries = new Map();
         const visibleRawClashes = [];
         for (const r of rawClashes) {
@@ -914,7 +927,6 @@
 
         const newClashes = visibleRawClashes.map((r, i) => normalizeClashRecord(r, i));
 
-        // Automatically reconstruct parent_group_guid links if saved via legacy schema fallback
         const groupLookup = {};
         newClashes.filter(c => c.is_group_header && c.group_name).forEach(g => {
           groupLookup[`${g.project_name}::${g.round}::${g.test_name}::${g.group_name}`] = g.guid;
@@ -933,7 +945,6 @@
         newClashes.sort((a, b) => (a.sequence_num || 0) - (b.sequence_num || 0));
         vpList.sort((a, b) => (a.sequence_num || 0) - (b.sequence_num || 0));
 
-        // Build accurate lightweight change signature across all fetched metadata
         let maxClashUpd = "", maxVpUpd = "", totalCmtLen = 0;
         for (let i = 0; i < newClashes.length; i++) {
           const u = newClashes[i].updated_at || "";
@@ -955,7 +966,6 @@
         allViewpoints = vpList;
         projectMembers = memList;
 
-        // Default all Clash Groups and Viewpoint Folders to COLLAPSED (▶) on initial load
         if (!hasInitializedDefaultCollapse && allClashes.length > 0) {
           allClashes.filter(c => c.is_group_header).forEach(g => collapsedGroups.add(g.guid));
           hasInitializedDefaultCollapse = true;
@@ -965,7 +975,6 @@
           hasInitializedVpDefaultCollapse = true;
         }
 
-        // Enforce strict role lock if current user's email matches a registered member in projectMembers
         if (currentUser.email && projectMembers.length > 0) {
           const matched = projectMembers.find(m => String(m.email || "").trim().toLowerCase() === currentUser.email.trim().toLowerCase());
           if (matched && matched.role) {
@@ -990,7 +999,7 @@
       }
     }
 
-    // On-Demand Lazy Image Loader: downloads snapshots ONLY for visible rows once and caches them in memory
+    // On-Demand Lazy Image Loader
     async function ensureVisibleImagesLoaded(dataset, items) {
       if (!Array.isArray(items) || items.length === 0) return;
 
@@ -1016,7 +1025,10 @@
 
       for (let i = 0; i < missingKeys.length; i += batchSize) {
         const batch = missingKeys.slice(i, i + batchSize);
-        const inExpr = batch.map(k => encodeURIComponent(`"${String(k).replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`)).join(",");
+        const inExpr = batch.map(k => {
+          const safe = String(k).replace(/\\/g, "\\\\").replace(/\x22/g, "\\\x22");
+          return encodeURIComponent(String.fromCharCode(34) + safe + String.fromCharCode(34));
+        }).join(",");
         const url = `${SUPABASE_URL}/rest/v1/${dataset}?select=${keyCol},image_base64&${keyCol}=in.(${inExpr})`;
 
         try {
@@ -1331,7 +1343,6 @@
         tbody.appendChild(tr);
       });
 
-      // Lazy-load snapshots ONLY for the visible rows on the current page
       ensureVisibleImagesLoaded("clashes", pageItems);
     }
 
@@ -1556,7 +1567,6 @@
         });
       });
 
-      // Lazy-load snapshots ONLY for expanded/visible viewpoints
       ensureVisibleImagesLoaded("viewpoints", visibleVps);
     }
 
@@ -1995,7 +2005,6 @@
       let totalCount = kpiSource.length;
       let totalGroups = filteredClashes.filter(c => c.is_group_header).length;
 
-      // Merge unpublished full-project KPI summary counts when viewing unfiltered project/round scope
       const projVal = document.getElementById("filterProject").value;
       const roundVal = document.getElementById("filterRound").value;
       const hasDetailFilter =
@@ -2185,13 +2194,15 @@
       window._toastTimer = setTimeout(() => t.classList.add("hidden"), 4500);
     }
 
+    // Entity-decode-proof HTML escaper (never breaks on copy/paste)
     function escapeHtml(str) {
+      const amp = String.fromCharCode(38);
       return String(str ?? "")
-        .replace(/&/g, "&")
-        .replace(/</g, "<")
-        .replace(/>/g, ">")
-        .replace(/\x22/g, """)
-        .replace(/\x27/g, "'");
+        .replace(/&/g, amp + "amp;")
+        .replace(/</g, amp + "lt;")
+        .replace(/>/g, amp + "gt;")
+        .replace(/\x22/g, amp + "quot;")
+        .replace(/\x27/g, amp + "#39;");
     }
 
     // INITIALIZATION
