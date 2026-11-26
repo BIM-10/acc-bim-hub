@@ -19,28 +19,24 @@
     }
     .row-highlight-flash { animation: pulseHighlight 1.5s ease-in-out 3; }
 
-    /* Crisp CSS Tree-Grid Connectors for Group Child Rows */
-    .tree-branch-cell { position: relative; padding-left: 24px; }
-    .tree-branch-cell::before {
-      content: "";
-      position: absolute;
-      left: 10px;
-      top: -10px;
-      bottom: -10px;
-      width: 2px;
-      background: rgba(20, 184, 166, 0.45);
+    /* Continuous full-height CSS gradient Tree-Grid connectors (zero gaps regardless of row height) */
+    .tree-td-mid {
+      padding-left: 30px !important;
+      background-image:
+        linear-gradient(rgba(20, 184, 166, 0.55), rgba(20, 184, 166, 0.55)),
+        linear-gradient(rgba(20, 184, 166, 0.65), rgba(20, 184, 166, 0.65));
+      background-size: 2px 100%, 12px 2px;
+      background-position: 14px 0, 14px 50%;
+      background-repeat: no-repeat;
     }
-    .tree-branch-last::before {
-      bottom: 50%;
-    }
-    .tree-branch-cell::after {
-      content: "";
-      position: absolute;
-      left: 10px;
-      top: 50%;
-      width: 10px;
-      height: 2px;
-      background: rgba(20, 184, 166, 0.55);
+    .tree-td-last {
+      padding-left: 30px !important;
+      background-image:
+        linear-gradient(rgba(20, 184, 166, 0.55), rgba(20, 184, 166, 0.55)),
+        linear-gradient(rgba(20, 184, 166, 0.65), rgba(20, 184, 166, 0.65));
+      background-size: 2px calc(50% + 1px), 12px 2px;
+      background-position: 14px 0, 14px 50%;
+      background-repeat: no-repeat;
     }
   </style>
 </head>
@@ -135,20 +131,20 @@
 
       <div class="flex items-center gap-1.5 flex-wrap sm:flex-nowrap shrink-0">
         <div class="bg-[#070b12] p-0.5 rounded-lg border border-slate-800 flex gap-1">
-          <button id="tabBtnClashes" onclick="switchMainTab('clashes')" class="px-2.5 py-1 rounded-md text-[11px] font-bold bg-sky-600 text-white transition">
+          <button id="tabBtnClashes" onclick="switchMainTab('clashes')" class="px-2.5 py-1 rounded-md text-[11px] font-bold bg-sky-600 text-white transition" title="View Clash Tests and Clash Groups">
             ⚡ Clashes (<span id="tabCountClashes">0</span>)
           </button>
-          <button id="tabBtnViewpoints" onclick="switchMainTab('viewpoints')" class="px-2.5 py-1 rounded-md text-[11px] font-bold text-slate-300 hover:text-white transition">
+          <button id="tabBtnViewpoints" onclick="switchMainTab('viewpoints')" class="px-2.5 py-1 rounded-md text-[11px] font-bold text-slate-300 hover:text-white transition" title="View Published Saved Viewpoints">
             📸 Viewpoints (<span id="tabCountViewpoints">0</span>)
           </button>
         </div>
 
-        <button onclick="toggleTeamDirectoryModal()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-teal-300 px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1" title="View Project Team Directory & Roles">
+        <button onclick="toggleTeamDirectoryModal()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-teal-300 px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1" title="View registered project team directory and roles.">
           <span>👥 Team</span>
           <span id="teamCountBadge" class="px-1.5 rounded-full text-[9px] bg-teal-950 text-teal-300 border border-teal-700">0</span>
         </button>
 
-        <div class="flex items-center gap-1.5 bg-[#070b12] border border-slate-700 rounded-lg px-2.5 py-1 select-none" title="Verified Identity & Role (Read-Only Locked)">
+        <div class="flex items-center gap-1.5 bg-[#070b12] border border-slate-700 rounded-lg px-2.5 py-1 select-none" title="Verified BIM identity and locked role permissions.">
           <span id="activeRoleIcon" class="text-xs">🛡️</span>
           <span id="activeUserDisplay" class="text-[11px] font-extrabold text-white truncate max-w-[125px]">Verifying...</span>
           <span id="activeRoleBadge" class="px-1.5 py-0.2 rounded text-[9px] font-black uppercase bg-sky-950 text-sky-300 border border-sky-700">LOCKED</span>
@@ -156,7 +152,7 @@
         </div>
 
         <div class="relative">
-          <button onclick="toggleNotificationsPanel()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 px-2 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1" title="Mentions & Alerts">
+          <button onclick="toggleNotificationsPanel()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 px-2 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1" title="View @mentions and rejected clash alerts.">
             <span>🔔</span>
             <span id="notifBadge" class="px-1.5 rounded-full text-[9px] bg-rose-600 text-white font-extrabold">0</span>
           </button>
@@ -169,20 +165,20 @@
           </div>
         </div>
 
-        <button id="btnToggleCharts" onclick="toggleAnalyticsSection()" class="bg-teal-950/90 hover:bg-teal-900 border border-teal-700 text-teal-200 px-2 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1 transition" title="Show / Hide Analytics Charts">
+        <button id="btnToggleCharts" onclick="toggleAnalyticsSection()" class="bg-teal-950/90 hover:bg-teal-900 border border-teal-700 text-teal-200 px-2 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1 transition" title="Show or hide KPI cards and analytics charts.">
           <span>📊</span>
           <span id="chartsToggleIcon">▴</span>
         </button>
 
-        <button id="btnAutoSync" onclick="toggleAutoSync()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-emerald-300 px-2 py-1 rounded-lg text-[11px] font-bold" title="Smart Cloud Auto-Sync (Metadata Only, Every 15s)">
+        <button id="btnAutoSync" onclick="toggleAutoSync()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-emerald-300 px-2 py-1 rounded-lg text-[11px] font-bold" title="Toggle automatic background cloud sync (every 15 seconds).">
           ⚡ Sync: ON
         </button>
 
-        <button onclick="openExportModal()" class="bg-teal-600 hover:bg-teal-500 text-white px-2.5 py-1 rounded-lg text-[11px] font-bold shadow">
+        <button onclick="openExportModal()" class="bg-teal-600 hover:bg-teal-500 text-white px-2.5 py-1 rounded-lg text-[11px] font-bold shadow" title="Export clashes or viewpoints to Excel, PDF, or HTML.">
           📥 Export
         </button>
 
-        <button onclick="reloadAllCloudData(null, null, false, true)" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white px-2 py-1 rounded-lg text-[11px] font-bold" title="Refresh Cloud Data">
+        <button onclick="reloadAllCloudData(null, null, false, true)" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white px-2 py-1 rounded-lg text-[11px] font-bold" title="Reload latest project updates and snapshots from the cloud.">
           🔄
         </button>
       </div>
@@ -296,8 +292,8 @@
           <div>
             <label class="block text-[9px] uppercase text-slate-400 font-bold mb-0.5">Groups</label>
             <div class="flex gap-1">
-              <button onclick="expandCollapseAllGroups(false)" class="bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded-lg text-[11px] border border-slate-700" title="Expand All Clash Groups">➕</button>
-              <button onclick="expandCollapseAllGroups(true)" class="bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded-lg text-[11px] border border-slate-700" title="Collapse All Clash Groups">➖</button>
+              <button onclick="expandCollapseAllGroups(false)" class="bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded-lg text-[11px] border border-slate-700" title="Expand all clash groups.">➕</button>
+              <button onclick="expandCollapseAllGroups(true)" class="bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded-lg text-[11px] border border-slate-700" title="Collapse all clash groups.">➖</button>
             </div>
           </div>
         </div>
@@ -323,8 +319,8 @@
           <div>
             <label class="block text-[9px] uppercase text-slate-400 font-bold mb-0.5">Folders</label>
             <div class="flex gap-1">
-              <button onclick="expandCollapseAllVpFolders(false)" class="bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded-lg text-[11px] border border-slate-700" title="Expand All Viewpoint Folders">➕</button>
-              <button onclick="expandCollapseAllVpFolders(true)" class="bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded-lg text-[11px] border border-slate-700" title="Collapse All Viewpoint Folders">➖</button>
+              <button onclick="expandCollapseAllVpFolders(false)" class="bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded-lg text-[11px] border border-slate-700" title="Expand all viewpoint folders.">➕</button>
+              <button onclick="expandCollapseAllVpFolders(true)" class="bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded-lg text-[11px] border border-slate-700" title="Collapse all viewpoint folders.">➖</button>
             </div>
           </div>
         </div>
@@ -334,12 +330,12 @@
             <label class="block text-[9px] uppercase text-slate-400 font-bold mb-0.5">Search</label>
             <input id="globalSearchInput" type="text" oninput="onSearchInput()" placeholder="ID, Name, File, @Chat..." class="bg-[#070b12] border border-slate-700 rounded-lg px-2.5 py-1 text-[11px] text-white w-40 focus:border-sky-500 focus:outline-none" />
           </div>
-          <button onclick="clearAllColumnFilters()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 px-2 py-1 rounded-lg text-[11px] font-semibold">✕ Reset</button>
+          <button onclick="clearAllColumnFilters()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 px-2 py-1 rounded-lg text-[11px] font-semibold" title="Reset all active filters and search.">✕ Reset</button>
 
           <div id="bulkActionContainer" class="flex items-center gap-1.5 bg-sky-950/40 border border-sky-800/70 rounded-lg px-2 py-0.5">
             <span class="text-[11px] font-bold text-sky-300"><span id="selectedCountLabel">0</span> Sel:</span>
             <select id="bulkResponseSelect" class="bg-[#070b12] border border-slate-700 rounded px-1.5 py-0.5 text-[11px] text-white"></select>
-            <button id="btnBulkApply" onclick="applyBulkRoleAction()" class="bg-sky-600 hover:bg-sky-500 text-white px-2 py-0.5 rounded text-[11px] font-bold">Apply</button>
+            <button id="btnBulkApply" onclick="applyBulkRoleAction()" class="bg-sky-600 hover:bg-sky-500 text-white px-2 py-0.5 rounded text-[11px] font-bold" title="Apply selected status to all checked rows.">Apply</button>
           </div>
         </div>
 
@@ -360,9 +356,9 @@
           <option value="250">250</option>
           <option value="999999">All</option>
         </select>
-        <button onclick="changePage(-1)" class="bg-slate-800 hover:bg-slate-700 px-2 py-0.5 rounded border border-slate-700 text-white">◀</button>
+        <button onclick="changePage(-1)" class="bg-slate-800 hover:bg-slate-700 px-2 py-0.5 rounded border border-slate-700 text-white" title="Previous page">◀</button>
         <span id="pageIndicator" class="font-bold text-white">1 / 1</span>
-        <button onclick="changePage(1)" class="bg-slate-800 hover:bg-slate-700 px-2 py-0.5 rounded border border-slate-700 text-white">▶</button>
+        <button onclick="changePage(1)" class="bg-slate-800 hover:bg-slate-700 px-2 py-0.5 rounded border border-slate-700 text-white" title="Next page">▶</button>
       </div>
     </div>
 
@@ -371,16 +367,16 @@
       <table class="w-full text-left border-collapse text-xs">
         <thead>
           <tr class="bg-[#060911] text-slate-300 border-b border-slate-800 uppercase text-[10px] tracking-wider select-none whitespace-nowrap">
-            <th class="p-2.5 w-8 text-center"><input type="checkbox" id="chkAllVisibleClashes" onclick="toggleSelectAllVisible(this)" /></th>
+            <th class="p-2.5 w-8 text-center"><input type="checkbox" id="chkAllVisibleClashes" onclick="toggleSelectAllVisible(this)" title="Select or deselect all visible rows." /></th>
             <th class="p-2.5 w-24">Snapshot</th>
-            <th class="p-2.5 w-20"><div class="flex items-center justify-between gap-1"><span>Round</span><button onclick="openExcelFilterMenu(event, 'round', 'clashes')" class="px-1">🔽</button></div></th>
-            <th class="p-2.5 w-36"><div class="flex items-center justify-between gap-1"><span>Clash Test</span><button onclick="openExcelFilterMenu(event, 'test_name', 'clashes')" class="px-1">🔽</button></div></th>
-            <th class="p-2.5 min-w-[160px]"><div class="flex items-center justify-between gap-1"><span>Clash Item</span><button onclick="openExcelFilterMenu(event, 'clash_name', 'clashes')" class="px-1">🔽</button></div></th>
-            <th class="p-2.5 w-28"><div class="flex items-center justify-between gap-1"><span>Discipline</span><button onclick="openExcelFilterMenu(event, 'assigned_to', 'clashes')" class="px-1">🔽</button></div></th>
-            <th class="p-2.5 w-64"><div class="flex items-center justify-between gap-1"><span>Revit Elements</span><button onclick="openExcelFilterMenu(event, 'item_a_file', 'clashes')" class="px-1">🔽</button></div></th>
-            <th class="p-2.5 w-28"><div class="flex items-center justify-between gap-1"><span>Level / Dist</span><button onclick="openExcelFilterMenu(event, 'level_grid', 'clashes')" class="px-1">🔽</button></div></th>
-            <th class="p-2.5 w-40 bg-sky-950/20 border-l border-r border-slate-800"><div class="flex items-center justify-between gap-1"><span class="text-sky-300">🛡️ BIM Status</span><button onclick="openExcelFilterMenu(event, 'navis_status', 'clashes')" class="px-1">🔽</button></div></th>
-            <th class="p-2.5 w-44 bg-teal-950/20 border-r border-slate-800"><div class="flex items-center justify-between gap-1"><span class="text-teal-300">🔧 Team Status</span><button onclick="openExcelFilterMenu(event, 'team_response', 'clashes')" class="px-1">🔽</button></div></th>
+            <th class="p-2.5 w-20"><div class="flex items-center justify-between gap-1"><span>Round</span><button onclick="openExcelFilterMenu(event, 'round', 'clashes')" class="px-1" title="Filter or sort by Round">🔽</button></div></th>
+            <th class="p-2.5 w-36"><div class="flex items-center justify-between gap-1"><span>Clash Test</span><button onclick="openExcelFilterMenu(event, 'test_name', 'clashes')" class="px-1" title="Filter or sort by Clash Test">🔽</button></div></th>
+            <th class="p-2.5 min-w-[165px]"><div class="flex items-center justify-between gap-1"><span>Clash Item</span><button onclick="openExcelFilterMenu(event, 'clash_name', 'clashes')" class="px-1" title="Filter or sort by Clash Item">🔽</button></div></th>
+            <th class="p-2.5 w-28"><div class="flex items-center justify-between gap-1"><span>Discipline</span><button onclick="openExcelFilterMenu(event, 'assigned_to', 'clashes')" class="px-1" title="Filter or sort by Discipline">🔽</button></div></th>
+            <th class="p-2.5 w-64"><div class="flex items-center justify-between gap-1"><span>Revit Elements</span><button onclick="openExcelFilterMenu(event, 'item_a_file', 'clashes')" class="px-1" title="Filter or sort by Model File">🔽</button></div></th>
+            <th class="p-2.5 w-28"><div class="flex items-center justify-between gap-1"><span>Level / Dist</span><button onclick="openExcelFilterMenu(event, 'level_grid', 'clashes')" class="px-1" title="Filter or sort by Level">🔽</button></div></th>
+            <th class="p-2.5 w-40 bg-sky-950/20 border-l border-r border-slate-800"><div class="flex items-center justify-between gap-1"><span class="text-sky-300">🛡️ BIM Status</span><button onclick="openExcelFilterMenu(event, 'navis_status', 'clashes')" class="px-1" title="Filter or sort by BIM Status">🔽</button></div></th>
+            <th class="p-2.5 w-44 bg-teal-950/20 border-r border-slate-800"><div class="flex items-center justify-between gap-1"><span class="text-teal-300">🔧 Team Status</span><button onclick="openExcelFilterMenu(event, 'team_response', 'clashes')" class="px-1" title="Filter or sort by Team Status">🔽</button></div></th>
             <th class="p-2.5 w-72">Discussion</th>
           </tr>
         </thead>
@@ -393,13 +389,13 @@
       <table class="w-full text-left border-collapse text-xs">
         <thead>
           <tr class="bg-[#060911] text-slate-300 border-b border-slate-800 uppercase text-[10px] tracking-wider select-none whitespace-nowrap">
-            <th class="p-2.5 w-12"><div class="flex items-center justify-between gap-1"><span>#</span><button onclick="openExcelFilterMenu(event, 'sequence_num', 'viewpoints')" class="px-1">🔽</button></div></th>
+            <th class="p-2.5 w-12"><div class="flex items-center justify-between gap-1"><span>#</span><button onclick="openExcelFilterMenu(event, 'sequence_num', 'viewpoints')" class="px-1" title="Filter or sort by Sequence">🔽</button></div></th>
             <th class="p-2.5 w-28">Snapshot</th>
-            <th class="p-2.5 w-40"><div class="flex items-center justify-between gap-1"><span>Folder</span><button onclick="openExcelFilterMenu(event, 'folder_name', 'viewpoints')" class="px-1">🔽</button></div></th>
-            <th class="p-2.5 min-w-[160px]"><div class="flex items-center justify-between gap-1"><span>Viewpoint</span><button onclick="openExcelFilterMenu(event, 'description', 'viewpoints')" class="px-1">🔽</button></div></th>
-            <th class="p-2.5 w-64"><div class="flex items-center justify-between gap-1"><span>Revit Elements</span><button onclick="openExcelFilterMenu(event, 'item_a_file', 'viewpoints')" class="px-1">🔽</button></div></th>
+            <th class="p-2.5 w-40"><div class="flex items-center justify-between gap-1"><span>Folder</span><button onclick="openExcelFilterMenu(event, 'folder_name', 'viewpoints')" class="px-1" title="Filter or sort by Folder">🔽</button></div></th>
+            <th class="p-2.5 min-w-[160px]"><div class="flex items-center justify-between gap-1"><span>Viewpoint</span><button onclick="openExcelFilterMenu(event, 'description', 'viewpoints')" class="px-1" title="Filter or sort by Viewpoint Name">🔽</button></div></th>
+            <th class="p-2.5 w-64"><div class="flex items-center justify-between gap-1"><span>Revit Elements</span><button onclick="openExcelFilterMenu(event, 'item_a_file', 'viewpoints')" class="px-1" title="Filter or sort by Model File">🔽</button></div></th>
             <th class="p-2.5 w-40 bg-sky-950/20 border-l border-r border-slate-800"><span class="text-sky-300">🛡️ BIM Status</span></th>
-            <th class="p-2.5 w-44 bg-teal-950/20 border-r border-slate-800"><div class="flex items-center justify-between gap-1"><span class="text-teal-300">🔧 Team Status</span><button onclick="openExcelFilterMenu(event, 'status', 'viewpoints')" class="px-1">🔽</button></div></th>
+            <th class="p-2.5 w-44 bg-teal-950/20 border-r border-slate-800"><div class="flex items-center justify-between gap-1"><span class="text-teal-300">🔧 Team Status</span><button onclick="openExcelFilterMenu(event, 'status', 'viewpoints')" class="px-1" title="Filter or sort by Team Status">🔽</button></div></th>
             <th class="p-2.5 w-72">Discussion</th>
           </tr>
         </thead>
@@ -877,7 +873,7 @@
       } catch {}
     }
 
-    // Bandwidth-Optimized Metadata Sync with automatic HTTP 400 fallback & case-insensitive project match
+    // Bandwidth-Optimized Metadata Sync with automatic HTTP 400 fallback, deduplication & case-insensitive project match
     async function reloadAllCloudData(preselectProject = null, preselectRound = null, isSilentAutoPoll = false, forceImageCacheReset = false) {
       if (!isSilentAutoPoll) setCloudPill("⏳ Syncing...", "amber");
 
@@ -951,7 +947,15 @@
           }
         }
 
-        const newClashes = visibleRawClashes.map((r, i) => normalizeClashRecord(r, i));
+        // Defensive deduplication by round_guid
+        const seenClashKeys = new Set();
+        const newClashes = [];
+        visibleRawClashes.forEach((r, i) => {
+          const norm = normalizeClashRecord(r, i);
+          if (seenClashKeys.has(norm.round_guid)) return;
+          seenClashKeys.add(norm.round_guid);
+          newClashes.push(norm);
+        });
 
         const groupLookup = {};
         newClashes.filter(c => c.is_group_header && c.group_name).forEach(g => {
@@ -967,7 +971,16 @@
           }
         });
 
-        const vpList = vpRawList.map((v, i) => normalizeViewpointRecord(v, i));
+        // Defensive deduplication by vp_key
+        const seenVpKeys = new Set();
+        const vpList = [];
+        vpRawList.forEach((v, i) => {
+          const norm = normalizeViewpointRecord(v, i);
+          if (seenVpKeys.has(norm.vp_key)) return;
+          seenVpKeys.add(norm.vp_key);
+          vpList.push(norm);
+        });
+
         newClashes.sort((a, b) => (a.sequence_num || 0) - (b.sequence_num || 0));
         vpList.sort((a, b) => (a.sequence_num || 0) - (b.sequence_num || 0));
 
@@ -1021,7 +1034,7 @@
         setCloudPill(`● Synced (${filteredClashes.length} Clashes, ${filteredViewpoints.length} VPs)`, "emerald");
       } catch (err) {
         setCloudPill("⚠️ Sync Error", "rose");
-        if (!isSilentAutoPoll) showToast("⚠️ Supabase Error: " + err.message, "rose");
+        if (!isSilentAutoPoll) showToast("⚠️ Cloud Sync Error: " + err.message, "rose");
       }
     }
 
@@ -1092,6 +1105,7 @@
           const img = document.createElement("img");
           img.src = imgBase64;
           img.className = `${sizeClass} object-cover rounded-lg cursor-pointer border border-slate-700 hover:scale-105 transition`;
+          img.title = "Click to zoom snapshot";
           img.onclick = () => showModal(imgBase64, caption || "");
           cell.innerHTML = "";
           cell.appendChild(img);
@@ -1295,53 +1309,83 @@
         return;
       }
 
+      // Precompute clash & group counts per Clash Test for the section divider bar
+      const testStats = new Map();
+      for (const rec of filteredClashes) {
+        const key = rec.test_name || "-";
+        let st = testStats.get(key);
+        if (!st) { st = { leaves: 0, groups: 0 }; testStats.set(key, st); }
+        if (rec.is_group_header) st.groups++;
+        else st.leaves++;
+      }
+
       const allowBimEdit = canEditBimStatus();
       const allowTeamEdit = canEditTeamStatus();
+      let lastRenderedTest = null;
 
       pageItems.forEach((c, idx) => {
+        // Insert a clean Clash Test divider bar whenever transitioning to a new Clash Test
+        const curTestName = c.test_name || "-";
+        if (curTestName !== lastRenderedTest) {
+          lastRenderedTest = curTestName;
+          const st = testStats.get(curTestName) || { leaves: 0, groups: 0 };
+          const testHdrTr = document.createElement("tr");
+          testHdrTr.className = "bg-[#0B172A] border-t-2 border-t-sky-700/75 border-b border-b-slate-800 select-none";
+          testHdrTr.innerHTML =
+            `<td colspan="11" class="px-3 py-1.5">` +
+              `<div class="flex items-center justify-between gap-2">` +
+                `<div class="flex items-center gap-2 min-w-0">` +
+                  `<span class="px-1.5 py-0.5 rounded bg-sky-950 text-sky-300 border border-sky-700/80 text-[9px] font-black tracking-wider uppercase shrink-0">CLASH TEST</span>` +
+                  `<span class="text-sky-200 font-bold text-[11px] truncate" title="${escapeHtml(curTestName)}">${escapeHtml(curTestName)}</span>` +
+                `</div>` +
+                `<div class="flex items-center gap-1.5 shrink-0 text-[10px]">` +
+                  `<span class="px-2 py-0.5 rounded-full bg-slate-900 text-slate-300 border border-slate-700 font-semibold">${st.leaves} ${st.leaves === 1 ? "Clash" : "Clashes"}</span>` +
+                  (st.groups > 0 ? `<span class="px-2 py-0.5 rounded-full bg-teal-950/80 text-teal-300 border border-teal-800/80 font-semibold">${st.groups} ${st.groups === 1 ? "Group" : "Groups"}</span>` : "") +
+                `</div>` +
+              `</div>` +
+            `</td>`;
+          tbody.appendChild(testHdrTr);
+        }
+
         const isGroup = c.is_group_header === true;
         const isSubClash = !isGroup && Boolean(c.parent_group_guid);
         const isChecked = selectedRowKeys.has(c.round_guid);
         const isRejected = c.navis_status === "Rejected" || c.review_decision === "Rejected";
 
-        const prevRow = idx > 0 ? pageItems[idx - 1] : null;
         const nextRow = idx < pageItems.length - 1 ? pageItems[idx + 1] : null;
-        const isNewTestBoundary = prevRow !== null && prevRow.test_name !== c.test_name;
-        const isLastChildInGroup = isSubClash && (!nextRow || nextRow.is_group_header || nextRow.parent_group_guid !== c.parent_group_guid);
+        const isLastChildInGroup = isSubClash && (!nextRow || nextRow.is_group_header || nextRow.parent_group_guid !== c.parent_group_guid || nextRow.test_name !== c.test_name);
 
         const tr = document.createElement("tr");
         tr.id = "row_" + c.round_guid;
 
-        const boundaryClass = isNewTestBoundary ? " border-t-2 border-t-sky-600/80" : "";
         if (isRejected) {
-          tr.className = "bg-rose-950/35 hover:bg-rose-900/40 border-l-4 border-l-rose-500" + boundaryClass;
+          tr.className = "bg-rose-950/35 hover:bg-rose-900/40 border-l-4 border-l-rose-500";
         } else if (isGroup) {
-          tr.className = "bg-[#0F253B] hover:bg-[#14314E] border-l-4 border-l-teal-400 border-t border-b border-sky-800/70" + boundaryClass;
+          tr.className = "bg-[#0F253B] hover:bg-[#14314E] border-l-4 border-l-teal-400 border-t border-b border-sky-800/70";
         } else if (isSubClash) {
-          tr.className = "bg-[#070D19] hover:bg-[#0E192E] border-l-4 border-l-teal-700/70" + boundaryClass;
+          tr.className = "bg-[#070D19] hover:bg-[#0E192E] border-l-4 border-l-teal-700/70";
         } else {
-          tr.className = "bg-[#0D1526] hover:bg-slate-800/60 border-l-4 border-l-transparent" + boundaryClass;
+          tr.className = "bg-[#0D1526] hover:bg-slate-800/60 border-l-4 border-l-transparent";
         }
 
         const thumbSize = isSubClash ? "w-16 h-11" : "w-20 h-14";
         const hasCached = clashImageCache.has(c.round_guid);
         const cachedSrc = hasCached ? clashImageCache.get(c.round_guid) : (c.image_base64 || "");
         const imgHtml = cachedSrc && cachedSrc.startsWith("data:image")
-          ? `<img src="${cachedSrc}" onclick="showModalByKey('clashes', '${escapeJsAttr(c.round_guid)}', '${escapeJsAttr(c.clash_name)}')" class="${thumbSize} object-cover rounded-lg cursor-pointer border border-slate-700 hover:scale-105 transition" />`
+          ? `<img src="${cachedSrc}" onclick="showModalByKey('clashes', '${escapeJsAttr(c.round_guid)}', '${escapeJsAttr(c.clash_name)}')" title="Click to zoom snapshot" class="${thumbSize} object-cover rounded-lg cursor-pointer border border-slate-700 hover:scale-105 transition" />`
           : `<div class="${thumbSize} bg-slate-800 rounded-lg flex items-center justify-center text-[9px] text-slate-500">${hasCached ? "No Image" : "Loading..."}</div>`;
 
-        const snapCellExtra = isSubClash ? "pl-5" : "p-2";
+        const snapCellExtra = isSubClash ? "pl-5 pr-2" : "px-2";
 
         const checkboxOnClick = isGroup
           ? `onclick="handleGroupCheckboxClick(event, '${escapeJsAttr(c.round_guid)}', '${escapeJsAttr(c.guid)}', '${escapeJsAttr(c.round)}')"`
           : `onclick="handleRowCheckboxClick(event, '${escapeJsAttr(c.round_guid)}', ${startIdx + idx})"`;
 
-        // Clash Test column: muted indicator on sub-clashes so hierarchy stays clean
         const testColHtml = isSubClash
-          ? `<div class="text-[10px] text-slate-500 italic" title="${escapeHtml(c.test_name)}">Sub-clash</div>`
-          : `<div class="font-medium ${isGroup ? 'text-sky-200 font-semibold' : 'text-slate-200'} text-[11px] break-words">${escapeHtml(c.test_name)}</div>`;
+          ? `<div class="text-[10px] text-slate-500 italic" title="${escapeHtml(curTestName)}">Sub-clash</div>`
+          : `<div class="font-medium ${isGroup ? 'text-sky-200 font-semibold' : 'text-slate-300'} text-[11px] break-words">${escapeHtml(curTestName)}</div>`;
 
-        // Clash Item column: distinct Group badge + count pill vs recessed Tree-Connected Sub-clash vs Standalone
+        let clashItemTdClass = "p-2";
         let clashItemHtml = "";
         if (isGroup) {
           const parsedGrp = parseGroupDisplayTitle(c.clash_name);
@@ -1350,26 +1394,23 @@
             : "";
           clashItemHtml =
             `<div class="flex items-center flex-wrap gap-y-1">` +
-              `<button onclick="toggleGroupCollapse('${escapeJsAttr(c.guid)}')" class="mr-1.5 px-1.5 py-0.5 rounded bg-teal-700 hover:bg-teal-600 text-white text-[10px] font-extrabold shadow-sm" title="Expand / Collapse Group">${collapsedGroups.has(c.guid) ? "▶" : "▼"}</button>` +
+              `<button onclick="toggleGroupCollapse('${escapeJsAttr(c.guid)}')" class="mr-1.5 px-1.5 py-0.5 rounded bg-teal-700 hover:bg-teal-600 text-white text-[10px] font-extrabold shadow-sm" title="Expand or collapse group">${collapsedGroups.has(c.guid) ? "▶" : "▼"}</button>` +
               `<span class="mr-1.5 px-1.5 py-0.5 rounded bg-teal-500/20 text-teal-300 border border-teal-400/50 text-[9px] font-black tracking-wider uppercase shrink-0">GROUP</span>` +
               `<span onclick="toggleGroupCollapse('${escapeJsAttr(c.guid)}')" class="text-white font-extrabold text-[11.5px] cursor-pointer hover:text-teal-200 transition">${escapeHtml(parsedGrp.base)}</span>` +
               countPill +
             `</div>`;
         } else if (isSubClash) {
-          clashItemHtml =
-            `<div class="tree-branch-cell ${isLastChildInGroup ? 'tree-branch-last' : ''} py-0.5">` +
-              `<span class="text-slate-100 font-semibold text-[11px]">${escapeHtml(c.clash_name)}</span>` +
-            `</div>`;
+          clashItemTdClass = isLastChildInGroup ? "py-2 pr-2 tree-td-last" : "py-2 pr-2 tree-td-mid";
+          clashItemHtml = `<span class="text-slate-100 font-semibold text-[11px]">${escapeHtml(c.clash_name)}</span>`;
         } else {
           clashItemHtml = `<div class="text-white font-bold text-[11px]">${escapeHtml(c.clash_name)}</div>`;
         }
 
-        // Revit Elements column: clean Group Container card instead of non-functional ID: GROUP buttons
         let elementsColHtml = "";
         if (isGroup) {
           const isExp = !collapsedGroups.has(c.guid);
           elementsColHtml =
-            `<div onclick="toggleGroupCollapse('${escapeJsAttr(c.guid)}')" class="bg-[#081524] hover:bg-[#0D2138] border border-sky-800/70 rounded-lg px-2.5 py-1.5 cursor-pointer flex items-center justify-between gap-2 transition" title="Expand group to inspect and isolate Revit Element IDs">` +
+            `<div onclick="toggleGroupCollapse('${escapeJsAttr(c.guid)}')" class="bg-[#081524] hover:bg-[#0D2138] border border-sky-800/70 rounded-lg px-2.5 py-1.5 cursor-pointer flex items-center justify-between gap-2 transition" title="Expand group to inspect and isolate Revit Element IDs.">` +
               `<div class="min-w-0">` +
                 `<div class="text-[10px] font-bold text-teal-300 truncate">${escapeHtml(c.item_a_name || "Grouped Clashes")}</div>` +
                 `<div class="text-[9px] text-slate-400">Expand group to isolate Revit IDs</div>` +
@@ -1380,11 +1421,11 @@
           elementsColHtml =
             `<div class="bg-[#070b12] border border-slate-800 rounded p-1 mb-1 flex items-center justify-between gap-1">` +
               `<span class="text-rose-400 font-bold truncate max-w-[115px] text-[10px]" title="${escapeHtml(c.item_a_file)}">A: ${escapeHtml(c.item_a_name)}</span>` +
-              `<button onclick="copyAndIsolateInRevit('${escapeJsAttr(c.project_name)}', '${escapeJsAttr(c.item_a_id)}', '${escapeJsAttr(c.item_b_id)}', '${escapeJsAttr(c.item_a_file)}', '${escapeJsAttr(c.item_b_file)}', '${escapeJsAttr(c.item_a_name)}', '${escapeJsAttr(c.item_b_name)}')" class="bg-sky-950 hover:bg-sky-800 text-sky-200 border border-sky-700 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold">ID: ${escapeHtml(c.item_a_id)} 🎯</button>` +
+              `<button onclick="copyAndIsolateInRevit('${escapeJsAttr(c.project_name)}', '${escapeJsAttr(c.item_a_id)}', '${escapeJsAttr(c.item_b_id)}', '${escapeJsAttr(c.item_a_file)}', '${escapeJsAttr(c.item_b_file)}', '${escapeJsAttr(c.item_a_name)}', '${escapeJsAttr(c.item_b_name)}')" title="Copy ID and isolate in Revit 3D Section Box" class="bg-sky-950 hover:bg-sky-800 text-sky-200 border border-sky-700 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold">ID: ${escapeHtml(c.item_a_id)} 🎯</button>` +
             `</div>` +
             `<div class="bg-[#070b12] border border-slate-800 rounded p-1 flex items-center justify-between gap-1">` +
               `<span class="text-emerald-400 font-bold truncate max-w-[115px] text-[10px]" title="${escapeHtml(c.item_b_file)}">B: ${escapeHtml(c.item_b_name)}</span>` +
-              `<button onclick="copyAndIsolateInRevit('${escapeJsAttr(c.project_name)}', '${escapeJsAttr(c.item_b_id)}', '${escapeJsAttr(c.item_a_id)}', '${escapeJsAttr(c.item_b_file)}', '${escapeJsAttr(c.item_a_file)}', '${escapeJsAttr(c.item_b_name)}', '${escapeJsAttr(c.item_a_name)}')" class="bg-emerald-950 hover:bg-emerald-800 text-emerald-200 border border-emerald-700 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold">ID: ${escapeHtml(c.item_b_id)} 🎯</button>` +
+              `<button onclick="copyAndIsolateInRevit('${escapeJsAttr(c.project_name)}', '${escapeJsAttr(c.item_b_id)}', '${escapeJsAttr(c.item_a_id)}', '${escapeJsAttr(c.item_b_file)}', '${escapeJsAttr(c.item_a_file)}', '${escapeJsAttr(c.item_b_name)}', '${escapeJsAttr(c.item_a_name)}')" title="Copy ID and isolate in Revit 3D Section Box" class="bg-emerald-950 hover:bg-emerald-800 text-emerald-200 border border-emerald-700 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold">ID: ${escapeHtml(c.item_b_id)} 🎯</button>` +
             `</div>`;
         }
 
@@ -1395,7 +1436,7 @@
              <div id="bimSync_${escapeHtml(c.round_guid)}" class="text-[9px] text-slate-400 mt-1">✓ BIM Control</div>`
           : `<div class="px-2 py-1 rounded-lg border text-[11px] font-bold flex items-center justify-between ${getBimStatusBadgeClass(c.navis_status)}">
                <span>${escapeHtml(c.navis_status)}</span>
-               <span class="text-[9px] opacity-75" title="Controlled by BIM Coordinator">🔒</span>
+               <span class="text-[9px] opacity-75" title="Controlled by BIM Coordinator or Lead.">🔒</span>
              </div>`;
 
         const teamStatusHtml = allowTeamEdit
@@ -1405,7 +1446,7 @@
              <div id="syncStatus_${escapeHtml(c.round_guid)}" class="text-[9px] text-slate-400 mt-1">✓ Eng Control</div>`
           : `<div class="px-2 py-1 rounded-lg border border-slate-700 bg-[#070b12] text-slate-200 text-[11px] font-bold flex items-center justify-between">
                <span class="truncate">${escapeHtml(c.team_response)}</span>
-               <span class="text-[9px] text-slate-500 ml-1" title="Controlled by Discipline Engineer">🔒</span>
+               <span class="text-[9px] text-slate-500 ml-1" title="Controlled by Discipline Engineer.">🔒</span>
              </div>`;
 
         tr.innerHTML =
@@ -1413,7 +1454,7 @@
           `<td class="${snapCellExtra} py-2" data-thumb-dataset="clashes" data-thumb-key="${escapeHtml(c.round_guid)}" data-thumb-size="${thumbSize}">${imgHtml}</td>` +
           `<td class="p-2"><span class="px-1.5 py-0.5 rounded bg-slate-800 text-teal-300 border border-slate-700 font-bold text-[11px]">R-${escapeHtml(c.round)}</span><div class="text-[9px] text-slate-400 mt-0.5 truncate max-w-[80px]">${escapeHtml(c.project_name)}</div></td>` +
           `<td class="p-2">${testColHtml}</td>` +
-          `<td class="p-2">${clashItemHtml}</td>` +
+          `<td class="${clashItemTdClass}">${clashItemHtml}</td>` +
           `<td class="p-2"><span class="px-2 py-0.5 rounded bg-sky-950 text-sky-300 border border-sky-800 font-bold text-[11px]">${escapeHtml(c.assigned_to)}</span></td>` +
           `<td class="p-2">${elementsColHtml}</td>` +
           `<td class="p-2 text-[11px]"><div class="font-bold text-slate-200">${escapeHtml(c.level_grid)}</div><div class="text-slate-400 text-[10px]">${escapeHtml(c.distance)}</div></td>` +
@@ -1436,7 +1477,7 @@
 
     async function updateClashBimStatus(roundGuid, newBimStatus, isGroupHeader = false, groupGuid = "") {
       if (!canEditBimStatus()) {
-        showToast("🔒 Only BIM Coordinators / Leads can modify BIM Review Status.", "rose");
+        showToast("🔒 Only BIM Coordinators or Leads can modify BIM Review Status.", "rose");
         return;
       }
       const ind = document.getElementById("bimSync_" + roundGuid);
@@ -1558,7 +1599,7 @@
         }
         selectedRowKeys.clear();
         document.getElementById("selectedCountLabel").textContent = "0";
-        showToast(`✓ Updated ${keys.length} items to '${newVal}'!`, "emerald");
+        showToast(`✓ Updated ${keys.length} items to '${newVal}'.`, "emerald");
         applyFilters();
       } catch (err) {
         showToast("⚠️ Bulk update error: " + err.message, "rose");
@@ -1610,7 +1651,7 @@
           const hasCached = vpImageCache.has(vp.vp_key);
           const cachedSrc = hasCached ? vpImageCache.get(vp.vp_key) : (vp.image_base64 || "");
           const imgHtml = cachedSrc && cachedSrc.startsWith("data:image")
-            ? `<img src="${cachedSrc}" onclick="showModalByKey('viewpoints', '${escapeJsAttr(vp.vp_key)}', '${escapeJsAttr(vp.description)}')" class="w-24 h-16 object-cover rounded-lg cursor-pointer border border-slate-700" />`
+            ? `<img src="${cachedSrc}" onclick="showModalByKey('viewpoints', '${escapeJsAttr(vp.vp_key)}', '${escapeJsAttr(vp.description)}')" title="Click to zoom snapshot" class="w-24 h-16 object-cover rounded-lg cursor-pointer border border-slate-700" />`
             : `<div class="w-24 h-16 bg-slate-800 rounded-lg flex items-center justify-center text-[10px] text-slate-500">${hasCached ? "No Image" : "Loading..."}</div>`;
 
           const currentVpTeamVal = normalizeTeamStatus(vp.status);
@@ -1622,13 +1663,15 @@
             ? `<select onchange="updateViewpointBimStatus('${escapeJsAttr(vp.vp_key)}', this.value)" class="w-full bg-[#070b12] border border-sky-700 rounded-lg px-2 py-1 text-[11px] font-bold text-sky-200">
                 ${BIM_COORDINATOR_STATUSES.map(st => `<option value="${st}" ${bimVpState === st ? "selected" : ""}>🛡️ ${st}</option>`).join("")}
                </select>`
-            : `<div class="px-2 py-1 rounded-lg border ${getBimStatusBadgeClass(bimVpState)} text-[11px] font-bold flex justify-between"><span>${bimVpState}</span><span>🔒</span></div>`;
+            : `<div class="px-2 py-1 rounded-lg border ${getBimStatusBadgeClass(bimVpState)} text-[11px] font-bold flex justify-between"><span>${bimVpState}</span><span title="Controlled by BIM Coordinator or Lead.">🔒</span></div>`;
 
           const teamVpHtml = allowTeamEdit
             ? `<select onchange="updateViewpointStatus('${escapeJsAttr(vp.vp_key)}', this.value)" class="w-full bg-[#070b12] border border-teal-700 rounded-lg px-2 py-1 text-[11px] font-bold text-teal-200">
                 ${TEAM_UNIFIED_STATUSES.map(st => `<option value="${st}" ${currentVpTeamVal === st ? "selected" : ""}>🔧 ${st}</option>`).join("")}
                </select>`
-            : `<div class="px-2 py-1 rounded-lg border border-slate-700 bg-[#070b12] text-slate-200 text-[11px] font-bold flex justify-between"><span class="truncate">${escapeHtml(currentVpTeamVal)}</span><span>🔒</span></div>`;
+            : `<div class="px-2 py-1 rounded-lg border border-slate-700 bg-[#070b12] text-slate-200 text-[11px] font-bold flex justify-between"><span class="truncate">${escapeHtml(currentVpTeamVal)}</span><span title="Controlled by Discipline Engineer.">🔒</span></div>`;
+
+          const folderTdClass = isLastVp ? "py-2 pr-2 tree-td-last" : "py-2 pr-2 tree-td-mid";
 
           const tr = document.createElement("tr");
           tr.id = "row_" + vp.vp_key;
@@ -1636,11 +1679,11 @@
           tr.innerHTML =
             `<td class="p-2 font-black text-teal-400">#${vp.sequence_num}</td>` +
             `<td class="p-2" data-thumb-dataset="viewpoints" data-thumb-key="${escapeHtml(vp.vp_key)}" data-thumb-size="w-24 h-16">${imgHtml}</td>` +
-            `<td class="p-2"><div class="tree-branch-cell ${isLastVp ? 'tree-branch-last' : ''} py-0.5"><span class="px-2 py-0.5 rounded bg-slate-800 text-teal-300 border border-slate-700 font-bold text-[10px]">📁 ${escapeHtml(vp.folder_name || "Root")}</span></div></td>` +
+            `<td class="${folderTdClass}"><span class="px-2 py-0.5 rounded bg-slate-800 text-teal-300 border border-slate-700 font-bold text-[10px]">📁 ${escapeHtml(vp.folder_name || "Root")}</span></td>` +
             `<td class="p-2 font-bold text-white text-xs">${escapeHtml(vp.description || "-")}</td>` +
             `<td class="p-2">` +
-              `<div class="mb-1"><button onclick="copyAndIsolateInRevit('${escapeJsAttr(vp.project_name)}', '${escapeJsAttr(vp.item_a_id)}', '${escapeJsAttr(vp.item_b_id)}', '${escapeJsAttr(vp.item_a_file)}', '${escapeJsAttr(vp.item_b_file)}', 'Element 1', 'Element 2')" class="bg-sky-950 text-sky-200 border border-sky-700 px-2 py-0.5 rounded text-[10px] font-mono">ID 1: ${escapeHtml(vp.item_a_id || "N/A")} (${escapeHtml(vp.item_a_file || "N/A")}) 🎯</button></div>` +
-              `<div><button onclick="copyAndIsolateInRevit('${escapeJsAttr(vp.project_name)}', '${escapeJsAttr(vp.item_b_id)}', '${escapeJsAttr(vp.item_a_id)}', '${escapeJsAttr(vp.item_b_file)}', '${escapeJsAttr(vp.item_a_file)}', 'Element 2', 'Element 1')" class="bg-emerald-950 text-emerald-200 border border-emerald-700 px-2 py-0.5 rounded text-[10px] font-mono">ID 2: ${escapeHtml(vp.item_b_id || "N/A")} (${escapeHtml(vp.item_b_file || "N/A")}) 🎯</button></div>` +
+              `<div class="mb-1"><button onclick="copyAndIsolateInRevit('${escapeJsAttr(vp.project_name)}', '${escapeJsAttr(vp.item_a_id)}', '${escapeJsAttr(vp.item_b_id)}', '${escapeJsAttr(vp.item_a_file)}', '${escapeJsAttr(vp.item_b_file)}', 'Element 1', 'Element 2')" title="Copy ID and isolate in Revit 3D Section Box" class="bg-sky-950 text-sky-200 border border-sky-700 px-2 py-0.5 rounded text-[10px] font-mono">ID 1: ${escapeHtml(vp.item_a_id || "N/A")} (${escapeHtml(vp.item_a_file || "N/A")}) 🎯</button></div>` +
+              `<div><button onclick="copyAndIsolateInRevit('${escapeJsAttr(vp.project_name)}', '${escapeJsAttr(vp.item_b_id)}', '${escapeJsAttr(vp.item_a_id)}', '${escapeJsAttr(vp.item_b_file)}', '${escapeJsAttr(vp.item_a_file)}', 'Element 2', 'Element 1')" title="Copy ID and isolate in Revit 3D Section Box" class="bg-emerald-950 text-emerald-200 border border-emerald-700 px-2 py-0.5 rounded text-[10px] font-mono">ID 2: ${escapeHtml(vp.item_b_id || "N/A")} (${escapeHtml(vp.item_b_file || "N/A")}) 🎯</button></div>` +
             `</td>` +
             `<td class="p-2 bg-sky-950/10 border-l border-r border-slate-800">${bimVpHtml}</td>` +
             `<td class="p-2 bg-teal-950/10 border-r border-slate-800">${teamVpHtml}</td>` +
@@ -1674,7 +1717,7 @@
       });
       const vp = allViewpoints.find(v => v.vp_key === vpKey);
       if (vp) { vp.item_b_name = newBimStatus; vp.updated_at = nowIso; }
-      showToast("✓ Viewpoint BIM status updated!", "emerald");
+      showToast("✓ Viewpoint BIM status updated.", "emerald");
       renderViewpointsTable();
     }
 
@@ -1688,7 +1731,7 @@
       });
       const vp = allViewpoints.find(v => v.vp_key === vpKey);
       if (vp) { vp.status = newStatus; vp.updated_at = nowIso; }
-      showToast("✓ Viewpoint Team status updated!", "emerald");
+      showToast("✓ Viewpoint Team status updated.", "emerald");
       renderViewpointsTable();
     }
 
@@ -1741,7 +1784,7 @@
       }));
 
       if (matches.length === 0) {
-        showToast(`📋 Copied ID [${primaryId}] - ⚠️ No open Revit model matches (${primaryFile}).`, "amber");
+        showToast(`📋 Copied ID [${primaryId}] - No open Revit model matches (${primaryFile}).`, "amber");
         return;
       }
 
@@ -1749,7 +1792,7 @@
         if (!matches[0].alreadyIsolated) {
           await triggerSpecificRevitTarget(matches[0].port, matches[0].docTitle, payload);
         } else {
-          showToast(`🎯 Isolated Element [${primaryId}] in Revit (${matches[0].docTitle})!`, "emerald");
+          showToast(`🎯 Isolated Element [${primaryId}] in Revit (${matches[0].docTitle}).`, "emerald");
         }
         return;
       }
@@ -1778,7 +1821,7 @@
           body: JSON.stringify({ ...basePayload, TargetDocTitle: targetDocTitle, Mode: "force_isolate" })
         });
         if (res.ok) {
-          showToast(`🎯 3D Section Box created in [${targetDocTitle}]!`, "emerald");
+          showToast(`🎯 3D Section Box created in [${targetDocTitle}].`, "emerald");
         }
       } catch {
         showToast("⚠️ Failed to reach selected Revit session.", "rose");
@@ -1795,7 +1838,7 @@
             const formatted = escapeHtml(m.text || "").replace(/(@[\w\.\-]+)/g, '<span class="bg-sky-900/90 text-sky-200 px-1 rounded font-bold">$1</span>');
             const rIcon = getRoleIcon(m.role || "Engineer");
             const imgTag = (m.image && String(m.image).startsWith("data:image"))
-              ? `<img src="${m.image}" onclick="showModal(this.src, 'Attachment - ${escapeJsAttr(m.author || "User")}')" class="mt-1 max-h-16 rounded border border-slate-700 cursor-pointer hover:border-sky-400 transition" />`
+              ? `<img src="${m.image}" onclick="showModal(this.src, 'Attachment - ${escapeJsAttr(m.author || "User")}')" title="Click to view full-resolution screenshot" class="mt-1 max-h-16 rounded border border-slate-700 cursor-pointer hover:border-sky-400 transition" />`
               : "";
             return `<div class="mb-1 border-b border-slate-800/80 pb-0.5"><span class="text-sky-300 font-bold text-[10px]">${rIcon} ${escapeHtml(m.author || "Eng")}: </span><span class="text-slate-200 text-[11px]">${formatted}</span>${imgTag}</div>`;
           }).join("");
@@ -1816,15 +1859,15 @@
             `oninput="onCommentInputMention(event, 'chatInput_${escapeJsAttr(recordKey)}')" ` +
             `onkeydown="onCommentKeyDown(event, '${escapeJsAttr(recordKey)}', '${tableType}')" ` +
             `class="bg-[#070b12] border border-slate-700 rounded px-2 py-1 text-[11px] text-white flex-1 min-w-0 focus:border-sky-500 focus:outline-none" />` +
-          `<button onclick="triggerChatImagePicker('${escapeJsAttr(recordKey)}')" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-sky-300 px-1.5 py-1 rounded text-[11px] font-bold shrink-0" title="Attach screenshot image (or press Ctrl+V in box)">📎</button>` +
-          `<button onclick="postChatMessage('${escapeJsAttr(recordKey)}', '${tableType}')" class="bg-sky-600 hover:bg-sky-500 text-white px-2 py-1 rounded text-[11px] font-bold shrink-0">Send</button>` +
+          `<button onclick="triggerChatImagePicker('${escapeJsAttr(recordKey)}')" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-sky-300 px-1.5 py-1 rounded text-[11px] font-bold shrink-0" title="Attach image file (or press Ctrl+V inside the comment box).">📎</button>` +
+          `<button onclick="postChatMessage('${escapeJsAttr(recordKey)}', '${tableType}')" class="bg-sky-600 hover:bg-sky-500 text-white px-2 py-1 rounded text-[11px] font-bold shrink-0" title="Post comment to cloud">Send</button>` +
         `</div>`;
     }
 
     function buildPendingPreviewInnerHtml(recordKey, dataUrl) {
       const kb = Math.max(1, Math.round((dataUrl.length * 0.75) / 1024));
       return `<div class="flex items-center gap-1.5 min-w-0">` +
-        `<img src="${dataUrl}" onclick="showModal(this.src, 'Pending Screenshot Preview')" class="w-9 h-6 object-cover rounded border border-sky-500 cursor-pointer shrink-0" />` +
+        `<img src="${dataUrl}" onclick="showModal(this.src, 'Pending Screenshot Preview')" title="Click to preview attached image" class="w-9 h-6 object-cover rounded border border-sky-500 cursor-pointer shrink-0" />` +
         `<span class="text-[10px] text-sky-200 font-bold truncate">Screenshot (${kb} KB)</span>` +
         `</div>` +
         `<button onclick="clearPendingChatImage('${escapeJsAttr(recordKey)}')" class="text-rose-300 hover:text-white font-bold px-1 text-[11px] shrink-0" title="Remove attachment">✕</button>`;
