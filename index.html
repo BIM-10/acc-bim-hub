@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="robots" content="noindex, nofollow, noarchive" />
-  <title>ACC — Enterprise BIM Coordination Hub</title>
+  <title>ACC - Enterprise BIM Coordination Hub</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js" async></script>
@@ -22,7 +22,7 @@
 </head>
 <body class="bg-[#070b12] text-slate-200 min-h-screen font-sans antialiased overflow-x-hidden">
 
-  <!-- نافذة التحقق التلقائي من الهوية عند فتح الرابط بدون توكن مستخدم مسبق -->
+  <!-- Identity Gate Modal -->
   <div id="identityGateModal" class="hidden fixed inset-0 bg-[#070b12]/95 backdrop-blur-md flex items-center justify-center p-4 z-50">
     <div class="bg-[#0d1526] border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl">
       <div class="flex items-center gap-3 border-b border-slate-800 pb-3 mb-4">
@@ -53,7 +53,7 @@
     </div>
   </div>
 
-  <!-- نافذة دليل أعضاء المشروع (Team Directory Modal) -->
+  <!-- Team Directory Modal -->
   <div id="teamDirectoryModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
     <div class="bg-[#0d1526] border border-slate-700 rounded-2xl max-w-2xl w-full p-5 shadow-2xl text-xs">
       <div class="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
@@ -67,7 +67,7 @@
     </div>
   </div>
 
-  <!-- نافذة اختيار ملف الريفيت عند وجود أكثر من ملف أو سيشن مفتوحة (Target RVT Picker) -->
+  <!-- Target RVT Picker Modal -->
   <div id="revitTargetPickerModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
     <div class="bg-[#0d1526] border border-sky-600 rounded-2xl max-w-lg w-full p-5 shadow-2xl text-xs">
       <div class="flex justify-between items-center border-b border-slate-800 pb-3 mb-3">
@@ -81,7 +81,7 @@
     </div>
   </div>
 
-  <!-- 1. TOP SINGLE-ROW BALANCED HEADER (FROZEN DESIGN) -->
+  <!-- 1. TOP SINGLE-ROW BALANCED HEADER -->
   <header class="w-full bg-[#0d1526] border-b border-slate-800 px-3 py-2 sticky top-0 z-40 shadow-lg">
     <div class="w-full flex items-center justify-between gap-3 flex-wrap xl:flex-nowrap">
       <!-- Left: Logo + Title + Locked Project Pill + Subtitle -->
@@ -103,7 +103,7 @@
             <span id="projectBadge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-950 text-sky-300 border border-sky-800 shrink-0">🔒 Project Locked</span>
             <span id="cloudSyncPill" class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-950 text-emerald-300 border border-emerald-800 shrink-0">⏳ Connecting...</span>
           </div>
-          <p class="text-[10px] text-slate-400 truncate">Advanced Consultancy Center (ACC) — ISO 19650 Clash Verification, Saved Viewpoints & Live Revit Bridge</p>
+          <p class="text-[10px] text-slate-400 truncate">Advanced Consultancy Center (ACC) - ISO 19650 Clash Verification, Saved Viewpoints & Live Revit Bridge</p>
         </div>
       </div>
 
@@ -155,7 +155,7 @@
         </button>
 
         <!-- Auto-Sync -->
-        <button id="btnAutoSync" onclick="toggleAutoSync()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-emerald-300 px-2 py-1 rounded-lg text-[11px] font-bold" title="Live Cloud Auto-Sync (Every 5s)">
+        <button id="btnAutoSync" onclick="toggleAutoSync()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-emerald-300 px-2 py-1 rounded-lg text-[11px] font-bold" title="Smart Cloud Auto-Sync (Metadata Only, Every 15s)">
           ⚡ Sync: ON
         </button>
 
@@ -165,14 +165,14 @@
         </button>
 
         <!-- Refresh -->
-        <button onclick="reloadAllCloudData()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white px-2 py-1 rounded-lg text-[11px] font-bold" title="Refresh Cloud Data">
+        <button onclick="reloadAllCloudData(null, null, false, true)" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white px-2 py-1 rounded-lg text-[11px] font-bold" title="Refresh Cloud Data">
           🔄
         </button>
       </div>
     </div>
   </header>
 
-  <!-- 2. ANALYTICS & CHARTS SURFACE (FROZEN DESIGN) -->
+  <!-- 2. ANALYTICS & CHARTS SURFACE -->
   <div id="analyticsWrapper" class="w-full bg-gradient-to-b from-[#132038] to-[#0f192d] border-b-2 border-teal-900/60 px-3 py-2.5 shadow-inner">
     <section id="analyticsSection" class="grid grid-cols-1 xl:grid-cols-12 gap-2.5">
       <div class="xl:col-span-4 grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -229,12 +229,12 @@
     </section>
   </div>
 
-  <!-- 3. WORKSPACE & SINGLE-ROW FILTER BAR (FROZEN DESIGN) -->
+  <!-- 3. WORKSPACE & SINGLE-ROW FILTER BAR -->
   <div class="w-full px-3 py-2.5">
     <section class="bg-[#0d1526] border border-slate-800 rounded-xl p-2.5 mb-2.5 shadow">
       <div class="w-full flex items-end justify-between gap-2 flex-wrap xl:flex-nowrap">
         
-        <!-- Clash Filters -->
+        <!-- Clash Filters (Compact Single-Row) -->
         <div id="clashTopFilters" class="flex items-end gap-2 flex-wrap xl:flex-nowrap">
           <div>
             <label class="block text-[9px] uppercase text-slate-400 font-bold mb-0.5">Project NWF</label>
@@ -286,7 +286,7 @@
           </div>
         </div>
 
-        <!-- Viewpoints Filters (Dedicated ISO 19650 / BCF Viewpoint Statuses) -->
+        <!-- Viewpoints Filters (Compact Single-Row) -->
         <div id="vpTopFilters" class="hidden items-end gap-2 flex-wrap xl:flex-nowrap">
           <div>
             <label class="block text-[9px] uppercase text-slate-400 font-bold mb-0.5">Folder</label>
@@ -295,25 +295,14 @@
             </select>
           </div>
           <div>
-            <label class="block text-[9px] uppercase text-slate-400 font-bold mb-0.5">BIM Status</label>
-            <select id="filterVpBimStatus" onchange="applyVpFilters()" class="bg-[#070b12] border border-slate-700 rounded-lg px-2.5 py-1 text-[11px] text-white">
-              <option value="ALL">All VP BIM States</option>
-              <option value="Open Issue">Open Issue</option>
-              <option value="Under Review">Under Review</option>
-              <option value="Action Required">Action Required</option>
-              <option value="Closed / Verified">Closed / Verified</option>
-              <option value="For Info (FYI)">For Info (FYI)</option>
-            </select>
-          </div>
-          <div>
             <label class="block text-[9px] uppercase text-slate-400 font-bold mb-0.5">Team Status</label>
             <select id="filterVpStatus" onchange="applyVpFilters()" class="bg-[#070b12] border border-slate-700 rounded-lg px-2.5 py-1 text-[11px] text-white">
-              <option value="ALL">All VP Team Actions (5)</option>
-              <option value="Pending Review">1. Pending Review</option>
-              <option value="Updated in Model">2. Updated in Model</option>
-              <option value="Technical Clarification">3. Technical Clarification</option>
-              <option value="Need Workshop / RFI">4. Need Workshop / RFI</option>
-              <option value="Not Our Scope">5. Not Our Scope</option>
+              <option value="ALL">All Team Actions (5)</option>
+              <option value="Pending Action">1. Pending Action</option>
+              <option value="Fixed in Revit (Pending NWC)">2. Fixed in Revit</option>
+              <option value="Request Approval (Valid Exception)">3. Request Approval</option>
+              <option value="Re-assign Request">4. Re-assign Request</option>
+              <option value="On Hold / RFI Pending">5. On Hold / RFI</option>
             </select>
           </div>
           <div>
@@ -333,6 +322,7 @@
           </div>
           <button onclick="clearAllColumnFilters()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 px-2 py-1 rounded-lg text-[11px] font-semibold">✕ Reset</button>
 
+          <!-- Bulk Action Bar (Adapts to BIM Coordinator / Lead vs Engineer) -->
           <div id="bulkActionContainer" class="flex items-center gap-1.5 bg-sky-950/40 border border-sky-800/70 rounded-lg px-2 py-0.5">
             <span class="text-[11px] font-bold text-sky-300"><span id="selectedCountLabel">0</span> Sel:</span>
             <select id="bulkResponseSelect" class="bg-[#070b12] border border-slate-700 rounded px-1.5 py-0.5 text-[11px] text-white"></select>
@@ -363,7 +353,7 @@
       </div>
     </div>
 
-    <!-- CLASHES TABLE -->
+    <!-- CLASHES TABLE (Single-Line Compact Headers) -->
     <div id="clashesTableContainer" class="bg-[#0d1526] border border-slate-800 rounded-xl shadow-2xl overflow-x-auto">
       <table class="w-full text-left border-collapse text-xs">
         <thead>
@@ -385,7 +375,7 @@
       </table>
     </div>
 
-    <!-- VIEWPOINTS TABLE -->
+    <!-- VIEWPOINTS TABLE (Single-Line Compact Headers) -->
     <div id="viewpointsTableContainer" class="hidden bg-[#0d1526] border border-slate-800 rounded-xl shadow-2xl overflow-x-auto">
       <table class="w-full text-left border-collapse text-xs">
         <thead>
@@ -394,7 +384,7 @@
             <th class="p-2.5 w-28">Snapshot</th>
             <th class="p-2.5 w-40"><div class="flex items-center justify-between gap-1"><span>Folder</span><button onclick="openExcelFilterMenu(event, 'folder_name', 'viewpoints')" class="px-1">🔽</button></div></th>
             <th class="p-2.5 min-w-[160px]"><div class="flex items-center justify-between gap-1"><span>Viewpoint</span><button onclick="openExcelFilterMenu(event, 'description', 'viewpoints')" class="px-1">🔽</button></div></th>
-            <th class="p-2.5 w-64"><div class="flex items-center justify-between gap-1"><span>Details & Elements</span><button onclick="openExcelFilterMenu(event, 'item_a_name', 'viewpoints')" class="px-1">🔽</button></div></th>
+            <th class="p-2.5 w-64"><div class="flex items-center justify-between gap-1"><span>Revit Elements</span><button onclick="openExcelFilterMenu(event, 'item_a_file', 'viewpoints')" class="px-1">🔽</button></div></th>
             <th class="p-2.5 w-40 bg-sky-950/20 border-l border-r border-slate-800"><span class="text-sky-300">🛡️ BIM Status</span></th>
             <th class="p-2.5 w-44 bg-teal-950/20 border-r border-slate-800"><div class="flex items-center justify-between gap-1"><span class="text-teal-300">🔧 Team Status</span><button onclick="openExcelFilterMenu(event, 'status', 'viewpoints')" class="px-1">🔽</button></div></th>
             <th class="p-2.5 w-72">Discussion</th>
@@ -486,7 +476,10 @@
     const SUPABASE_KEY = "sb_publishable_R96kfu1_6AJrLGw9zD8E5Q_L6vO8VDf";
     const REVIT_PORTS = [51965, 51966, 51967, 51968, 51969, 51970, 51971, 51972, 51973, 51974];
 
-    // Clashes Statuses (Untouched)
+    // Lightweight metadata column lists (excludes image_base64 to reduce Supabase egress by >95%)
+    const CLASH_META_COLS = "round_guid,guid,project_name,round,sequence_num,test_name,is_group_header,group_name,parent_group_guid,clash_name,assigned_to,level_grid,distance,item_a_id,item_a_name,item_a_file,item_b_id,item_b_name,item_b_file,navis_status,team_response,reassigned_to,review_decision,comments_json,updated_at";
+    const VP_META_COLS = "vp_key,project_name,sequence_num,folder_name,description,item_a_id,item_a_name,item_a_file,item_b_id,item_b_name,item_b_file,status,comments_json,updated_at";
+
     const TEAM_UNIFIED_STATUSES = [
       "Pending Action",
       "Fixed in Revit (Pending NWC)",
@@ -504,23 +497,6 @@
       "Rejected"
     ];
 
-    // Dedicated Viewpoints Engineering Statuses (ISO 19650 / BCF Best Practice)
-    const VP_BIM_STATUSES = [
-      "Open Issue",
-      "Under Review",
-      "Action Required",
-      "Closed / Verified",
-      "For Info (FYI)"
-    ];
-
-    const VP_TEAM_STATUSES = [
-      "Pending Review",
-      "Updated in Model",
-      "Technical Clarification",
-      "Need Workshop / RFI",
-      "Not Our Scope"
-    ];
-
     const ACC_SVG_RAW = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 360" width="120" height="64">
       <text x="665" y="76" text-anchor="end" fill="#334155" font-family="'Segoe UI', Tahoma, sans-serif" font-size="56" font-weight="700">مركز الإستشارات المتقدم</text>
       <text x="665" y="134" text-anchor="end" fill="#475569" font-family="'Segoe UI', Arial, sans-serif" font-size="38" font-weight="700">Advanced Consultancy Center</text>
@@ -530,11 +506,16 @@
       <path d="M 638 215 A 54 54 0 1 0 638 292 L 675 322 A 98 98 0 1 1 675 185 Z" fill="#008529" />
     </svg>`;
 
+    // Global State
     let lockedProjectName = null;
+    let knownProjectNames = [];
+    let kpiSummariesByKey = new Map();
+    const clashImageCache = new Map();
+    const vpImageCache = new Map();
+    const inFlightImageKeys = new Set();
+
     let currentUser = { name: "Unverified", email: "", role: "BIM Coordinator", discipline: "ALL" };
     let allClashes = [], filteredClashes = [], allViewpoints = [], filteredViewpoints = [], projectMembers = [];
-    let allKpiSummaries = []; // Full-project KPI metadata records published by Navisworks
-    let pendingChatImages = {}; // Pasted PNG/JPEG base64 per recordKey before sending
     let currentTab = "clashes", collapsedGroups = new Set(), collapsedVpFolders = new Set(), selectedRowKeys = new Set(), lastCheckedIndex = null;
     let hasInitializedDefaultCollapse = false;
     let hasInitializedVpDefaultCollapse = false;
@@ -546,17 +527,15 @@
     let autoSyncEnabled = true, autoSyncTimer = null, lastDataSignature = "";
     let chartsVisible = true, activeMentionInputId = null;
 
-    function getSupabaseHeaders(includeContentType = false) {
-      const h = { "apikey": SUPABASE_KEY };
-      if (!SUPABASE_KEY.startsWith("sb_publishable_")) {
-        h["Authorization"] = "Bearer " + SUPABASE_KEY;
-      }
-      if (includeContentType) {
-        h["Content-Type"] = "application/json";
-      }
-      return h;
+    function getSupabaseHeaders(extra = {}) {
+      return {
+        "apikey": SUPABASE_KEY,
+        "Authorization": "Bearer " + SUPABASE_KEY,
+        ...extra
+      };
     }
 
+    // Role Normalization & Permission Helpers
     function normalizeRoleName(rawRole) {
       const r = String(rawRole || "").trim().toLowerCase();
       if (r.includes("coordinator") || r.includes("bim")) return "BIM Coordinator";
@@ -670,7 +649,7 @@
               <span class="text-base">${icon}</span>
               <div>
                 <div class="font-bold text-white text-xs">${escapeHtml(m.member_name)}</div>
-                <div class="text-[10px] text-slate-400">${escapeHtml(m.email || 'Registered Member')} • <span class="text-teal-300 font-semibold">${escapeHtml(m.discipline_team || 'Project Team')}</span></div>
+                <div class="text-[10px] text-slate-400">${escapeHtml(m.email || 'Registered Member')} | <span class="text-teal-300 font-semibold">${escapeHtml(m.discipline_team || 'Project Team')}</span></div>
               </div>
             </div>
             <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-sky-300 border border-slate-700">${escapeHtml(rNorm)}</span>
@@ -764,15 +743,15 @@
       }
     }
 
+    // Smart Auto-Sync: pauses when browser tab is hidden and fetches lightweight metadata only every 15s
     function startAutoSyncLoop() {
       if (autoSyncTimer) clearInterval(autoSyncTimer);
       autoSyncTimer = setInterval(async () => {
-        if (!autoSyncEnabled) return;
+        if (!autoSyncEnabled || document.hidden) return;
         const activeEl = document.activeElement;
         if (activeEl && (activeEl.tagName === "INPUT" || activeEl.tagName === "SELECT")) return;
-        if (Object.keys(pendingChatImages).length > 0) return;
-        await reloadAllCloudData(null, null, true);
-      }, 6000);
+        await reloadAllCloudData(null, null, true, false);
+      }, 15000);
     }
 
     function toggleAutoSync() {
@@ -780,7 +759,6 @@
       document.getElementById("btnAutoSync").textContent = autoSyncEnabled ? "⚡ Sync: ON" : "⏸️ Sync: OFF";
     }
 
-    // Clash Status Normalizers (Untouched)
     function normalizeTeamStatus(rawStatus) {
       if (!rawStatus) return "Pending Action";
       if (TEAM_UNIFIED_STATUSES.includes(rawStatus)) return rawStatus;
@@ -799,35 +777,12 @@
       return "Active";
     }
 
-    // Viewpoints Dedicated Engineering Status Normalizers
-    function normalizeVpBimStatus(raw) {
-      if (!raw) return "Open Issue";
-      const exact = VP_BIM_STATUSES.find(s => s.toLowerCase() === String(raw).trim().toLowerCase());
-      if (exact) return exact;
-      const s = String(raw).toLowerCase();
-      if (s.includes("closed") || s.includes("verified") || s.includes("approved") || s.includes("resolved")) return "Closed / Verified";
-      if (s.includes("action") || s.includes("rejected")) return "Action Required";
-      if (s.includes("review")) return "Under Review";
-      if (s.includes("fyi") || s.includes("info")) return "For Info (FYI)";
-      return "Open Issue";
-    }
-
-    function normalizeVpTeamStatus(raw) {
-      if (!raw) return "Pending Review";
-      const exact = VP_TEAM_STATUSES.find(s => s.toLowerCase() === String(raw).trim().toLowerCase());
-      if (exact) return exact;
-      const s = String(raw).toLowerCase();
-      if (s.includes("updated") || s.includes("fixed") || s.includes("solved")) return "Updated in Model";
-      if (s.includes("clarif") || s.includes("approval") || s.includes("valid")) return "Technical Clarification";
-      if (s.includes("workshop") || s.includes("rfi") || s.includes("hold")) return "Need Workshop / RFI";
-      if (s.includes("scope") || s.includes("re-assign")) return "Not Our Scope";
-      return "Pending Review";
-    }
-
     function normalizeClashRecord(raw, idx) {
       const bimSt = normalizeBimStatus(raw.navis_status || raw.status, raw.review_decision);
+      const rGuid = raw.round_guid || raw.guid || ("ROW_" + idx);
+      const cachedImg = clashImageCache.has(rGuid) ? clashImageCache.get(rGuid) : (raw.image_base64 || "");
       return {
-        round_guid: raw.round_guid || raw.guid || ("ROW_" + idx),
+        round_guid: rGuid,
         guid: raw.guid || raw.round_guid || ("GUID_" + idx),
         project_name: raw.project_name || "Federated_Model",
         round: String(raw.round || "1"),
@@ -851,7 +806,7 @@
         reassigned_to: raw.reassigned_to || "",
         review_decision: raw.review_decision || "Pending",
         comments_json: raw.comments_json || "[]",
-        image_base64: raw.image_base64 || "",
+        image_base64: cachedImg,
         updated_at: raw.updated_at || ""
       };
     }
@@ -860,70 +815,106 @@
       let folder = raw.folder_name || "";
       let desc = raw.description || ("Viewpoint #" + (idx + 1));
       if (!folder) {
-        const dashIdx = desc.indexOf("—");
+        const dashIdx = desc.indexOf("\u2014");
         if (dashIdx > 0) {
           folder = desc.substring(0, dashIdx).replace(/^\[\d+\]\s*/, "").trim();
         } else {
           folder = raw.item_a_file || "Saved Viewpoints";
         }
       }
+      const key = raw.vp_key || ("VP_" + idx);
+      const cachedImg = vpImageCache.has(key) ? vpImageCache.get(key) : (raw.image_base64 || "");
       return {
         ...raw,
-        vp_key: raw.vp_key || ("VP_" + idx),
+        vp_key: key,
         project_name: raw.project_name || "Federated_Model",
         sequence_num: typeof raw.sequence_num === "number" ? raw.sequence_num : (idx + 1),
         folder_name: folder,
         description: desc,
-        item_b_name: normalizeVpBimStatus(raw.item_b_name),
-        status: normalizeVpTeamStatus(raw.status)
+        status: raw.status || "Pending Action",
+        image_base64: cachedImg
       };
     }
 
-    async function reloadAllCloudData(preselectProject = null, preselectRound = null, isSilentAutoPoll = false) {
+    // One-time lightweight project directory discovery (project_name column only, no images)
+    async function refreshKnownProjectNames(headers) {
+      try {
+        const [cRes, vRes] = await Promise.all([
+          fetch(`${SUPABASE_URL}/rest/v1/clashes?select=project_name`, { headers }),
+          fetch(`${SUPABASE_URL}/rest/v1/viewpoints?select=project_name`, { headers })
+        ]);
+        const set = new Set();
+        if (cRes.ok) (await cRes.json()).forEach(r => { if (r.project_name) set.add(r.project_name); });
+        if (vRes.ok) (await vRes.json()).forEach(r => { if (r.project_name) set.add(r.project_name); });
+        if (lockedProjectName) set.add(lockedProjectName);
+        knownProjectNames = Array.from(set).sort();
+      } catch {}
+    }
+
+    // Bandwidth-Optimized Metadata Sync (>95% egress savings: active project filter + no image_base64 in sync polls)
+    async function reloadAllCloudData(preselectProject = null, preselectRound = null, isSilentAutoPoll = false, forceImageCacheReset = false) {
       if (!isSilentAutoPoll) setCloudPill("⏳ Syncing...", "amber");
 
-      try {
-        const headers = getSupabaseHeaders(false);
+      if (forceImageCacheReset) {
+        clashImageCache.clear();
+        vpImageCache.clear();
+        inFlightImageKeys.clear();
+        lastDataSignature = "";
+      }
 
-        const clashRes = await fetch(`${SUPABASE_URL}/rest/v1/clashes?select=*`, { headers, cache: "no-store" });
-        if (!clashRes.ok) {
-          const errText = await clashRes.text();
-          throw new Error(`HTTP ${clashRes.status}: ${errText}`);
+      try {
+        const headers = getSupabaseHeaders();
+
+        if (!isSilentAutoPoll && (knownProjectNames.length === 0 || forceImageCacheReset)) {
+          await refreshKnownProjectNames(headers);
         }
 
-        let vpRawList = [], memList = [];
-        try {
-          const vpRes = await fetch(`${SUPABASE_URL}/rest/v1/viewpoints?select=*`, { headers, cache: "no-store" });
-          if (vpRes.ok) vpRawList = await vpRes.json();
-        } catch {}
+        const dropdownVal = document.getElementById("filterProject")?.value || "ALL";
+        let targetProj = preselectProject || lockedProjectName || (dropdownVal !== "ALL" ? dropdownVal : null);
+        if (targetProj === "ALL") targetProj = null;
 
-        try {
-          const memRes = await fetch(`${SUPABASE_URL}/rest/v1/project_members?select=*`, { headers, cache: "no-store" });
-          if (memRes.ok) memList = await memRes.json();
-        } catch {}
+        const projFilterQuery = targetProj ? `&project_name=eq.${encodeURIComponent(targetProj)}` : "";
+
+        // Fetch lightweight metadata only (image_base64 is lazy-loaded and cached on demand)
+        const fetchTasks = [
+          fetch(`${SUPABASE_URL}/rest/v1/clashes?select=${CLASH_META_COLS}${projFilterQuery}`, { headers }),
+          fetch(`${SUPABASE_URL}/rest/v1/viewpoints?select=${VP_META_COLS}${projFilterQuery}`, { headers })
+        ];
+
+        // Team roster only changes rarely; skip re-fetching on silent background polls
+        const shouldFetchMembers = !isSilentAutoPoll || projectMembers.length === 0;
+        if (shouldFetchMembers) {
+          fetchTasks.push(fetch(`${SUPABASE_URL}/rest/v1/project_members?select=*${projFilterQuery}`, { headers }));
+        }
+
+        const results = await Promise.all(fetchTasks);
+        const clashRes = results[0];
+        const vpRes = results[1];
+        const memRes = shouldFetchMembers ? results[2] : null;
+
+        if (!clashRes.ok) throw new Error("HTTP " + clashRes.status);
 
         const rawClashes = await clashRes.json();
+        const vpRawList = vpRes && vpRes.ok ? await vpRes.json() : [];
+        const memList = memRes && memRes.ok ? await memRes.json() : projectMembers;
 
-        // Separate Full-Project KPI Metadata rows from actual Clash table rows
-        const kpiMetaRows = [];
-        const actualRawClashes = [];
+        // Separate __KPI_SUMMARY__ rows from visible clash records
+        const nextKpiSummaries = new Map();
+        const visibleRawClashes = [];
         for (const r of rawClashes) {
           if (r.guid === "__KPI_SUMMARY__" || r.test_name === "__KPI_SUMMARY__") {
             try {
               const parsed = JSON.parse(r.comments_json || "{}");
-              kpiMetaRows.push({
-                project_name: r.project_name || "",
-                round: String(r.round || "1"),
-                summary: parsed
-              });
+              nextKpiSummaries.set(`${r.project_name || ""}::${String(r.round || "1")}`, parsed);
             } catch {}
           } else {
-            actualRawClashes.push(r);
+            visibleRawClashes.push(r);
           }
         }
 
-        const newClashes = actualRawClashes.map((r, i) => normalizeClashRecord(r, i));
+        const newClashes = visibleRawClashes.map((r, i) => normalizeClashRecord(r, i));
 
+        // Automatically reconstruct parent_group_guid links if saved via legacy schema fallback
         const groupLookup = {};
         newClashes.filter(c => c.is_group_header && c.group_name).forEach(g => {
           groupLookup[`${g.project_name}::${g.round}::${g.test_name}::${g.group_name}`] = g.guid;
@@ -942,17 +933,29 @@
         newClashes.sort((a, b) => (a.sequence_num || 0) - (b.sequence_num || 0));
         vpList.sort((a, b) => (a.sequence_num || 0) - (b.sequence_num || 0));
 
-        const sig = newClashes.length + "_" + vpList.length + "_" + memList.length + "_" + kpiMetaRows.length + "_" +
-          (newClashes[0]?.updated_at || "") + "_" + (newClashes[newClashes.length - 1]?.updated_at || "");
+        // Build accurate lightweight change signature across all fetched metadata
+        let maxClashUpd = "", maxVpUpd = "", totalCmtLen = 0;
+        for (let i = 0; i < newClashes.length; i++) {
+          const u = newClashes[i].updated_at || "";
+          if (u > maxClashUpd) maxClashUpd = u;
+          totalCmtLen += (newClashes[i].comments_json || "").length;
+        }
+        for (let i = 0; i < vpList.length; i++) {
+          const u = vpList[i].updated_at || "";
+          if (u > maxVpUpd) maxVpUpd = u;
+          totalCmtLen += (vpList[i].comments_json || "").length;
+        }
+        const sig = `${targetProj || "ALL"}_${newClashes.length}_${vpList.length}_${memList.length}_${maxClashUpd}_${maxVpUpd}_${totalCmtLen}`;
 
         if (isSilentAutoPoll && sig === lastDataSignature) return;
         lastDataSignature = sig;
 
-        allKpiSummaries = kpiMetaRows;
+        kpiSummariesByKey = nextKpiSummaries;
         allClashes = newClashes;
         allViewpoints = vpList;
         projectMembers = memList;
 
+        // Default all Clash Groups and Viewpoint Folders to COLLAPSED (▶) on initial load
         if (!hasInitializedDefaultCollapse && allClashes.length > 0) {
           allClashes.filter(c => c.is_group_header).forEach(g => collapsedGroups.add(g.guid));
           hasInitializedDefaultCollapse = true;
@@ -962,6 +965,7 @@
           hasInitializedVpDefaultCollapse = true;
         }
 
+        // Enforce strict role lock if current user's email matches a registered member in projectMembers
         if (currentUser.email && projectMembers.length > 0) {
           const matched = projectMembers.find(m => String(m.email || "").trim().toLowerCase() === currentUser.email.trim().toLowerCase());
           if (matched && matched.role) {
@@ -986,6 +990,79 @@
       }
     }
 
+    // On-Demand Lazy Image Loader: downloads snapshots ONLY for visible rows once and caches them in memory
+    async function ensureVisibleImagesLoaded(dataset, items) {
+      if (!Array.isArray(items) || items.length === 0) return;
+
+      const isClash = dataset === "clashes";
+      const keyCol = isClash ? "round_guid" : "vp_key";
+      const cache = isClash ? clashImageCache : vpImageCache;
+      const missingKeys = [];
+
+      for (const item of items) {
+        const k = item[keyCol];
+        if (!k) continue;
+        const flightTag = dataset + "::" + k;
+        if (!cache.has(k) && !inFlightImageKeys.has(flightTag)) {
+          inFlightImageKeys.add(flightTag);
+          missingKeys.push(k);
+        }
+      }
+
+      if (missingKeys.length === 0) return;
+
+      const headers = getSupabaseHeaders();
+      const batchSize = 15;
+
+      for (let i = 0; i < missingKeys.length; i += batchSize) {
+        const batch = missingKeys.slice(i, i + batchSize);
+        const inExpr = batch.map(k => encodeURIComponent(`"${String(k).replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`)).join(",");
+        const url = `${SUPABASE_URL}/rest/v1/${dataset}?select=${keyCol},image_base64&${keyCol}=in.(${inExpr})`;
+
+        try {
+          const res = await fetch(url, { headers });
+          const returnedMap = new Map();
+          if (res.ok) {
+            const rows = await res.json();
+            for (const r of rows) {
+              returnedMap.set(r[keyCol], r.image_base64 || "");
+            }
+          }
+
+          for (const k of batch) {
+            const imgVal = returnedMap.has(k) ? returnedMap.get(k) : "";
+            cache.set(k, imgVal);
+            inFlightImageKeys.delete(dataset + "::" + k);
+
+            const rec = (isClash ? allClashes : allViewpoints).find(x => x[keyCol] === k);
+            if (rec) rec.image_base64 = imgVal;
+
+            updateThumbCellInDom(dataset, k, imgVal, rec ? (isClash ? rec.clash_name : rec.description) : "");
+          }
+        } catch {
+          for (const k of batch) inFlightImageKeys.delete(dataset + "::" + k);
+        }
+      }
+    }
+
+    function updateThumbCellInDom(dataset, key, imgBase64, caption) {
+      const cells = document.querySelectorAll(`[data-thumb-dataset="${dataset}"]`);
+      const sizeClass = dataset === "clashes" ? "w-20 h-14" : "w-24 h-16";
+      for (const cell of cells) {
+        if (cell.getAttribute("data-thumb-key") !== key) continue;
+        if (imgBase64 && imgBase64.startsWith("data:image")) {
+          const img = document.createElement("img");
+          img.src = imgBase64;
+          img.className = `${sizeClass} object-cover rounded-lg cursor-pointer border border-slate-700 hover:scale-105 transition`;
+          img.onclick = () => showModal(imgBase64, caption || "");
+          cell.innerHTML = "";
+          cell.appendChild(img);
+        } else {
+          cell.innerHTML = `<div class="${sizeClass} bg-slate-800 rounded-lg flex items-center justify-center text-[9px] text-slate-500">No Image</div>`;
+        }
+      }
+    }
+
     function setCloudPill(text, color) {
       const pill = document.getElementById("cloudSyncPill");
       pill.textContent = text;
@@ -995,10 +1072,10 @@
     function populateDynamicDropdowns(preselectProject, preselectRound) {
       const projSelect = document.getElementById("filterProject");
       const projects = [...new Set([
+        ...knownProjectNames,
         ...allClashes.map(c => c.project_name),
-        ...allViewpoints.map(v => v.project_name),
-        ...allKpiSummaries.map(k => k.project_name)
-      ].filter(Boolean))];
+        ...allViewpoints.map(v => v.project_name)
+      ].filter(Boolean))].sort();
 
       const matchedLockedProj = lockedProjectName
         ? projects.find(p => p.toLowerCase() === lockedProjectName.toLowerCase())
@@ -1027,15 +1104,12 @@
       const scopeVps = activeProjVal === "ALL" ? allViewpoints : allViewpoints.filter(v => v.project_name === activeProjVal);
       const scopeMembers = activeProjVal === "ALL" ? projectMembers : projectMembers.filter(m => m.project_name === activeProjVal);
 
-      document.getElementById("tabCountClashes").textContent = scopeClashes.filter(c => !c.is_group_header).length || scopeClashes.length;
+      document.getElementById("tabCountClashes").textContent = scopeClashes.length;
       document.getElementById("tabCountViewpoints").textContent = scopeVps.length;
       document.getElementById("teamCountBadge").textContent = scopeMembers.length;
 
       const roundSelect = document.getElementById("filterRound");
-      const rounds = [...new Set([
-        ...scopeClashes.map(c => c.round),
-        ...allKpiSummaries.filter(k => activeProjVal === "ALL" || k.project_name === activeProjVal).map(k => k.round)
-      ].filter(Boolean))].sort();
+      const rounds = [...new Set(scopeClashes.map(c => c.round).filter(Boolean))].sort();
       let currentRound = preselectRound || roundSelect.value || "ALL";
       if (currentRound !== "ALL" && !rounds.includes(currentRound)) currentRound = "ALL";
       roundSelect.innerHTML = `<option value="ALL">All Rounds (${rounds.length})</option>` +
@@ -1054,13 +1128,16 @@
         folders.map(f => `<option value="${escapeHtml(f)}" ${f === currentFolder ? "selected" : ""}>📁 ${escapeHtml(f)}</option>`).join("");
     }
 
-    function onProjectDropdownChange() {
+    async function onProjectDropdownChange() {
       const val = document.getElementById("filterProject").value;
       lockedProjectName = val === "ALL" ? null : val;
+      hasInitializedDefaultCollapse = false;
+      hasInitializedVpDefaultCollapse = false;
+      collapsedGroups.clear();
+      collapsedVpFolders.clear();
+      lastDataSignature = "";
       document.getElementById("projectBadge").textContent = val === "ALL" ? "🔒 All Projects" : ("🔒 NWF: " + val);
-      populateDynamicDropdowns(val, "ALL");
-      applyFilters();
-      applyVpFilters();
+      await reloadAllCloudData(val, "ALL", false, false);
     }
 
     function switchMainTab(tab) {
@@ -1124,20 +1201,19 @@
     function applyVpFilters() {
       const proj = document.getElementById("filterProject").value;
       const folder = document.getElementById("filterVpFolder").value;
-      const bimSt = document.getElementById("filterVpBimStatus").value;
       const st = document.getElementById("filterVpStatus").value;
       const q = document.getElementById("globalSearchInput").value.trim().toLowerCase();
 
       filteredViewpoints = allViewpoints.filter(v => {
         if (proj !== "ALL" && v.project_name !== proj) return false;
         if (folder !== "ALL" && v.folder_name !== folder) return false;
-        if (bimSt !== "ALL" && normalizeVpBimStatus(v.item_b_name) !== bimSt) return false;
-        if (st !== "ALL" && normalizeVpTeamStatus(v.status) !== st) return false;
+        const normSt = normalizeTeamStatus(v.status);
+        if (st !== "ALL" && normSt !== st) return false;
         for (const [col, allowedSet] of Object.entries(activeColumnFilters.viewpoints)) {
           if (allowedSet && !allowedSet.has(String(v[col] ?? ""))) return false;
         }
         if (q) {
-          const hay = [v.folder_name, v.description, v.item_a_id, v.item_b_id, v.item_a_name, v.item_a_file, v.item_b_file, v.comments_json].join(" ").toLowerCase();
+          const hay = [v.folder_name, v.description, v.item_a_id, v.item_b_id, v.item_a_file, v.item_b_file, v.comments_json].join(" ").toLowerCase();
           if (!hay.includes(q)) return false;
         }
         return true;
@@ -1166,7 +1242,7 @@
       const pageItems = visibleRows.slice(startIdx, startIdx + pageSize);
 
       document.getElementById("showingRangeLabel").textContent =
-        `Showing ${total === 0 ? 0 : startIdx + 1}-${Math.min(total, startIdx + pageSize)} of ${total} (${filteredClashes.length} published)`;
+        `Showing ${total === 0 ? 0 : startIdx + 1}-${Math.min(total, startIdx + pageSize)} of ${total} (${filteredClashes.length} filtered)`;
       document.getElementById("pageIndicator").textContent = `${currentPage} / ${totalPages}`;
 
       if (pageItems.length === 0) {
@@ -1196,9 +1272,11 @@
           tr.className = "hover:bg-slate-800/50";
         }
 
-        const imgHtml = c.image_base64 && c.image_base64.startsWith("data:image")
-          ? `<img src="${c.image_base64}" onclick="showModal(this.src, '${escapeHtml(c.clash_name)}')" class="w-20 h-14 object-cover rounded-lg cursor-pointer border border-slate-700 hover:scale-105 transition" />`
-          : `<div class="w-20 h-14 bg-slate-800 rounded-lg flex items-center justify-center text-[9px] text-slate-500">No Image</div>`;
+        const hasCached = clashImageCache.has(c.round_guid);
+        const cachedSrc = hasCached ? clashImageCache.get(c.round_guid) : (c.image_base64 || "");
+        const imgHtml = cachedSrc && cachedSrc.startsWith("data:image")
+          ? `<img src="${cachedSrc}" onclick="showModalByKey('clashes', '${escapeHtml(c.round_guid)}', '${escapeHtml(c.clash_name)}')" class="w-20 h-14 object-cover rounded-lg cursor-pointer border border-slate-700 hover:scale-105 transition" />`
+          : `<div class="w-20 h-14 bg-slate-800 rounded-lg flex items-center justify-center text-[9px] text-slate-500">${hasCached ? "No Image" : "Loading..."}</div>`;
 
         const collapseBtn = isGroup
           ? `<button onclick="toggleGroupCollapse('${escapeHtml(c.guid)}')" class="mr-1.5 px-1.5 py-0.5 rounded bg-teal-800 hover:bg-teal-700 text-teal-100 text-[10px] font-extrabold" title="Expand / Collapse Group">${collapsedGroups.has(c.guid) ? "▶" : "▼"}</button>`
@@ -1212,7 +1290,7 @@
           ? `<select onchange="updateClashBimStatus('${escapeHtml(c.round_guid)}', this.value, ${isGroup}, '${escapeHtml(c.guid)}')" class="w-full bg-[#070b12] border border-sky-700/80 rounded-lg px-2 py-1 text-[11px] font-bold text-sky-200 focus:outline-none">
               ${BIM_COORDINATOR_STATUSES.map(st => `<option value="${st}" ${c.navis_status === st ? "selected" : ""}>🛡️ ${st}</option>`).join("")}
              </select>
-             <div id="bimSync_${c.round_guid}" class="text-[9px] text-slate-400 mt-1">✓ BIM Control</div>`
+             <div id="bimSync_${escapeHtml(c.round_guid)}" class="text-[9px] text-slate-400 mt-1">✓ BIM Control</div>`
           : `<div class="px-2 py-1 rounded-lg border text-[11px] font-bold flex items-center justify-between ${getBimStatusBadgeClass(c.navis_status)}">
                <span>${escapeHtml(c.navis_status)}</span>
                <span class="text-[9px] opacity-75" title="Controlled by BIM Coordinator">🔒</span>
@@ -1222,7 +1300,7 @@
           ? `<select onchange="updateClashTeamResponse('${escapeHtml(c.round_guid)}', this.value, ${isGroup}, '${escapeHtml(c.guid)}')" class="w-full bg-[#070b12] border border-teal-700/80 rounded-lg px-2 py-1 text-[11px] font-bold text-teal-200 focus:outline-none">
               ${TEAM_UNIFIED_STATUSES.map(st => `<option value="${st}" ${c.team_response === st ? "selected" : ""}>🔧 ${st}</option>`).join("")}
              </select>
-             <div id="syncStatus_${c.round_guid}" class="text-[9px] text-slate-400 mt-1">✓ Eng Control</div>`
+             <div id="syncStatus_${escapeHtml(c.round_guid)}" class="text-[9px] text-slate-400 mt-1">✓ Eng Control</div>`
           : `<div class="px-2 py-1 rounded-lg border border-slate-700 bg-[#070b12] text-slate-200 text-[11px] font-bold flex items-center justify-between">
                <span class="truncate">${escapeHtml(c.team_response)}</span>
                <span class="text-[9px] text-slate-500 ml-1" title="Controlled by Discipline Engineer">🔒</span>
@@ -1230,7 +1308,7 @@
 
         tr.innerHTML =
           `<td class="p-2 text-center"><input type="checkbox" class="w-3.5 h-3.5 accent-teal-500 cursor-pointer" ${isChecked ? "checked" : ""} ${checkboxOnClick} /></td>` +
-          `<td class="p-2">${imgHtml}</td>` +
+          `<td class="p-2" data-thumb-dataset="clashes" data-thumb-key="${escapeHtml(c.round_guid)}">${imgHtml}</td>` +
           `<td class="p-2"><span class="px-1.5 py-0.5 rounded bg-slate-800 text-teal-300 border border-slate-700 font-bold text-[11px]">R-${escapeHtml(c.round)}</span><div class="text-[9px] text-slate-400 mt-0.5 truncate max-w-[80px]">${escapeHtml(c.project_name)}</div></td>` +
           `<td class="p-2 font-medium text-slate-200 text-[11px] break-words">${escapeHtml(c.test_name)}</td>` +
           `<td class="p-2"><div class="flex items-center">${collapseBtn}<span class="${isGroup ? 'text-teal-200 font-black cursor-pointer' : 'text-white font-semibold'} text-[11px]" ${isGroup ? `onclick="toggleGroupCollapse('${escapeHtml(c.guid)}')"` : ""}>${escapeHtml(c.clash_name)}</span></div></td>` +
@@ -1252,13 +1330,15 @@
 
         tbody.appendChild(tr);
       });
+
+      // Lazy-load snapshots ONLY for the visible rows on the current page
+      ensureVisibleImagesLoaded("clashes", pageItems);
     }
 
     function getBimStatusBadgeClass(status) {
-      if (status === "Resolved" || status === "Approved" || status === "Closed / Verified") return "bg-emerald-950 text-emerald-300 border-emerald-700";
-      if (status === "Rejected" || status === "Action Required") return "bg-rose-950 text-rose-300 border-rose-600";
-      if (status === "Reviewed" || status === "Under Review") return "bg-amber-950 text-amber-300 border-amber-700";
-      if (status === "For Info (FYI)") return "bg-indigo-950 text-indigo-300 border-indigo-700";
+      if (status === "Resolved" || status === "Approved") return "bg-emerald-950 text-emerald-300 border-emerald-700";
+      if (status === "Rejected") return "bg-rose-950 text-rose-300 border-rose-600";
+      if (status === "Reviewed") return "bg-amber-950 text-amber-300 border-amber-700";
       return "bg-rose-950/70 text-rose-300 border-rose-800";
     }
 
@@ -1271,35 +1351,37 @@
       if (ind) { ind.textContent = "⏳ Saving..."; ind.className = "text-[9px] text-amber-400 mt-1 font-bold"; }
 
       const revDecision = newBimStatus === "Rejected" ? "Rejected" : (newBimStatus === "Approved" || newBimStatus === "Resolved" ? "Approved" : "Reviewed");
-      const payload = { navis_status: newBimStatus, review_decision: revDecision, updated_at: new Date().toISOString() };
+      const nowIso = new Date().toISOString();
+      const payload = { navis_status: newBimStatus, review_decision: revDecision, updated_at: nowIso };
 
       try {
         let res = await fetch(`${SUPABASE_URL}/rest/v1/clashes?round_guid=eq.${encodeURIComponent(roundGuid)}`, {
           method: "PATCH",
-          headers: getSupabaseHeaders(true),
+          headers: getSupabaseHeaders({ "Content-Type": "application/json" }),
           body: JSON.stringify(payload)
         });
         if (!res.ok && res.status === 400) {
           res = await fetch(`${SUPABASE_URL}/rest/v1/clashes?round_guid=eq.${encodeURIComponent(roundGuid)}`, {
             method: "PATCH",
-            headers: getSupabaseHeaders(true),
-            body: JSON.stringify({ navis_status: newBimStatus, updated_at: new Date().toISOString() })
+            headers: getSupabaseHeaders({ "Content-Type": "application/json" }),
+            body: JSON.stringify({ navis_status: newBimStatus, updated_at: nowIso })
           });
         }
         if (!res.ok) throw new Error("HTTP " + res.status);
 
         const item = allClashes.find(c => c.round_guid === roundGuid);
-        if (item) { item.navis_status = newBimStatus; item.review_decision = revDecision; }
+        if (item) { item.navis_status = newBimStatus; item.review_decision = revDecision; item.updated_at = nowIso; }
 
         if (isGroupHeader && groupGuid && item) {
           const children = allClashes.filter(c => c.parent_group_guid === groupGuid && c.round === item.round);
           for (const ch of children) {
             ch.navis_status = newBimStatus;
             ch.review_decision = revDecision;
+            ch.updated_at = nowIso;
             await fetch(`${SUPABASE_URL}/rest/v1/clashes?round_guid=eq.${encodeURIComponent(ch.round_guid)}`, {
               method: "PATCH",
-              headers: getSupabaseHeaders(true),
-              body: JSON.stringify({ navis_status: newBimStatus, updated_at: new Date().toISOString() })
+              headers: getSupabaseHeaders({ "Content-Type": "application/json" }),
+              body: JSON.stringify({ navis_status: newBimStatus, updated_at: nowIso })
             });
           }
           renderClashesTable();
@@ -1325,24 +1407,26 @@
       }
 
       try {
-        const payload = { team_response: newResponse, updated_at: new Date().toISOString() };
+        const nowIso = new Date().toISOString();
+        const payload = { team_response: newResponse, updated_at: nowIso };
         const res = await fetch(`${SUPABASE_URL}/rest/v1/clashes?round_guid=eq.${encodeURIComponent(roundGuid)}`, {
           method: "PATCH",
-          headers: getSupabaseHeaders(true),
+          headers: getSupabaseHeaders({ "Content-Type": "application/json" }),
           body: JSON.stringify(payload)
         });
         if (!res.ok) throw new Error("HTTP " + res.status);
 
         const item = allClashes.find(c => c.round_guid === roundGuid);
-        if (item) { item.team_response = newResponse; item.reassigned_to = reassignedTarget; }
+        if (item) { item.team_response = newResponse; item.reassigned_to = reassignedTarget; item.updated_at = nowIso; }
 
         if (isGroupHeader && groupGuid && item) {
           const children = allClashes.filter(c => c.parent_group_guid === groupGuid && c.round === item.round);
           for (const ch of children) {
             ch.team_response = newResponse;
+            ch.updated_at = nowIso;
             await fetch(`${SUPABASE_URL}/rest/v1/clashes?round_guid=eq.${encodeURIComponent(ch.round_guid)}`, {
               method: "PATCH",
-              headers: getSupabaseHeaders(true),
+              headers: getSupabaseHeaders({ "Content-Type": "application/json" }),
               body: JSON.stringify(payload)
             });
           }
@@ -1361,19 +1445,20 @@
       const keys = Array.from(selectedRowKeys);
 
       try {
+        const nowIso = new Date().toISOString();
         for (const k of keys) {
           let payload = {};
           if (canEditTeamStatus()) {
-            payload = { team_response: newVal, updated_at: new Date().toISOString() };
+            payload = { team_response: newVal, updated_at: nowIso };
           } else if (canEditBimStatus()) {
-            payload = { navis_status: newVal, updated_at: new Date().toISOString() };
+            payload = { navis_status: newVal, updated_at: nowIso };
           } else {
             return;
           }
 
           await fetch(`${SUPABASE_URL}/rest/v1/clashes?round_guid=eq.${encodeURIComponent(k)}`, {
             method: "PATCH",
-            headers: getSupabaseHeaders(true),
+            headers: getSupabaseHeaders({ "Content-Type": "application/json" }),
             body: JSON.stringify(payload)
           });
           const item = allClashes.find(c => c.round_guid === k);
@@ -1398,6 +1483,7 @@
 
       const allowBimEdit = canEditBimStatus();
       const allowTeamEdit = canEditTeamStatus();
+      const visibleVps = [];
 
       const groupedByFolder = {};
       filteredViewpoints.forEach(vp => {
@@ -1406,10 +1492,6 @@
         groupedByFolder[f].push(vp);
       });
 
-      document.getElementById("showingRangeLabel").textContent =
-        `Showing ${filteredViewpoints.length} Saved Viewpoints (${Object.keys(groupedByFolder).length} Folders)`;
-      document.getElementById("pageIndicator").textContent = `1 / 1`;
-
       Object.entries(groupedByFolder).forEach(([folderName, vps]) => {
         const isCollapsed = collapsedVpFolders.has(folderName);
 
@@ -1417,7 +1499,7 @@
         folderTr.className = "bg-gradient-to-r from-teal-950/80 via-slate-900/95 to-slate-900/90 hover:from-teal-900/80 border-l-4 border-teal-400 border-t border-b border-teal-800/50 cursor-pointer";
         folderTr.onclick = () => toggleVpFolderCollapse(folderName);
         folderTr.innerHTML =
-          `<td class="p-2 text-center font-bold text-teal-300">—</td>` +
+          `<td class="p-2 text-center font-bold text-teal-300">-</td>` +
           `<td class="p-2 text-[10px] font-extrabold text-teal-400 uppercase">FOLDER</td>` +
           `<td class="p-2" colspan="6">` +
             `<div class="flex items-center gap-2">` +
@@ -1431,49 +1513,51 @@
         if (isCollapsed) return;
 
         vps.forEach(vp => {
-          const imgHtml = vp.image_base64 && vp.image_base64.startsWith("data:image")
-            ? `<img src="${vp.image_base64}" onclick="showModal(this.src, '${escapeHtml(vp.description)}')" class="w-24 h-16 object-cover rounded-lg cursor-pointer border border-slate-700" />`
-            : `<div class="w-24 h-16 bg-slate-800 rounded-lg flex items-center justify-center text-[10px] text-slate-500">No Image</div>`;
+          visibleVps.push(vp);
+          const hasCached = vpImageCache.has(vp.vp_key);
+          const cachedSrc = hasCached ? vpImageCache.get(vp.vp_key) : (vp.image_base64 || "");
+          const imgHtml = cachedSrc && cachedSrc.startsWith("data:image")
+            ? `<img src="${cachedSrc}" onclick="showModalByKey('viewpoints', '${escapeHtml(vp.vp_key)}', '${escapeHtml(vp.description)}')" class="w-24 h-16 object-cover rounded-lg cursor-pointer border border-slate-700" />`
+            : `<div class="w-24 h-16 bg-slate-800 rounded-lg flex items-center justify-center text-[10px] text-slate-500">${hasCached ? "No Image" : "Loading..."}</div>`;
 
-          const bimVpState = normalizeVpBimStatus(vp.item_b_name);
-          const teamVpState = normalizeVpTeamStatus(vp.status);
+          const currentVpTeamVal = normalizeTeamStatus(vp.status);
+          const bimVpState = (vp.item_b_name && BIM_COORDINATOR_STATUSES.includes(vp.item_b_name))
+            ? vp.item_b_name
+            : ((vp.status || "").includes("Approved") ? "Approved" : ((vp.status || "").includes("Unreviewed") ? "Rejected" : "Active"));
 
           const bimVpHtml = allowBimEdit
             ? `<select onchange="updateViewpointBimStatus('${escapeHtml(vp.vp_key)}', this.value)" class="w-full bg-[#070b12] border border-sky-700 rounded-lg px-2 py-1 text-[11px] font-bold text-sky-200">
-                ${VP_BIM_STATUSES.map(st => `<option value="${st}" ${bimVpState === st ? "selected" : ""}>🛡️ ${st}</option>`).join("")}
+                ${BIM_COORDINATOR_STATUSES.map(st => `<option value="${st}" ${bimVpState === st ? "selected" : ""}>🛡️ ${st}</option>`).join("")}
                </select>`
-            : `<div class="px-2 py-1 rounded-lg border ${getBimStatusBadgeClass(bimVpState)} text-[11px] font-bold flex justify-between"><span>${escapeHtml(bimVpState)}</span><span>🔒</span></div>`;
+            : `<div class="px-2 py-1 rounded-lg border ${getBimStatusBadgeClass(bimVpState)} text-[11px] font-bold flex justify-between"><span>${bimVpState}</span><span>🔒</span></div>`;
 
           const teamVpHtml = allowTeamEdit
             ? `<select onchange="updateViewpointStatus('${escapeHtml(vp.vp_key)}', this.value)" class="w-full bg-[#070b12] border border-teal-700 rounded-lg px-2 py-1 text-[11px] font-bold text-teal-200">
-                ${VP_TEAM_STATUSES.map(st => `<option value="${st}" ${teamVpState === st ? "selected" : ""}>🔧 ${st}</option>`).join("")}
+                ${TEAM_UNIFIED_STATUSES.map(st => `<option value="${st}" ${currentVpTeamVal === st ? "selected" : ""}>🔧 ${st}</option>`).join("")}
                </select>`
-            : `<div class="px-2 py-1 rounded-lg border border-slate-700 bg-[#070b12] text-slate-200 text-[11px] font-bold flex justify-between"><span class="truncate">${escapeHtml(teamVpState)}</span><span>🔒</span></div>`;
-
-          const hasValidIdA = vp.item_a_id && vp.item_a_id !== "N/A" && vp.item_a_id !== "0";
-          const hasValidIdB = vp.item_b_id && vp.item_b_id !== "N/A" && vp.item_b_id !== "0";
-
-          const detailsHtml = `
-            <div class="text-[11px] text-slate-200 font-medium mb-1 leading-snug">${escapeHtml(vp.item_a_name || "3D Saved Viewpoint")}</div>
-            ${hasValidIdA ? `<div class="mb-1"><button onclick="copyAndIsolateInRevit('${escapeHtml(vp.project_name)}', '${escapeHtml(vp.item_a_id)}', '${escapeHtml(vp.item_b_id)}', '${escapeHtml(vp.item_a_file)}', '${escapeHtml(vp.item_b_file)}', 'Element 1', 'Element 2')" class="bg-sky-950 text-sky-200 border border-sky-700 px-2 py-0.5 rounded text-[10px] font-mono">ID 1: ${escapeHtml(vp.item_a_id)} 🎯</button></div>` : ""}
-            ${hasValidIdB ? `<div><button onclick="copyAndIsolateInRevit('${escapeHtml(vp.project_name)}', '${escapeHtml(vp.item_b_id)}', '${escapeHtml(vp.item_a_id)}', '${escapeHtml(vp.item_b_file)}', '${escapeHtml(vp.item_a_file)}', 'Element 2', 'Element 1')" class="bg-emerald-950 text-emerald-200 border border-emerald-700 px-2 py-0.5 rounded text-[10px] font-mono">ID 2: ${escapeHtml(vp.item_b_id)} 🎯</button></div>` : ""}
-          `;
+            : `<div class="px-2 py-1 rounded-lg border border-slate-700 bg-[#070b12] text-slate-200 text-[11px] font-bold flex justify-between"><span class="truncate">${escapeHtml(currentVpTeamVal)}</span><span>🔒</span></div>`;
 
           const tr = document.createElement("tr");
           tr.id = "row_" + vp.vp_key;
           tr.className = "bg-[#070b12]/85 hover:bg-slate-800/50 border-l-4 border-slate-700";
           tr.innerHTML =
             `<td class="p-2 font-black text-teal-400">#${vp.sequence_num}</td>` +
-            `<td class="p-2">${imgHtml}</td>` +
+            `<td class="p-2" data-thumb-dataset="viewpoints" data-thumb-key="${escapeHtml(vp.vp_key)}">${imgHtml}</td>` +
             `<td class="p-2"><span class="px-2 py-0.5 rounded bg-slate-800 text-teal-300 border border-slate-700 font-bold text-[11px]">↳ 📁 ${escapeHtml(vp.folder_name || "Root")}</span></td>` +
             `<td class="p-2 font-bold text-white text-xs">${escapeHtml(vp.description || "-")}</td>` +
-            `<td class="p-2">${detailsHtml}</td>` +
+            `<td class="p-2">` +
+              `<div class="mb-1"><button onclick="copyAndIsolateInRevit('${escapeHtml(vp.project_name)}', '${escapeHtml(vp.item_a_id)}', '${escapeHtml(vp.item_b_id)}', '${escapeHtml(vp.item_a_file)}', '${escapeHtml(vp.item_b_file)}', 'Element 1', 'Element 2')" class="bg-sky-950 text-sky-200 border border-sky-700 px-2 py-0.5 rounded text-[10px] font-mono">ID 1: ${escapeHtml(vp.item_a_id || "N/A")} (${escapeHtml(vp.item_a_file || "N/A")}) 🎯</button></div>` +
+              `<div><button onclick="copyAndIsolateInRevit('${escapeHtml(vp.project_name)}', '${escapeHtml(vp.item_b_id)}', '${escapeHtml(vp.item_a_id)}', '${escapeHtml(vp.item_b_file)}', '${escapeHtml(vp.item_a_file)}', 'Element 2', 'Element 1')" class="bg-emerald-950 text-emerald-200 border border-emerald-700 px-2 py-0.5 rounded text-[10px] font-mono">ID 2: ${escapeHtml(vp.item_b_id || "N/A")} (${escapeHtml(vp.item_b_file || "N/A")}) 🎯</button></div>` +
+            `</td>` +
             `<td class="p-2 bg-sky-950/10 border-l border-r border-slate-800">${bimVpHtml}</td>` +
             `<td class="p-2 bg-teal-950/10 border-r border-slate-800">${teamVpHtml}</td>` +
             `<td class="p-2">${buildChatCellHtml(vp.vp_key, vp.comments_json, "viewpoints")}</td>`;
           tbody.appendChild(tr);
         });
       });
+
+      // Lazy-load snapshots ONLY for expanded/visible viewpoints
+      ensureVisibleImagesLoaded("viewpoints", visibleVps);
     }
 
     function toggleVpFolderCollapse(folderName) {
@@ -1490,30 +1574,33 @@
 
     async function updateViewpointBimStatus(vpKey, newBimStatus) {
       if (!canEditBimStatus()) return;
+      const nowIso = new Date().toISOString();
       await fetch(`${SUPABASE_URL}/rest/v1/viewpoints?vp_key=eq.${encodeURIComponent(vpKey)}`, {
         method: "PATCH",
-        headers: getSupabaseHeaders(true),
-        body: JSON.stringify({ item_b_name: newBimStatus, updated_at: new Date().toISOString() })
+        headers: getSupabaseHeaders({ "Content-Type": "application/json" }),
+        body: JSON.stringify({ item_b_name: newBimStatus, updated_at: nowIso })
       });
       const vp = allViewpoints.find(v => v.vp_key === vpKey);
-      if (vp) vp.item_b_name = newBimStatus;
+      if (vp) { vp.item_b_name = newBimStatus; vp.updated_at = nowIso; }
       showToast("✓ Viewpoint BIM status updated!", "emerald");
       renderViewpointsTable();
     }
 
     async function updateViewpointStatus(vpKey, newStatus) {
       if (!canEditTeamStatus()) return;
+      const nowIso = new Date().toISOString();
       await fetch(`${SUPABASE_URL}/rest/v1/viewpoints?vp_key=eq.${encodeURIComponent(vpKey)}`, {
         method: "PATCH",
-        headers: getSupabaseHeaders(true),
-        body: JSON.stringify({ status: newStatus, updated_at: new Date().toISOString() })
+        headers: getSupabaseHeaders({ "Content-Type": "application/json" }),
+        body: JSON.stringify({ status: newStatus, updated_at: nowIso })
       });
       const vp = allViewpoints.find(v => v.vp_key === vpKey);
-      if (vp) vp.status = newStatus;
+      if (vp) { vp.status = newStatus; vp.updated_at = nowIso; }
       showToast("✓ Viewpoint Team status updated!", "emerald");
       renderViewpointsTable();
     }
 
+    // MULTI-SESSION & HOST/LINK PRIORITY REVIT BRIDGE
     async function copyAndIsolateInRevit(projectName, primaryId, secondaryId, primaryFile, secondaryFile, primaryName = "", secondaryName = "") {
       if (primaryId && primaryId !== "N/A") {
         try { await navigator.clipboard.writeText(primaryId); } catch {}
@@ -1562,7 +1649,7 @@
       }));
 
       if (matches.length === 0) {
-        showToast(`📋 Copied ID [${primaryId}] — ⚠️ No open Revit model matches (${primaryFile}).`, "amber");
+        showToast(`📋 Copied ID [${primaryId}] - ⚠️ No open Revit model matches (${primaryFile}).`, "amber");
         return;
       }
 
@@ -1582,7 +1669,7 @@
         <div onclick='triggerSpecificRevitTarget(${m.port}, ${JSON.stringify(m.docTitle)}, ${JSON.stringify(payload)})' class="p-3 rounded-xl bg-[#070b12] hover:bg-sky-950/60 border ${m.isHost ? 'border-emerald-600' : 'border-slate-700'} cursor-pointer flex items-center justify-between transition">
           <div>
             <div class="font-bold text-white text-xs">${m.isHost ? '⭐ Priority 1 (Host RVT): ' : '🔗 Priority 2 (Linked RVT in): '} ${escapeHtml(m.docTitle)}</div>
-            <div class="text-[10px] text-slate-400">Revit Session Port: ${m.port} • Target ID: ${escapeHtml(primaryId)}</div>
+            <div class="text-[10px] text-slate-400">Target ID: ${escapeHtml(primaryId)}</div>
           </div>
           <span class="px-2.5 py-1 rounded-lg bg-sky-600 text-white font-bold text-[10px]">Isolate 3D 🎯</span>
         </div>
@@ -1606,95 +1693,28 @@
       }
     }
 
-    // SMART DISCUSSION CELL WITH CTRL+V PNG SCREENSHOT SUPPORT
     function buildChatCellHtml(recordKey, commentsJson, tableType) {
       let messages = [];
       try { messages = JSON.parse(commentsJson || "[]"); } catch { messages = []; }
       const chatItemsHtml = messages.length === 0
-        ? `<div class="text-[10px] text-slate-500 italic">No comments. Type @ or Ctrl+V screenshot.</div>`
+        ? `<div class="text-[10px] text-slate-500 italic">No comments. Type @ to mention team/member.</div>`
         : messages.map(m => {
             const formatted = escapeHtml(m.text || "").replace(/(@[\w\.\-]+)/g, '<span class="bg-sky-900/90 text-sky-200 px-1 rounded font-bold">$1</span>');
             const rIcon = getRoleIcon(m.role || "Engineer");
-            const imgBlock = (m.image && String(m.image).startsWith("data:image"))
-              ? `<div class="mt-1"><img src="${m.image}" onclick="showModal(this.src, 'Attachment — ${escapeHtml(m.author || 'User')}')" class="max-h-14 rounded border border-sky-700/70 cursor-pointer hover:opacity-90 transition" title="Click to zoom screenshot" /></div>`
+            const imgTag = (m.image && String(m.image).startsWith("data:image"))
+              ? `<img src="${m.image}" onclick="showModal(this.src, 'Attachment - ${escapeHtml(m.author || "User")}')" class="mt-1 max-h-14 rounded border border-slate-700 cursor-pointer" />`
               : "";
-            return `<div class="mb-1 border-b border-slate-800/80 pb-1"><span class="text-sky-300 font-bold text-[10px]">${rIcon} ${escapeHtml(m.author || "Eng")}: </span><span class="text-slate-200 text-[11px]">${formatted}</span>${imgBlock}</div>`;
+            return `<div class="mb-1 border-b border-slate-800/80 pb-0.5"><span class="text-sky-300 font-bold text-[10px]">${rIcon} ${escapeHtml(m.author || "Eng")}: </span><span class="text-slate-200 text-[11px]">${formatted}</span>${imgTag}</div>`;
           }).join("");
 
-      const pendingImg = pendingChatImages[recordKey] || "";
-      const previewBlock = pendingImg
-        ? `<div id="chatImgPreview_${recordKey}" class="mb-1 flex items-center gap-1.5 bg-sky-950/60 border border-sky-700/80 rounded px-1.5 py-1">
-             <img src="${pendingImg}" class="h-8 rounded border border-slate-600" />
-             <span class="text-[10px] text-sky-200 font-semibold flex-1 truncate">📷 Screenshot ready</span>
-             <button onclick="clearPendingChatImage('${escapeHtml(recordKey)}')" class="text-rose-400 hover:text-white text-[11px] font-bold px-1">✕</button>
-           </div>`
-        : `<div id="chatImgPreview_${recordKey}" class="hidden"></div>`;
-
-      return `<div class="bg-[#070b12] border border-slate-800 rounded-lg p-1.5 max-h-20 overflow-y-auto mb-1">${chatItemsHtml}</div>` +
-        previewBlock +
+      return `<div class="bg-[#070b12] border border-slate-800 rounded-lg p-1.5 max-h-16 overflow-y-auto mb-1">${chatItemsHtml}</div>` +
         `<div class="flex gap-1 relative">` +
-          `<input id="chatInput_${recordKey}" type="text" autocomplete="off" placeholder="@mention or Ctrl+V img..." ` +
-            `onpaste="onCommentPasteImage(event, '${escapeHtml(recordKey)}')" ` +
+          `<input id="chatInput_${escapeHtml(recordKey)}" type="text" autocomplete="off" placeholder="Comment or @mention..." ` +
             `oninput="onCommentInputMention(event, 'chatInput_${escapeHtml(recordKey)}')" ` +
             `onkeydown="onCommentKeyDown(event, '${escapeHtml(recordKey)}', '${tableType}')" ` +
             `class="bg-[#070b12] border border-slate-700 rounded px-2 py-1 text-[11px] text-white flex-1 focus:border-sky-500 focus:outline-none" />` +
           `<button onclick="postChatMessage('${escapeHtml(recordKey)}', '${tableType}')" class="bg-sky-600 hover:bg-sky-500 text-white px-2 py-1 rounded text-[11px] font-bold">Send</button>` +
         `</div>`;
-    }
-
-    function onCommentPasteImage(event, recordKey) {
-      const items = (event.clipboardData || window.clipboardData)?.items;
-      if (!items) return;
-      for (const item of items) {
-        if (item.type && item.type.startsWith("image/")) {
-          event.preventDefault();
-          const blob = item.getAsFile();
-          if (!blob) return;
-          const reader = new FileReader();
-          reader.onload = (ev) => {
-            compressImageDataUrl(ev.target.result, 900, 0.78, (compressedDataUrl) => {
-              pendingChatImages[recordKey] = compressedDataUrl;
-              const prevEl = document.getElementById("chatImgPreview_" + recordKey);
-              if (prevEl) {
-                prevEl.className = "mb-1 flex items-center gap-1.5 bg-sky-950/60 border border-sky-700/80 rounded px-1.5 py-1";
-                prevEl.innerHTML = `<img src="${compressedDataUrl}" class="h-8 rounded border border-slate-600" />
-                  <span class="text-[10px] text-sky-200 font-semibold flex-1 truncate">📷 Screenshot ready</span>
-                  <button onclick="clearPendingChatImage('${escapeHtml(recordKey)}')" class="text-rose-400 hover:text-white text-[11px] font-bold px-1">✕</button>`;
-              }
-              showToast("📷 Screenshot pasted! Press Enter or Send to post.", "sky");
-            });
-          };
-          reader.readAsDataURL(blob);
-          break;
-        }
-      }
-    }
-
-    function compressImageDataUrl(dataUrl, maxW, quality, callback) {
-      const img = new Image();
-      img.onload = () => {
-        let w = img.width, h = img.height;
-        if (w > maxW) {
-          h = Math.round(h * (maxW / w));
-          w = maxW;
-        }
-        const canvas = document.createElement("canvas");
-        canvas.width = w;
-        canvas.height = h;
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, w, h);
-        callback(canvas.toDataURL("image/jpeg", quality));
-      };
-      img.src = dataUrl;
-    }
-
-    function clearPendingChatImage(recordKey) {
-      delete pendingChatImages[recordKey];
-      const prevEl = document.getElementById("chatImgPreview_" + recordKey);
-      if (prevEl) {
-        prevEl.className = "hidden";
-        prevEl.innerHTML = "";
-      }
     }
 
     function getAllMentionCandidates() {
@@ -1710,7 +1730,7 @@
       projectMembers.forEach(m => {
         const rNorm = normalizeRoleName(m.role);
         const icon = getRoleIcon(rNorm);
-        if (m.member_name) addCandidate(m.member_name, icon, `${rNorm} • ${m.discipline_team || 'Team'}`);
+        if (m.member_name) addCandidate(m.member_name, icon, `${rNorm} | ${m.discipline_team || 'Team'}`);
         if (m.discipline_team) addCandidate(m.discipline_team, "👥", `Entire ${m.discipline_team} Team`);
       });
 
@@ -1770,10 +1790,8 @@
 
     async function postChatMessage(recordKey, tableType) {
       const inp = document.getElementById("chatInput_" + recordKey);
-      const text = inp ? inp.value.trim() : "";
-      const pastedImg = pendingChatImages[recordKey] || "";
-      if (!text && !pastedImg) return;
-
+      if (!inp || !inp.value.trim()) return;
+      const text = inp.value.trim();
       const isClash = tableType === "clashes";
       const list = isClash ? allClashes : allViewpoints;
       const keyCol = isClash ? "round_guid" : "vp_key";
@@ -1782,26 +1800,23 @@
 
       let messages = [];
       try { messages = JSON.parse(record.comments_json || "[]"); } catch { messages = []; }
-      const msgObj = {
+      messages.push({
         author: currentUser.name,
         role: currentUser.role,
-        text: text || (pastedImg ? "[Screenshot Attached]" : ""),
+        text: text,
         time: new Date().toISOString().slice(0, 16).replace("T", " ")
-      };
-      if (pastedImg) msgObj.image = pastedImg;
-
-      messages.push(msgObj);
+      });
       const updatedJson = JSON.stringify(messages);
+      const nowIso = new Date().toISOString();
 
       await fetch(`${SUPABASE_URL}/rest/v1/${tableType}?${keyCol}=eq.${encodeURIComponent(recordKey)}`, {
         method: "PATCH",
-        headers: getSupabaseHeaders(true),
-        body: JSON.stringify({ comments_json: updatedJson, updated_at: new Date().toISOString() })
+        headers: getSupabaseHeaders({ "Content-Type": "application/json" }),
+        body: JSON.stringify({ comments_json: updatedJson, updated_at: nowIso })
       });
       record.comments_json = updatedJson;
-      if (inp) inp.value = "";
-      delete pendingChatImages[recordKey];
-
+      record.updated_at = nowIso;
+      inp.value = "";
       if (isClash) renderClashesTable(); else renderViewpointsTable();
       updateNotificationsList();
     }
@@ -1919,7 +1934,6 @@
       document.getElementById("filterNavisStatus").value = "ALL";
       document.getElementById("filterTeamResponse").value = "ALL";
       document.getElementById("filterVpFolder").value = "ALL";
-      document.getElementById("filterVpBimStatus").value = "ALL";
       document.getElementById("filterVpStatus").value = "ALL";
       document.getElementById("globalSearchInput").value = "";
       applyFilters();
@@ -1949,9 +1963,7 @@
         let msgs = [];
         try { msgs = JSON.parse(c.comments_json || "[]"); } catch {}
         msgs.forEach(m => {
-          if ((m.text && m.text.includes("@")) || m.image) {
-            alerts.push({ tab: "clashes", key: c.round_guid, title: `${m.author} in ${c.clash_name}`, sub: m.image ? `📷 ${m.text}` : m.text });
-          }
+          if (m.text && m.text.includes("@")) alerts.push({ tab: "clashes", key: c.round_guid, title: `${m.author} in ${c.clash_name}`, sub: m.text });
         });
       });
       document.getElementById("notifBadge").textContent = alerts.length;
@@ -1974,82 +1986,60 @@
       }, 150);
     }
 
-    // HYBRID FULL-PROJECT KPI & 4 CHARTS ENGINE
-    // Automatically merges Live Published Clashes + Unpublished Statuses from __KPI_SUMMARY__ so Top Cards & Charts ALWAYS reflect 100% of the Project!
     function updateKPIsAndCharts() {
-      const proj = document.getElementById("filterProject").value;
-      const round = document.getElementById("filterRound").value;
-      const assigned = document.getElementById("filterAssigned").value;
-      const navisSt = document.getElementById("filterNavisStatus").value;
-      const teamResp = document.getElementById("filterTeamResponse").value;
-      const q = document.getElementById("globalSearchInput").value.trim();
-      const hasColFilters = Object.keys(activeColumnFilters.clashes).length > 0;
-
       const leafClashes = filteredClashes.filter(c => !c.is_group_header);
       const kpiSource = leafClashes.length > 0 ? leafClashes : filteredClashes;
 
-      // Live counts from table rows
       const navisCounts = countByField(kpiSource, "navis_status");
-      const respCounts = {};
-      TEAM_UNIFIED_STATUSES.forEach(s => respCounts[s] = 0);
-      kpiSource.forEach(c => { respCounts[c.team_response] = (respCounts[c.team_response] || 0) + 1; });
       const discCounts = countByField(kpiSource, "assigned_to");
-      const roundCounts = countByField(kpiSource, "round");
-
-      let totalAll = kpiSource.length;
+      let totalCount = kpiSource.length;
       let totalGroups = filteredClashes.filter(c => c.is_group_header).length;
-      let activeNewCount = kpiSource.filter(c => c.navis_status === "Active" || c.navis_status === "New").length;
-      let fixedRevitCount = kpiSource.filter(c => c.team_response === "Fixed in Revit (Pending NWC)").length;
-      let approvalHoldCount = kpiSource.filter(c => c.team_response === "Request Approval (Valid Exception)" || c.team_response === "On Hold / RFI Pending").length;
-      let rejectedCount = kpiSource.filter(c => c.navis_status === "Rejected" || c.review_decision === "Rejected").length;
-      let resolvedCount = kpiSource.filter(c => c.navis_status === "Resolved" || c.navis_status === "Approved").length;
 
-      // Merge Full-Project Unpublished Statuses when viewing Project/Round level (no narrow row filter active)
-      const isFullScopeView = (assigned === "ALL" && navisSt === "ALL" && teamResp === "ALL" && !q && !hasColFilters);
-      const matchingMetas = allKpiSummaries.filter(m =>
-        (proj === "ALL" || m.project_name === proj) &&
-        (round === "ALL" || m.round === round)
-      );
+      // Merge unpublished full-project KPI summary counts when viewing unfiltered project/round scope
+      const projVal = document.getElementById("filterProject").value;
+      const roundVal = document.getElementById("filterRound").value;
+      const hasDetailFilter =
+        document.getElementById("filterAssigned").value !== "ALL" ||
+        document.getElementById("filterNavisStatus").value !== "ALL" ||
+        document.getElementById("filterTeamResponse").value !== "ALL" ||
+        document.getElementById("globalSearchInput").value.trim() !== "" ||
+        Object.keys(activeColumnFilters.clashes).length > 0;
 
-      if (isFullScopeView && matchingMetas.length > 0) {
-        let extraUnpublishedTotal = 0;
-        let metaGroupsTotal = 0;
+      if (!hasDetailFilter && kpiSummariesByKey.size > 0) {
+        let extraGroups = 0;
+        kpiSummariesByKey.forEach((summary, key) => {
+          const [sProj, sRound] = key.split("::");
+          if (projVal !== "ALL" && sProj !== projVal) return;
+          if (roundVal !== "ALL" && sRound !== roundVal) return;
 
-        matchingMetas.forEach(m => {
-          const s = m.summary || {};
-          const pubSet = new Set((s.publishedStatuses || []).map(x => String(x).toLowerCase()));
-          metaGroupsTotal += (s.totalGroups || 0);
-
-          // Add counts ONLY for statuses that were NOT published to the table (so live edits on published rows stay 100% live!)
-          const byBim = s.byBimStatus || {};
-          Object.entries(byBim).forEach(([stKey, cnt]) => {
-            if (!pubSet.has(stKey.toLowerCase()) && cnt > 0) {
-              navisCounts[stKey] = (navisCounts[stKey] || 0) + cnt;
-              extraUnpublishedTotal += cnt;
-              if (stKey === "Active" || stKey === "New") activeNewCount += cnt;
-              if (stKey === "Approved" || stKey === "Resolved") resolvedCount += cnt;
-              if (stKey === "Rejected") rejectedCount += cnt;
-              roundCounts[m.round] = (roundCounts[m.round] || 0) + cnt;
-            }
-          });
-
-          const byDiscUnpub = s.unpublishedByDiscipline || {};
-          Object.entries(byDiscUnpub).forEach(([dKey, cnt]) => {
-            if (cnt > 0) discCounts[dKey] = (discCounts[dKey] || 0) + cnt;
-          });
+          const pubSet = new Set((summary.publishedStatuses || []).map(x => String(x).toLowerCase()));
+          if (summary.byBimStatus) {
+            Object.entries(summary.byBimStatus).forEach(([st, cnt]) => {
+              const n = Number(cnt) || 0;
+              if (n > 0 && !pubSet.has(st.toLowerCase())) {
+                navisCounts[st] = (navisCounts[st] || 0) + n;
+                totalCount += n;
+              }
+            });
+          }
+          if (summary.unpublishedByDiscipline) {
+            Object.entries(summary.unpublishedByDiscipline).forEach(([d, cnt]) => {
+              const n = Number(cnt) || 0;
+              if (n > 0) discCounts[d] = (discCounts[d] || 0) + n;
+            });
+          }
+          if (typeof summary.totalGroups === "number") extraGroups += summary.totalGroups;
         });
-
-        totalAll += extraUnpublishedTotal;
-        if (metaGroupsTotal > totalGroups) totalGroups = metaGroupsTotal;
+        if (extraGroups > totalGroups) totalGroups = extraGroups;
       }
 
-      document.getElementById("kpiTotal").textContent = totalAll;
+      document.getElementById("kpiTotal").textContent = totalCount;
       document.getElementById("kpiGroupsSub").textContent = totalGroups + " Clash Groups";
-      document.getElementById("kpiActive").textContent = activeNewCount;
-      document.getElementById("kpiFixedRevit").textContent = fixedRevitCount;
-      document.getElementById("kpiApprovalReq").textContent = approvalHoldCount;
-      document.getElementById("kpiRejected").textContent = rejectedCount;
-      document.getElementById("kpiResolved").textContent = resolvedCount;
+      document.getElementById("kpiActive").textContent = (navisCounts["Active"] || 0) + (navisCounts["New"] || 0);
+      document.getElementById("kpiFixedRevit").textContent = kpiSource.filter(c => c.team_response === "Fixed in Revit (Pending NWC)").length;
+      document.getElementById("kpiApprovalReq").textContent = kpiSource.filter(c => c.team_response === "Request Approval (Valid Exception)" || c.team_response === "On Hold / RFI Pending").length;
+      document.getElementById("kpiRejected").textContent = navisCounts["Rejected"] || 0;
+      document.getElementById("kpiResolved").textContent = (navisCounts["Resolved"] || 0) + (navisCounts["Approved"] || 0);
 
       if (typeof Chart === "undefined") return;
 
@@ -2059,6 +2049,10 @@
         data: { labels: Object.keys(navisCounts), datasets: [{ data: Object.values(navisCounts), backgroundColor: ["#f43f5e", "#f97316", "#eab308", "#0ea5e9", "#10b981", "#e11d48"], borderWidth: 0 }] },
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "right", labels: { color: "#cbd5e1", boxWidth: 10, font: { size: 9 } } } } }
       });
+
+      const respCounts = {};
+      TEAM_UNIFIED_STATUSES.forEach(s => respCounts[s] = 0);
+      kpiSource.forEach(c => { respCounts[c.team_response] = (respCounts[c.team_response] || 0) + 1; });
 
       if (chartTeam) chartTeam.destroy();
       chartTeam = new Chart(document.getElementById("chartTeamResponse"), {
@@ -2074,10 +2068,11 @@
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
       });
 
+      const roundCounts = countByField(kpiSource, "round");
       if (chartRound) chartRound.destroy();
       chartRound = new Chart(document.getElementById("chartRounds"), {
         type: "bar",
-        data: { labels: Object.keys(roundCounts).sort().map(r => "R-" + r), datasets: [{ data: Object.keys(roundCounts).sort().map(r => roundCounts[r]), backgroundColor: "#14b8a6", borderRadius: 4 }] },
+        data: { labels: Object.keys(roundCounts).map(r => "R-" + r), datasets: [{ data: Object.values(roundCounts), backgroundColor: "#14b8a6", borderRadius: 4 }] },
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
       });
     }
@@ -2100,9 +2095,8 @@
     function getExportDataset(moduleName, scope) {
       if (moduleName === "viewpoints") {
         let base = scope === "current_filtered" ? [...filteredViewpoints] : [...allViewpoints];
-        if (scope === "only_active") base = base.filter(v => normalizeVpBimStatus(v.item_b_name) === "Open Issue" || normalizeVpBimStatus(v.item_b_name) === "Action Required");
-        if (scope === "only_fixed_revit") base = base.filter(v => normalizeVpTeamStatus(v.status) === "Updated in Model");
-        if (scope === "only_resolved") base = base.filter(v => normalizeVpBimStatus(v.item_b_name) === "Closed / Verified");
+        if (scope === "only_active") base = base.filter(v => normalizeTeamStatus(v.status) === "Pending Action");
+        if (scope === "only_fixed_revit") base = base.filter(v => v.status === "Fixed in Revit (Pending NWC)");
         return base;
       } else {
         let base = scope === "current_filtered" ? [...filteredClashes] : [...allClashes];
@@ -2128,11 +2122,6 @@
         if (typeof XLSX === "undefined") { showToast("Excel library loading...", "amber"); return; }
         const wb = XLSX.utils.book_new();
         const buildSheet = (rows) => {
-          if (moduleName === "viewpoints") {
-            const headers = ["#", "Project", "Folder", "Viewpoint", "Details / Annotations", "BIM Status", "Team Status"];
-            const aoa = [headers, ...rows.map(r => [r.sequence_num, r.project_name, r.folder_name, r.description, r.item_a_name, r.item_b_name, r.status])];
-            return XLSX.utils.aoa_to_sheet(aoa);
-          }
           const headers = ["Round", "Project", "Clash Test", "Clash / Group", "Discipline", "Element A", "ID A", "File A", "Element B", "ID B", "File B", "Level", "Distance", "BIM Status", "Team Status"];
           const aoa = [headers, ...rows.map(r => ["R-" + r.round, r.project_name, r.test_name, r.clash_name, r.assigned_to, r.item_a_name, r.item_a_id, r.item_a_file, r.item_b_name, r.item_b_id, r.item_b_file, r.level_grid, r.distance, r.navis_status, r.team_response])];
           return XLSX.utils.aoa_to_sheet(aoa);
@@ -2162,24 +2151,31 @@
 
     function buildCleanReportHtmlDocument(data, moduleName, reportTitle) {
       const rowsHtml = data.map(r => `<tr>
-        <td><b>${moduleName === "viewpoints" ? ("#" + r.sequence_num) : ("R-" + escapeHtml(r.round || "01"))}</b></td>
-        <td>${escapeHtml(r.test_name || r.folder_name || "-")}</td>
+        <td><b>R-${escapeHtml(r.round || "01")}</b></td>
+        <td>${escapeHtml(r.test_name || "-")}</td>
         <td><b>${escapeHtml(r.clash_name || r.description || "-")}</b></td>
         <td>${escapeHtml(r.assigned_to || r.folder_name || "-")}</td>
-        <td>${moduleName === "viewpoints" ? escapeHtml(r.item_a_name || "-") : `A: ${escapeHtml(r.item_a_name || "")} [${escapeHtml(r.item_a_id)}] (${escapeHtml(r.item_a_file)})<br>B: ${escapeHtml(r.item_b_name || "")} [${escapeHtml(r.item_b_id)}] (${escapeHtml(r.item_b_file)})`}</td>
-        <td><b>${escapeHtml(moduleName === "viewpoints" ? r.item_b_name : (r.navis_status || "Active"))}</b></td>
+        <td>A: ${escapeHtml(r.item_a_name || "")} [${escapeHtml(r.item_a_id)}] (${escapeHtml(r.item_a_file)})<br>B: ${escapeHtml(r.item_b_name || "")} [${escapeHtml(r.item_b_id)}] (${escapeHtml(r.item_b_file)})</td>
+        <td><b>${escapeHtml(r.navis_status || "Active")}</b></td>
         <td><b>${escapeHtml(r.team_response || r.status || "Pending Action")}</b></td>
       </tr>`).join("");
-      return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>ACC Report</title><style>body{font-family:'Segoe UI',sans-serif;margin:20px}table{width:100%;border-collapse:collapse;font-size:11px}th,td{border:1px solid #cbd5e1;padding:6px;text-align:left}th{background:#0d2763;color:#fff}</style></head><body><div style="display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid #008529;padding-bottom:10px;margin-bottom:15px"><h2>ACC Enterprise BIM Report — ${escapeHtml(reportTitle)}</h2>${ACC_SVG_RAW}</div><table><thead><tr><th>Round / #</th><th>Test / Folder</th><th>Item</th><th>Discipline / Folder</th><th>Details & Elements</th><th>BIM Status</th><th>Team Status</th></tr></thead><tbody>${rowsHtml}</tbody></table></body></html>`;
+      return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>ACC Report</title><style>body{font-family:'Segoe UI',sans-serif;margin:20px}table{width:100%;border-collapse:collapse;font-size:11px}th,td{border:1px solid #cbd5e1;padding:6px;text-align:left}th{background:#0d2763;color:#fff}</style></head><body><div style="display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid #008529;padding-bottom:10px;margin-bottom:15px"><h2>ACC Enterprise BIM Report - ${escapeHtml(reportTitle)}</h2>${ACC_SVG_RAW}</div><table><thead><tr><th>Round</th><th>Test</th><th>Clash / Item</th><th>Discipline</th><th>Elements & NWC</th><th>BIM Status</th><th>Team Status</th></tr></thead><tbody>${rowsHtml}</tbody></table></body></html>`;
     }
 
     function changePageSize(val) { pageSize = parseInt(val, 10) || 100; currentPage = 1; renderClashesTable(); }
     function changePage(delta) { currentPage = Math.max(1, currentPage + delta); renderClashesTable(); }
+
+    function showModalByKey(dataset, key, caption = "") {
+      const src = dataset === "clashes" ? clashImageCache.get(key) : vpImageCache.get(key);
+      if (src && src.startsWith("data:image")) showModal(src, caption);
+    }
+
     function showModal(src, caption = "") {
       document.getElementById("modalImg").src = src;
       document.getElementById("modalCaption").textContent = caption;
       document.getElementById("imgModal").classList.remove("hidden");
     }
+
     function showToast(msg, color = "sky") {
       const t = document.getElementById("toastAlert");
       t.textContent = msg;
@@ -2190,17 +2186,12 @@
     }
 
     function escapeHtml(str) {
-      const eAmp = '&' + 'amp;';
-      const eLt = '&' + 'lt;';
-      const eGt = '&' + 'gt;';
-      const eQuot = '&' + 'quot;';
-      const eApos = '&' + '#39;';
       return String(str ?? "")
-        .replace(/&/g, eAmp)
-        .replace(/</g, eLt)
-        .replace(/>/g, eGt)
-        .replace(/\x22/g, eQuot)
-        .replace(/\x27/g, eApos);
+        .replace(/&/g, "&")
+        .replace(/</g, "<")
+        .replace(/>/g, ">")
+        .replace(/\x22/g, """)
+        .replace(/\x27/g, "'");
     }
 
     // INITIALIZATION
@@ -2218,7 +2209,7 @@
       }
 
       const hasVerifiedUser = resolveUserIdentityFromUrlOrStorage();
-      await reloadAllCloudData(qProject, qRound, false);
+      await reloadAllCloudData(qProject, qRound, false, false);
 
       if (!hasVerifiedUser) {
         promptIdentityVerificationModal();
